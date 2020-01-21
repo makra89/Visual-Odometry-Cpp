@@ -32,9 +32,12 @@ Using the application TrackFeatures.exe in apps/ it is possible to visualize mat
 
 # Dependencies
 
-Dependencies are placed in the folder 3rdparty and included during build.
+The following dependencies are placed in the folder 3rdparty and included as source:
 
-- [opencv](https://opencv.org/license/)
 - [gtest](https://github.com/google/googletest/blob/master/googletest/LICENSE)
 
+
+The following dependencies are required as CMake package:
+
+- [opencv](https://opencv.org/license/)
 
