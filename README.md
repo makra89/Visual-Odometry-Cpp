@@ -8,12 +8,15 @@ After taking part in the coursera course Robotics:Perception, I decided to just 
 
 It would be rather straightforward to use opencv and just connect the provided functionality to some kind of visual odometry pipeline. What I rather try to do:
 
-- Create a visual odometry pipeline from scratch (see below) extracting poses from monocular camera images
+- Creating a visual odometry pipeline from scratch (see below) extracting poses from monocular camera images
 - Implementing all major algorithms (like feature detection, description,..) myself
 - Using only utility functions and structs from opencv. For me also things like SVD count as such.
--....... And finally hop on the open-source train ;) 
+- Having fun, so please pardon the lack of testing and documentation. I do enough of this at work.
+- ....... And finally hop on the open-source train ;) 
 
 The goal is not to create yet another visual odometry pipeline that can easily be used by everyone. There exist multiple sophisticated open-source projects for this. But maybe this project helps someone understanding visual odometry. 
+
+What I 
 
 # Current functionality
 
