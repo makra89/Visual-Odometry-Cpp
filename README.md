@@ -14,3 +14,24 @@ It would be rather straightforward to use opencv and just connect the provided f
 -....... And finally hop on the open-source train ;) 
 
 The goal is not to create yet another visual odometry pipeline that can easily be used by everyone. There exist multiple sophisticated open-source projects for this. But maybe this project helps someone understanding visual odometry. 
+
+# Current functionality
+
+The only functionality provided so far is very basic feature matching, description and matching:
+- Harris edge detector
+- BRIEF descriptor
+- Brute force matcher
+
+# Usage
+
+Using the application TrackFeatures.exe in apps/ it is possible to visualize matched features in an camera image stream:
+`TrackFeatures.exe <path-to-camera-images> e.g. TrackFeatures.exe ./test/*.jpg` 
+
+# Dependencies
+
+Dependencies are placed in the folder 3rdparty and included during build.
+
+- [opencv](https://opencv.org/license/)
+- [gtest](https://github.com/google/googletest/blob/master/googletest/LICENSE)
+
+
