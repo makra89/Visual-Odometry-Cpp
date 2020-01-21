@@ -16,8 +16,6 @@ It would be rather straightforward to use opencv and just connect the provided f
 
 The goal is not to create yet another visual odometry pipeline that can easily be used by everyone. There exist multiple sophisticated open-source projects for this. But maybe this project helps someone understanding visual odometry. 
 
-What I 
-
 # Current functionality
 
 The only functionality provided so far is very basic feature matching, description and matching:
