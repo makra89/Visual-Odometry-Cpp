@@ -2,6 +2,7 @@
 add_executable(Vocpp_UtilsTest
     #src
     src/FrameTest.cpp
+    src/ImageProcessingUtilsTest.cpp
     src/main.cpp
 )
 

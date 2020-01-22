@@ -89,8 +89,8 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch
     bool ret = true;
 
     // First check whether all coordinates are within range of in_image
-    const bool inRangeX = static_cast<int32_t>(in_pixelPosX - in_distanceAroundCenter) >= 0 && static_cast<int32_t>(in_pixelPosX + in_distanceAroundCenter + 1U) < in_image.size[1];
-    const bool inRangeY = static_cast<int32_t>(in_pixelPosY - in_distanceAroundCenter) >= 0 && static_cast<int32_t>(in_pixelPosY + in_distanceAroundCenter + 1U) < in_image.size[0];
+    const bool inRangeX = static_cast<int32_t>(in_pixelPosX - in_distanceAroundCenter) >= 0 && static_cast<int32_t>(in_pixelPosX + in_distanceAroundCenter) < in_image.size[1];
+    const bool inRangeY = static_cast<int32_t>(in_pixelPosY - in_distanceAroundCenter) >= 0 && static_cast<int32_t>(in_pixelPosY + in_distanceAroundCenter) < in_image.size[0];
     // Then check if dimensions of provided patch matrix are correct
     const bool correctPatchDimX = out_patch.size[1] == (2 * in_distanceAroundCenter + 1);
     const bool correctPatchDimY = out_patch.size[0] == (2 * in_distanceAroundCenter + 1);
