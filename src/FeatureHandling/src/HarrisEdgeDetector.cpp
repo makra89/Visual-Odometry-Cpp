@@ -75,7 +75,7 @@ bool HarrisEdgeDetector::ExtractKeypoints(Utils::Frame& inout_frame)
     cv::minMaxLoc(response, NULL, &maxResponse);
     const double thresh = maxResponse * m_relResponseThresh;
     cv::threshold(response, response, thresh, maxResponse, cv::THRESH_TOZERO);
-    
+
     // Extract local maxima
     std::vector<cv::Point2f> localMax;
     Utils::ExtractLocalMaxima(response, m_localMaxDistance, localMax, m_subPixelCalculationDistance);

@@ -33,8 +33,13 @@ int main(int argc, char** argv)
     uint32_t frameId = 0U;
     for (auto imageName : imageNames)
     {
-        Utils::Frame frame(imread(imageName, 1), frameId);
+        // Convert the image to grayscale CV_32F, here from CV_8U to CV_32F
+        cv::Mat grayScaleImg;
+        cv::cvtColor(imread(imageName, 1), grayScaleImg, COLOR_BGR2GRAY);
+        grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
 
+        // Feed frame to Master
+        Utils::Frame frame(std::move(grayScaleImg), frameId);
         voMaster.FeedNextFrame(frame);
 
         frameId++;

@@ -36,11 +36,6 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
 {
     bool ret = false;
 
-    // Convert depth to float, just to be sure that all kinds of depths are usable
-    // TODO: There must be a better way, this is ugly!
-    cv::Mat imageConv;
-    inout_frame.GetImage().convertTo(imageConv, CV_32F);
-
     if (inout_frame.GetKeypoints().size() == 0)
     {    
         std::cout << "[BriefDescriptor]: No keypoints found in provided frame" << std::endl;
@@ -71,15 +66,15 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
             int32_t indSecY = static_cast<int32_t>(pair.at<float>(0, 3) + key.pt.y);
            
             // Check whether all indices are within range
-            const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < imageConv.size[1]);
-            const bool inRangeFirstY = (indFirstY >= 0) && (indFirstY < imageConv.size[0]);
-            const bool inRangeSecX = (indSecX >= 0) && (indSecX < imageConv.size[1]);
-            const bool inRangeSecY = (indSecY >= 0) && (indSecY < imageConv.size[0]);
+            const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < inout_frame.GetImage().size[1]);
+            const bool inRangeFirstY = (indFirstY >= 0) && (indFirstY < inout_frame.GetImage().size[0]);
+            const bool inRangeSecX = (indSecX >= 0) && (indSecX < inout_frame.GetImage().size[1]);
+            const bool inRangeSecY = (indSecY >= 0) && (indSecY < inout_frame.GetImage().size[0]);
 
             if (inRangeFirstX && inRangeFirstY && inRangeSecX && inRangeSecY)
             {
                 // Compare intensities and append bin to description
-                uint8_t bin = imageConv.at<float>(indFirstY, indFirstX) > imageConv.at<float>(indSecY, indSecX) ? 1U : 0U;
+                uint8_t bin = inout_frame.GetImage().at<float>(indFirstY, indFirstX) > inout_frame.GetImage().at<float>(indSecY, indSecX) ? 1U : 0U;
                 descriptions.at<uint8_t>(0, numSucessfulPairs) = bin;
                 numSucessfulPairs++;
             }
