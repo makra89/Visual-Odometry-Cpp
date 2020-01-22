@@ -16,29 +16,29 @@ namespace Utils
 
 cv::Mat GetWindowKernel(const uint32_t size)
 {
-    return cv::Mat::ones(size, size, CV_8U);
+    return cv::Mat::ones(size, size, CV_32F);
 }
 
 void ApplyKernelToImage(const cv::Mat& in_image, const cv::Mat& in_kernel, cv::Mat& out_image)
 {
-    cv::filter2D(in_image, out_image, CV_64F, in_kernel);
+    cv::filter2D(in_image, out_image, CV_32F, in_kernel);
 }
 
 void Compute2DGradients(const cv::Mat& in_image, cv::Mat& out_gradX, cv::Mat& out_gradY)
 { 
     // Compute gradient using sobel operators
     // Sobel operator can be replaced by two convolutions
-    int8_t dataRowX[3] = { -1, 0, 1 };
-    cv::Mat sobelRowX = cv::Mat(1, 3, CV_8S, dataRowX);
-    int8_t dataColX[3] = { 1, 2, 1 };
-    cv::Mat sobelColX = cv::Mat(3, 1, CV_8S, dataColX);
-    cv::sepFilter2D(in_image, out_gradX, CV_64F, sobelRowX, sobelColX);
+    float dataRowX[3] = { -1.0, 0.0, 1.0 };
+    cv::Mat sobelRowX = cv::Mat(1, 3, CV_32F, dataRowX);
+    float dataColX[3] = { 1.0, 2.0, 1.0 };
+    cv::Mat sobelColX = cv::Mat(3, 1, CV_32F, dataColX);
+    cv::sepFilter2D(in_image, out_gradX, CV_32F, sobelRowX, sobelColX);
 
-    int8_t dataRowY[3] = { 1, 2, 1 };
-    cv::Mat sobelRowY = cv::Mat(1, 3, CV_8S, dataRowY);
-    int8_t dataColY[3] = { -1, 0, 1 };
-    cv::Mat sobelColY = cv::Mat(3, 1, CV_8S, dataColY);
-    cv::sepFilter2D(in_image, out_gradY, CV_64F, sobelRowY, sobelColY);
+    float dataRowY[3] = { 1.0, 2.0, 1.0 };
+    cv::Mat sobelRowY = cv::Mat(1, 3, CV_32F, dataRowY);
+    float dataColY[3] = { -1.0, 0.0, 1.0 };
+    cv::Mat sobelColY = cv::Mat(3, 1, CV_32F, dataColY);
+    cv::sepFilter2D(in_image, out_gradY, CV_32F, sobelRowY, sobelColY);
 }
 
 void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std::vector<cv::Point2f>& out_localMaxima, const uint32_t in_subPixelCalculationDistance)
@@ -52,10 +52,10 @@ void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std
     {
         for (int32_t j = 0; j < in_image.size[0]; j++)
         {
-            bool greaterZero = in_image.at<double>(j, i) > 0.0;
+            bool greaterZero = in_image.at<float>(j, i) > 0.0;
             // If image value is equal to the dilated value (maximum value of surrounding pixels)
             // this pixel has the maximum value
-            if (greaterZero && in_image.at<double>(j, i) == dilatedImage.at<double>(j, i))
+            if (greaterZero && in_image.at<float>(j, i) == dilatedImage.at<float>(j, i))
             {
 
                 out_localMaxima.push_back(cv::Point2f(static_cast<float>(i), static_cast<float>(j)));
@@ -69,7 +69,7 @@ void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std
         for (auto pos = out_localMaxima.begin(); pos != out_localMaxima.end(); pos++)
         {
             const uint32_t patchDim = 2 * in_subPixelCalculationDistance + 1U;
-            cv::Mat patch = cv::Mat::zeros(patchDim, patchDim, CV_64F);
+            cv::Mat patch = cv::Mat::zeros(patchDim, patchDim, CV_32F);
             bool subPixSuccess = ExtractImagePatchAroundPixelPos(in_image, patch, in_subPixelCalculationDistance, static_cast<uint32_t>(pos->x), static_cast<uint32_t>(pos->y));
 
             if (subPixSuccess)
@@ -103,7 +103,7 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch
             {
                 int32_t imagePosX = in_pixelPosX - in_distanceAroundCenter + i;
                 int32_t imagePos› = in_pixelPosY - in_distanceAroundCenter + j;
-                out_patch.at<double>(j, i) = in_image.at<double>(in_pixelPosY - in_distanceAroundCenter + j, in_pixelPosX - in_distanceAroundCenter + i);
+                out_patch.at<float>(j, i) = in_image.at<float>(in_pixelPosY - in_distanceAroundCenter + j, in_pixelPosX - in_distanceAroundCenter + i);
             }
         }
     }

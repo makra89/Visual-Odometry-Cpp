@@ -36,6 +36,11 @@ bool Master::FeedNextFrame(Utils::Frame& in_frame)
         std::cout << "[Master]: Feature handling members could not be instantiated" << std::endl;
         ret = false;
     }
+    else if (!in_frame.isValid())
+    {
+        std::cout << "[Master]: Invalid frame provided" << std::endl;
+        ret = false;
+    }
     else
     {
         // Measure frame processing time
@@ -54,6 +59,7 @@ bool Master::FeedNextFrame(Utils::Frame& in_frame)
             // Get matches and draw them
             ret = m_matcher->matchDesriptions(in_frame, m_lastFrame);
             cv::Mat matchImage = in_frame.GetImageCopy();
+            cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
 
             for (auto matches : in_frame.GetMatches())
             {
@@ -66,7 +72,7 @@ bool Master::FeedNextFrame(Utils::Frame& in_frame)
             }
 
             cv::imshow("Optical Flow", matchImage);
-            cv::waitKey(20);
+            cv::waitKey(10);
         }
 
         m_lastFrame = in_frame;
