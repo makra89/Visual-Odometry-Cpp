@@ -6,6 +6,8 @@
 */
 
 #include<BriefDescriptor.h>
+#include<Vocpp_Utils/NumericalUtilities.h>
+
 #include <iostream>
 #include<random>
 
@@ -60,10 +62,10 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
         // Loop over pairs
         for (auto pair : m_pairs)
         {
-            int32_t indFirstX = static_cast<int32_t>(pair.at<float>(0, 0) + key.pt.x);
-            int32_t indFirstY = static_cast<int32_t>(pair.at<float>(0, 1) + key.pt.y);
-            int32_t indSecX = static_cast<int32_t>(pair.at<float>(0, 2) + key.pt.x);
-            int32_t indSecY = static_cast<int32_t>(pair.at<float>(0, 3) + key.pt.y);
+            int indFirstX = static_cast<int>(pair.at<float>(0, 0) + key.pt.x);
+            int indFirstY = static_cast<int>(pair.at<float>(0, 1) + key.pt.y);
+            int indSecX = static_cast<int>(pair.at<float>(0, 2) + key.pt.x);
+            int indSecY = static_cast<int>(pair.at<float>(0, 3) + key.pt.y);
            
             // Check whether all indices are within range
             const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < inout_frame.GetImage().size[1]);
@@ -105,10 +107,10 @@ void BriefDescriptor::DrawPairs()
     for (uint32_t i = 0U; i < m_numRandomPairs; i++)
     {
         // Draw index in range [-radius, radius]
-        float index1 = ((static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) - float(0.5)) * float(2.0) * static_cast<float>(m_randomPairDrawRadius));
-        float index2 = ((static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) - float(0.5)) * float(2.0) * static_cast<float>(m_randomPairDrawRadius));
-        float index3 = ((static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) - float(0.5)) * float(2.0) * static_cast<float>(m_randomPairDrawRadius));
-        float index4 = ((static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX) - float(0.5)) * float(2.0) * static_cast<float>(m_randomPairDrawRadius));
+        float index1 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
+        float index2 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
+        float index3 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
+        float index4 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
 
         cv::Mat pairs = cv::Mat::zeros(1, 4, CV_32F);
 

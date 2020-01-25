@@ -6,6 +6,7 @@
 */
 
 #include<BruteForceMatcher.h>
+
 #include <iostream>
 
 namespace VOCPP
@@ -53,14 +54,14 @@ bool BruteForceMatcher::matchDesriptions(Utils::Frame& inout_frame1, const Utils
 
     // Loop over all descriptions
     // Look for first-frame features in the second frame
-    int32_t idX1 = 0;
+    int idX1 = 0;
     for (auto desc1 : inout_frame1.GetDescriptions())
     {
         
         uint32_t smallestDist = UINT32_MAX;
-        int32_t smallestIdx2 = 0;
+        int smallestIdx2 = 0;
         
-        int32_t idX2 = 0;
+        int idX2 = 0;
         for (auto desc2 : in_frame2.GetDescriptions())
         {
             uint32_t distance = ComputeHammingDistance(desc1, desc2);
@@ -102,7 +103,7 @@ uint32_t BruteForceMatcher::ComputeHammingDistance(const cv::Mat& left, const cv
     }
     else
     {
-        for (int32_t i = 0; i < left.size[1]; i++)
+        for (int i = 0; i < left.size[1]; i++)
         {
             if (left.at<uint8_t>(0, i) != right.at<uint8_t>(0, i))
             {

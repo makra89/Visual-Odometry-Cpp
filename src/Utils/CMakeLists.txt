@@ -4,9 +4,15 @@ add_library(Vocpp_Utils STATIC
     #include
     ./include/Vocpp_Utils/ImageProcessingUtils.h
     ./include/Vocpp_Utils/Frame.h
+    ./include/Vocpp_Utils/EpipolarGeometryUtils.h
+    ./include/Vocpp_Utils/NumericalUtilities.h
+    ./include/Vocpp_Utils/ConversionUtils.h
     #src
     ./src/ImageProcessingUtils.cpp
     ./src/Frame.cpp
+    ./src/EpipolarGeometryUtils.cpp
+    ./src/NumericalUtilities.cpp
+    ./src/ConversionUtils.cpp
 )
 
 
