@@ -17,9 +17,13 @@ namespace Utils
 
 /**
 * /brief Convert a cv::Point2f (a,b) to a cv::Mat containing the homogenous coordinates of the point (a,b,1)
-* 
 */
 cv::Mat Point2fToMatHomCoordinates(const cv::Point2f& in_point);
+
+/**
+* /brief Convert a cv::Point3f (a,b, c) to a cv::Mat containing the homogenous coordinates of the point (a,b,c, 1)
+*/
+cv::Mat Point3fToMatHomCoordinates(const cv::Point3f& in_point);
 
 } //namespace Utils
 } //namespace VOCPP

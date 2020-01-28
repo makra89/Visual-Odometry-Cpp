@@ -47,10 +47,10 @@ void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std
     cv::Mat kernel = GetWindowKernel(2 * in_distance + 1);
     cv::dilate(in_image, dilatedImage, kernel);
 
-    const int32_t patchSize = 1;
-    for (int32_t i = 0; i < in_image.size[1]; i++)
+    const int patchSize = 1;
+    for (int i = 0; i < in_image.size[1]; i++)
     {
-        for (int32_t j = 0; j < in_image.size[0]; j++)
+        for (int j = 0; j < in_image.size[0]; j++)
         {
             bool greaterZero = in_image.at<float>(j, i) > 0.0;
             // If image value is equal to the dilated value (maximum value of surrounding pixels)
@@ -89,20 +89,20 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch
     bool ret = true;
 
     // First check whether all coordinates are within range of in_image
-    const bool inRangeX = static_cast<int32_t>(in_pixelPosX - in_distanceAroundCenter) >= 0 && static_cast<int32_t>(in_pixelPosX + in_distanceAroundCenter) < in_image.size[1];
-    const bool inRangeY = static_cast<int32_t>(in_pixelPosY - in_distanceAroundCenter) >= 0 && static_cast<int32_t>(in_pixelPosY + in_distanceAroundCenter) < in_image.size[0];
+    const bool inRangeX = static_cast<int>(in_pixelPosX - in_distanceAroundCenter) >= 0 && static_cast<int>(in_pixelPosX + in_distanceAroundCenter) < in_image.size[1];
+    const bool inRangeY = static_cast<int>(in_pixelPosY - in_distanceAroundCenter) >= 0 && static_cast<int>(in_pixelPosY + in_distanceAroundCenter) < in_image.size[0];
     // Then check if dimensions of provided patch matrix are correct
     const bool correctPatchDimX = out_patch.size[1] == (2 * in_distanceAroundCenter + 1);
     const bool correctPatchDimY = out_patch.size[0] == (2 * in_distanceAroundCenter + 1);
 
     if (inRangeX && inRangeY && correctPatchDimX && correctPatchDimY)
     {
-        for (int32_t i = 0; i < out_patch.size[1]; i++)
+        for (int i = 0; i < out_patch.size[1]; i++)
         {
-            for (int32_t j = 0; j < out_patch.size[0]; j++)
+            for (int j = 0; j < out_patch.size[0]; j++)
             {
-                int32_t imagePosX = in_pixelPosX - in_distanceAroundCenter + i;
-                int32_t imagePosÝ = in_pixelPosY - in_distanceAroundCenter + j;
+                int imagePosX = in_pixelPosX - in_distanceAroundCenter + i;
+                int imagePosÝ = in_pixelPosY - in_distanceAroundCenter + j;
                 out_patch.at<float>(j, i) = in_image.at<float>(in_pixelPosY - in_distanceAroundCenter + j, in_pixelPosX - in_distanceAroundCenter + i);
             }
         }
@@ -120,6 +120,101 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch
     return ret;
 
 }
+
+void ComputeMatchingPoints(const std::vector<cv::KeyPoint>& in_left, const std::vector<cv::KeyPoint>& in_right, const std::vector<cv::DMatch>& in_matchesLeftRight,
+    const int in_imgIdx, std::vector<cv::Point2f>& out_leftPoints, std::vector<cv::Point2f>& out_rightPoints)
+{
+    for (auto match : in_matchesLeftRight)
+    {
+        if (match.imgIdx == in_imgIdx)
+        {
+            out_leftPoints.push_back(in_left[match.queryIdx].pt);
+            out_rightPoints.push_back(in_right[match.trainIdx].pt);
+        }
+    }
+}
+
+void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv::Point2f>& out_normPoints, cv::Mat& out_transform)
+{
+    float meanX = 0, meanY = 0;
+    for (auto element : in_points)
+    {
+        meanX += static_cast<float>(element.x / in_points.size());
+        meanY += static_cast<float>(element.y / in_points.size());
+    }
+
+    float meanDist = 0;
+    for (auto element : in_points)
+    {
+        const float shiftedX = static_cast<float>(element.x) - meanX;
+        const float shiftedY = static_cast<float>(element.y) - meanY;
+
+        meanDist += ((std::pow(shiftedX, 2) + std::pow(shiftedY, 2)) / in_points.size());
+    }
+
+    const float scale = std::sqrt(2) / std::sqrt(meanDist);
+
+    for (auto element : in_points)
+    {
+        const float normX = scale * (static_cast<float>(element.x) - meanX);
+        const float normY = scale * (static_cast<float>(element.y) - meanY);
+
+        out_normPoints.push_back(cv::Point2f(normX, normY));
+    }
+
+    out_transform = cv::Mat::zeros(3, 3, CV_32F);
+    out_transform.at<float>(0, 0) = scale;
+    out_transform.at<float>(1, 1) = scale;
+    out_transform.at<float>(0, 2) = -scale * meanX;
+    out_transform.at<float>(1, 2) = -scale * meanY;
+    out_transform.at<float>(2, 2) = 1.0;
+}
+
+bool GetProjectionMatrix(const cv::Mat& in_rotationMatrix, const cv::Mat& in_translation, cv::Mat& out_projMat)
+{
+    bool ret = true;
+
+    if (in_rotationMatrix.rows != 3 || in_rotationMatrix.cols != 3)
+    {
+        std::cout << "[CalculateProjectionMatrix]: Rotation matrix has to be 3x3" << std::endl;
+        ret = false;
+    }
+    else if (in_translation.rows != 3 || in_translation.cols != 1)
+    {
+        std::cout << "[CalculateProjectionMatrix]: translation matrix has to be 3x1" << std::endl;
+        ret = false;
+    }
+    else
+    {
+        cv::hconcat(in_rotationMatrix, in_translation, out_projMat);
+    }
+
+    return ret;
+}
+
+bool GetCrossProductMatrix(const cv::Mat& in_generatingMat, cv::Mat& out_crossMat)
+{
+    bool ret = true;
+
+    if (in_generatingMat.rows != 3 || in_generatingMat.cols != 1)
+    {
+        std::cout << "[GetCrossProductMatrix]: cross product generating vector has to be 3x1" << std::endl;
+        ret = false;
+    }
+    else
+    {
+        out_crossMat = cv::Mat::zeros(3, 3, CV_32F);
+        out_crossMat.at<float>(0, 1) = -in_generatingMat.at<float>(2, 0);
+        out_crossMat.at<float>(0, 2) = in_generatingMat.at<float>(1, 0);
+        out_crossMat.at<float>(1, 0) = in_generatingMat.at<float>(2, 0);
+        out_crossMat.at<float>(1, 2) = -in_generatingMat.at<float>(0, 0);
+        out_crossMat.at<float>(2, 0) = -in_generatingMat.at<float>(1, 0);
+        out_crossMat.at<float>(2, 1) = in_generatingMat.at<float>(0, 0);
+    }
+
+    return ret;
+}
+
 
 } //namespace Utils
 } //namespace VOCPP

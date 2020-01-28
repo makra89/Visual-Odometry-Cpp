@@ -48,7 +48,7 @@ TEST(DrawIntInRange, ProbabilityCheck)
     // Check element counts, expected is 100k / 21 = 4761
     for (uint it = 0U; it < 21U; it++)
     {
-        EXPECT_NEAR(elCount[it], 4761, 200);
+        EXPECT_NEAR(elCount[it], 4761, 300);
     }
 }
 
