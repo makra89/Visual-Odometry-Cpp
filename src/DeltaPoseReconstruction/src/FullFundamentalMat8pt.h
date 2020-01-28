@@ -15,14 +15,17 @@ namespace DeltaPoseReconstruction
 {
 
 /**
-* /brief Tries to reconstruct a full fundamental matrix from provided point matches. 8 correspondences are needed.
-*/
+  * /brief Tries to reconstruct a full fundamental matrix from provided point matches. 8 correspondences are needed.
+  */
 class FullFundamentalMat8pt : public EpipolarModel
 {
 public:
 
+    /**
+      * /brief Compute fundamental matrix F such that x_left.T * F * x_right = 0
+      */
     virtual bool compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        const std::vector<cv::Mat>& out_solutions);
+        std::vector<cv::Mat>& out_solutions);
 };
 
 } //namespace DeltaPoseReconstruction

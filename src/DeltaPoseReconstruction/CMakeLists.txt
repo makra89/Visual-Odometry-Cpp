@@ -19,6 +19,10 @@ target_include_directories(Vocpp_DeltaPoseReconstruction
 
 target_link_libraries(Vocpp_DeltaPoseReconstruction
     PRIVATE
-	    ${OpenCV_LIBS} 
-	    Vocpp_Utils
+        ${OpenCV_LIBS} 
+        Vocpp_Utils
 )
+
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()

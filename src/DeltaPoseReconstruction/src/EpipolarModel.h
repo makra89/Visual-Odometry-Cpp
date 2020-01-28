@@ -31,10 +31,12 @@ class EpipolarModel
 {
 public:
     
-    virtual ~EpipolarModel() = 0;
-
-    virtual bool compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
-        const std::vector<cv::Mat>& out_solutions) = 0;
+virtual ~EpipolarModel()
+{
+}
+    
+virtual bool compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
+        std::vector<cv::Mat>& out_solutions) = 0;
 };
 
 } //namespace DeltaPoseReconstruction
