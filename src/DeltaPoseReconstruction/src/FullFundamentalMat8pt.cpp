@@ -14,7 +14,7 @@ namespace VOCPP
 namespace DeltaPoseReconstruction
 {
 
-bool FullFundamentalMat8pt::compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
         std::vector<cv::Mat>& out_solutions)
 {
     bool ret = true;
@@ -84,6 +84,12 @@ bool FullFundamentalMat8pt::compute(const std::vector<cv::Point2f>& in_pointCorr
     }
 
     return ret;
+}
+
+void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+    cv::Mat& in_solution, std::vector<int>& out_inliers)
+{
+    
 }
 
 

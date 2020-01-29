@@ -5,13 +5,12 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_MASTER_H
+#define VOCPP_MASTER_H
 
 #include<Vocpp_Utils/Frame.h>
 
-#include<Vocpp_FeatureHandling/FeatureDetector.h>
-#include<Vocpp_FeatureHandling/FeatureDescriptor.h>
-#include<Vocpp_FeatureHandling/FeatureMatcher.h>
+#include<Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -43,14 +42,11 @@ public:
 
 private:
 
-    FeatureHandling::FeatureDetector* m_detector; ///< feature detector
-    FeatureHandling::FeatureDescriptor* m_descriptor; ///< feature descriptor
-    FeatureHandling::FeatureMatcher* m_matcher; ///< feature matcher
-
-    Utils::Frame m_lastFrame;  ///< last processed frame (fed via Master::FeedNextFrame(Utils::Frame& in_frame)
+    DeltaPoseReconstruction::DeltaPoseReconstructor m_reconstructor; /// reconstructor which provides delta poses between consecutive frames
 
 };
 
 } //namespace Master
 } //namespace VOCPP
 
+#endif /* VOCPP_MASTER_H */

@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_HARRIS_EDGE_DETECTOR_H
+#define VOCPP_HARRIS_EDGE_DETECTOR_H
 
 #include<Vocpp_FeatureHandling/FeatureDetector.h>
 
@@ -51,3 +52,4 @@ private:
 } //namespace FeatureHandling
 } //namespace VOCPP
 
+#endif /* VOCPP_HARRIS_EDGE_DETECTOR_H */

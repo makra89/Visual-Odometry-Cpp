@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_BRUTE_FORCE_MATCHER_H
+#define VOCPP_BRUTE_FORCE_MATCHER_H
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -63,3 +64,5 @@ private:
 
 } //namespace FeatureHandling
 } //namespace VOCPP
+
+#endif /* VOCPP_BRUTE_FORCE_MATCHER_H */

@@ -17,26 +17,44 @@ namespace DeltaPoseReconstruction
 {
 
 /**
-* /brief Available epipolar geometry models
-*/
-enum EpipolarModelTypes
-{
-    FullFundMat8pt
-};
-
-/**
 * /brief Reconstructs epipolar geometry out of provided feature point matches
 */
 class EpipolarModel
 {
 public:
     
-virtual ~EpipolarModel()
-{
-}
+    /**
+      * /brief Available epipolar geometry models
+      */
+    enum class Types
+    {
+        FullFundMat8pt,
+            None
+    };
+
+    EpipolarModel(int in_numCorrespondences)
+    {
+        m_numCorrespondences = in_numCorrespondences;
+    }
+
+    virtual ~EpipolarModel()
+    {
+    }
     
-virtual bool compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
-        std::vector<cv::Mat>& out_solutions) = 0;
+    virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
+            std::vector<cv::Mat>& out_solutions) = 0;
+
+    virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+        cv::Mat& in_solution, std::vector<int>& out_inliers) = 0;
+
+    int GetNumCorrespondences()
+    {
+        return m_numCorrespondences;
+    }
+
+protected:
+
+    int m_numCorrespondences; ///< number of correspondences needed by this model
 };
 
 } //namespace DeltaPoseReconstruction

@@ -22,10 +22,20 @@ class FullFundamentalMat8pt : public EpipolarModel
 public:
 
     /**
+      * /brief Constructor of model, needed correspondences: 8
+      */
+    FullFundamentalMat8pt() : EpipolarModel(8)
+    {
+    }
+    
+    /**
       * /brief Compute fundamental matrix F such that x_left.T * F * x_right = 0
       */
-    virtual bool compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+    virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
         std::vector<cv::Mat>& out_solutions);
+
+    virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+        cv::Mat& in_solution, std::vector<int>& out_inliers);
 };
 
 } //namespace DeltaPoseReconstruction

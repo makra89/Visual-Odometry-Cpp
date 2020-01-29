@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_BRIEF_DESCRIPTOR_H
+#define VOCPP_BRIEF_DESCRIPTOR_H
 
 #include<Vocpp_FeatureHandling/FeatureDescriptor.h>
 
@@ -54,3 +55,4 @@ private:
 } //namespace FeatureHandling
 } //namespace VOCPP
 
+#endif /* VOCPP_BRIEF_DESCRIPTOR_H */
