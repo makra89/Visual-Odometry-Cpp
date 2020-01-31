@@ -23,15 +23,8 @@ Master::Master()
 
 bool Master::FeedNextFrame(Utils::Frame& in_frame)
 {  
-    
-    // Measure frame processing time
-    cv::TickMeter tick;
-    tick.start();
 
     bool ret = m_reconstructor.FeedNextFrame(in_frame);
-
-    tick.stop();
-    std::cout << "[Master]: Frame processing time: " << tick.getTimeMilli() << std::endl;
 
     return ret;
 }

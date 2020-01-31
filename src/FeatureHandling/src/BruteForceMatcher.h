@@ -29,7 +29,7 @@ public:
       *
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
-    static BruteForceMatcher* CreateInstance(const uint32_t in_maxDistance=25U);
+    static BruteForceMatcher* CreateInstance(const uint32_t in_maxDistance=50U);
 
     /**
       * /brief Match feature descriptions in provided frame and return matches. Features and descriptions have to be present!

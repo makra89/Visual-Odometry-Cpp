@@ -32,21 +32,38 @@ public:
             None
     };
 
-    EpipolarModel(int in_numCorrespondences)
+    /**
+      * /brief Constructor
+      */
+    EpipolarModel(int in_numCorrespondences) : m_numCorrespondences(in_numCorrespondences)
     {
-        m_numCorrespondences = in_numCorrespondences;
     }
 
+    /**
+      * /brief Destructor
+      */
     virtual ~EpipolarModel()
     {
     }
     
+    /**
+      * /brief Compute model solution for given image correspondences
+      */
     virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
             std::vector<cv::Mat>& out_solutions) = 0;
 
+    /**
+      * /brief Tests a particular model solution with a set of correspondendec and computes the inliers given an error treshold.
+      * When comparing the error treshold value to the actual distance error measure, 
+      * the model has to scale this value by the 95% value of a chi^2 distribution
+      * for either one or two dimensions (depends on the codimension of the variety)
+      */
     virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        cv::Mat& in_solution, std::vector<int>& out_inliers) = 0;
+        cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) = 0;
 
+    /**
+      * /brief Get number of necessary image correspondences to compute a solution for the model
+      */
     int GetNumCorrespondences()
     {
         return m_numCorrespondences;
@@ -54,7 +71,7 @@ public:
 
 protected:
 
-    int m_numCorrespondences; ///< number of correspondences needed by this model
+    const int m_numCorrespondences; ///< number of correspondences needed by this model
 };
 
 } //namespace DeltaPoseReconstruction

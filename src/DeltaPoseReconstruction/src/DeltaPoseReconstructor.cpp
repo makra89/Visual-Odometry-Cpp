@@ -26,8 +26,8 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_descriptor = FeatureHandling::InstantiateFeatureDescriptor("Brief");
     m_matcher = FeatureHandling::InstantiateFeatureMatcher("BruteForce");
 
-    // Instantiate optimizer
-    m_optimizer = new RansacOptimizer();
+    // Instantiate optimizer with an initial estimate of 30% outlier ratio
+    m_optimizer = new RansacOptimizer(static_cast<float>(0.3), static_cast<float>(0.01));
 
     m_epiPolModels.clear();
     m_epiPolModels.push_back(new FullFundamentalMat8pt());
@@ -64,26 +64,33 @@ bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
         {
             // Get matches and draw them
             ret = m_matcher->matchDesriptions(in_frame, m_lastFrame);
-            
+           
             std::vector<cv::Point2f> pLastFrame;
             std::vector<cv::Point2f> pCurrFrame;
             Utils::ComputeMatchingPoints(in_frame.GetKeypoints(), m_lastFrame.GetKeypoints(), in_frame.GetMatches(), m_lastFrame.GetId(), pCurrFrame, pLastFrame);
 
-            m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame);
+            std::vector<cv::Point2f> pLastFrameInliers;
+            std::vector<cv::Point2f> pCurrFrameInliers;
+            cv::Mat bestSolution;
+            m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, pCurrFrameInliers, pLastFrameInliers, bestSolution);
             
+            tick.stop();
+            std::cout << "[Master]: Frame processing time: " << tick.getTimeMilli() << std::endl;
             cv::Mat matchImage = in_frame.GetImageCopy();
             cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
-
-            for (auto matches : in_frame.GetMatches())
+            
+            for (int it = 0; it < pLastFrameInliers.size(); it++)
             {
+               
                 // Draw keypoints from current frame
-                cv::circle(matchImage, in_frame.GetKeypoints()[matches.queryIdx].pt, 5, cv::Scalar(0, 0.0, 255.0), 2);
+                cv::circle(matchImage, pCurrFrameInliers[it], 5, cv::Scalar(0, 0.0, 255.0), 2);
                 // Draw keypoints from last frame
-                cv::circle(matchImage, m_lastFrame.GetKeypoints()[matches.trainIdx].pt, 5, cv::Scalar(0.0, 255.0, 0.0), 2);
+                cv::circle(matchImage, pLastFrameInliers[it], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
                 // Draw connecting line
-                cv::line(matchImage, in_frame.GetKeypoints()[matches.queryIdx].pt, m_lastFrame.GetKeypoints()[matches.trainIdx].pt, cv::Scalar(0.0, 0.0, 255.0), 2);
+                cv::line(matchImage, pCurrFrameInliers[it], pLastFrameInliers[it], cv::Scalar(0.0, 0.0, 255.0), 2);
             }
 
+         
             cv::imshow("Optical Flow", matchImage);
             cv::waitKey(1);
         }

@@ -32,10 +32,13 @@ public:
       * /brief Compute fundamental matrix F such that x_left.T * F * x_right = 0
       */
     virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        std::vector<cv::Mat>& out_solutions);
+        std::vector<cv::Mat>& out_solutions) override;
 
+    /**
+      * /brief Test model solution given a set of image correspondences
+      */
     virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        cv::Mat& in_solution, std::vector<int>& out_inliers);
+        cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) override;
 };
 
 } //namespace DeltaPoseReconstruction

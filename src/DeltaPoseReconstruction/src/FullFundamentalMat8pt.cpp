@@ -7,6 +7,7 @@
 
 #include <FullFundamentalMat8pt.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
+#include <Vocpp_Utils/ConversionUtils.h>
 #include <iostream>
 
 namespace VOCPP
@@ -28,23 +29,26 @@ bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorr
     {
         cv::Mat transLeft;
         cv::Mat transRight;
-        std::vector<cv::Point2f> in_normLeftPoints;
-        std::vector<cv::Point2f> in_normRightPoints;
-        Utils::NormalizePointSet(in_pointCorrLeft, in_normLeftPoints, transLeft);
-        Utils::NormalizePointSet(in_pointCorrRight, in_normRightPoints, transRight);
+        std::vector<cv::Point2f> normLeftPoints;
+        std::vector<cv::Point2f> normRightPoints;
+        normLeftPoints.reserve(in_pointCorrLeft.size());
+        normRightPoints.reserve(in_pointCorrRight.size());
 
-        cv::Mat A = cv::Mat::zeros(static_cast<int>(in_normRightPoints.size()), 9, CV_64F);
+        Utils::NormalizePointSet(in_pointCorrLeft, normLeftPoints, transLeft);
+        Utils::NormalizePointSet(in_pointCorrRight, normRightPoints, transRight);
 
-        for (int it = 0; it < static_cast<int>(in_normRightPoints.size()); it++)
+        cv::Mat A = cv::Mat::zeros(static_cast<int>(normRightPoints.size()), 9, CV_64F);
+
+        for (int it = 0; it < static_cast<int>(normRightPoints.size()); it++)
         {
-            A.at<double>(it, 0) = static_cast<double>(in_normRightPoints[it].x)* static_cast<double>(in_normLeftPoints[it].x);
-            A.at<double>(it, 1) = static_cast<double>(in_normRightPoints[it].x)* static_cast<double>(in_normLeftPoints[it].y);
-            A.at<double>(it, 2) = static_cast<double>(in_normRightPoints[it].x);
-            A.at<double>(it, 3) = static_cast<double>(in_normRightPoints[it].y)* static_cast<double>(in_normLeftPoints[it].x);
-            A.at<double>(it, 4) = static_cast<double>(in_normRightPoints[it].y)* static_cast<double>(in_normLeftPoints[it].y);
-            A.at<double>(it, 5) = static_cast<double>(in_normRightPoints[it].y);
-            A.at<double>(it, 6) = static_cast<double>(in_normLeftPoints[it].x);
-            A.at<double>(it, 7) = static_cast<double>(in_normLeftPoints[it].y);
+            A.at<double>(it, 0) = static_cast<double>(normRightPoints[it].x)* static_cast<double>(normLeftPoints[it].x);
+            A.at<double>(it, 1) = static_cast<double>(normRightPoints[it].x)* static_cast<double>(normLeftPoints[it].y);
+            A.at<double>(it, 2) = static_cast<double>(normRightPoints[it].x);
+            A.at<double>(it, 3) = static_cast<double>(normRightPoints[it].y)* static_cast<double>(normLeftPoints[it].x);
+            A.at<double>(it, 4) = static_cast<double>(normRightPoints[it].y)* static_cast<double>(normLeftPoints[it].y);
+            A.at<double>(it, 5) = static_cast<double>(normRightPoints[it].y);
+            A.at<double>(it, 6) = static_cast<double>(normLeftPoints[it].x);
+            A.at<double>(it, 7) = static_cast<double>(normLeftPoints[it].y);
             A.at<double>(it, 8) = 1.0;
         }
 
@@ -87,9 +91,30 @@ bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorr
 }
 
 void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-    cv::Mat& in_solution, std::vector<int>& out_inliers)
+    cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
 {
-    
+    out_inliers.clear();
+    in_solution = in_solution / cv::norm(in_solution);
+
+    for (int i = 0; i < in_pointCorrLeft.size(); i++)
+    {
+        // We are using the symmetric epipolar distance here (SED)
+        // See https://www.robots.ox.ac.uk/~vgg/publications/1998/Torr98c/torr98c.pdf
+        // There it is called "Luongs distance"
+        cv::Mat epiLineLeft = in_solution * Utils::Point2fToMatHomCoordinates(in_pointCorrRight[i]);
+        cv::Mat epiLineRight = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * in_solution;
+
+        const float scale = static_cast<float>(1.0) / (std::pow(epiLineLeft.at<float>(0, 0), 2) + std::pow(epiLineLeft.at<float>(1, 0), 2)) +
+            (static_cast<float>(1.0) / (std::pow(epiLineRight.at<float>(0, 0), 2) + std::pow(epiLineRight.at<float>(1, 0), 2)));
+
+        cv::Mat dist = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * epiLineLeft;
+
+        // Codimension 1 to R^4 --> divide by 3.84
+        if ((std::pow(dist.at<float>(0, 0), 2) * scale / static_cast<float>(3.84)) < std::pow(in_errorTresh, 2))
+        {
+            out_inliers.push_back(i);
+        }
+    }
 }
 
 

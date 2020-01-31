@@ -26,7 +26,7 @@ public:
       *
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
-    static BriefDescriptor* CreateInstance(const uint32_t in_randomPairDrawRadius = 50, const uint32_t in_numRandomPairs = 128);
+    static BriefDescriptor* CreateInstance(const uint32_t in_randomPairDrawRadius = 50, const uint32_t in_numRandomPairs = 256);
 
     /**
       * /brief Compute descriptions for provided frame
