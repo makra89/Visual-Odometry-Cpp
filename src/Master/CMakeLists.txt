@@ -17,7 +17,8 @@ target_include_directories(Vocpp_Master
 
 target_link_libraries(Vocpp_Master
     PRIVATE
-	    ${OpenCV_LIBS} 
-	    Vocpp_Utils
-	    Vocpp_FeatureHandling
+        Vocpp_DeltaPoseReconstruction
+        Vocpp_FeatureHandling
+        Vocpp_Utils
+        ${OpenCV_LIBS} 
 )

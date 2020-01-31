@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_BRUTE_FORCE_MATCHER_H
+#define VOCPP_BRUTE_FORCE_MATCHER_H
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -28,7 +29,7 @@ public:
       *
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
-    static BruteForceMatcher* CreateInstance(const uint32_t in_maxDistance=25U);
+    static BruteForceMatcher* CreateInstance(const uint32_t in_maxDistance=50U);
 
     /**
       * /brief Match feature descriptions in provided frame and return matches. Features and descriptions have to be present!
@@ -63,3 +64,5 @@ private:
 
 } //namespace FeatureHandling
 } //namespace VOCPP
+
+#endif /* VOCPP_BRUTE_FORCE_MATCHER_H */

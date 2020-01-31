@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_FEATURE_MATCHER_H
+#define VOCPP_FEATURE_MATCHER_H
 
 #include<Vocpp_Utils/Frame.h>
 #include<opencv2/core/types.hpp>
@@ -47,3 +48,5 @@ FeatureMatcher* InstantiateFeatureMatcher(std::string in_matcherName);
 
 } //namespace FeatureHandling
 } //namespace VOCPP
+
+#endif /* VOCPP_FEATURE_MATCHER_H */

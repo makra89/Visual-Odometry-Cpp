@@ -1,9 +1,10 @@
-add_executable( main main.cpp )
+add_executable( TrackFeatures TrackFeatures.cpp )
 
-target_link_libraries( main 
-	${OpenCV_LIBS} 
-	Vocpp_FeatureHandling
-	Vocpp_Master
-	Vocpp_Utils
+target_link_libraries( TrackFeatures 
+    ${OpenCV_LIBS} 
+    Vocpp_FeatureHandling
+    Vocpp_DeltaPoseReconstruction
+    Vocpp_Master
+    Vocpp_Utils
 )
 

@@ -5,11 +5,12 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include <Vocpp_Utils/EpipolarGeometryUtils.h>
 #include <Vocpp_Utils/ConversionUtils.h>
 #include <Vocpp_Utils/NumericalUtilities.h>
 #include <Vocpp_Utils/FrameRotations.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
+#include <EpipolarModel.h>
+#include <FullFundamentalMat8pt.h>
 
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
@@ -24,7 +25,7 @@ using VOCPP::Utils::GetCrossProductMatrix;
 /* Most general type of fundamental matrix consisting out of a translation + rotation 
 If additionally the point cloud lies not on a plane we can be sure that for this kind 
 of movement we don't have any kind of degeneracy */
-TEST(FundamentalMatrix8pt, RotationAndTranslation)
+TEST(FullFundamentalMat8pt, RotationAndTranslation)
 {
     std::vector<cv::Point3f> realWorldPoints;
     std::vector<cv::Point2f> imgPoints;
@@ -70,9 +71,11 @@ TEST(FundamentalMatrix8pt, RotationAndTranslation)
         scaledImgPoints.push_back(cv::Point2f(projPoint.at<float>(0, 0) / projPoint.at<float>(2, 0), projPoint.at<float>(1, 0) / projPoint.at<float>(2, 0)));
     }
 
-    // Get fundamental matrix 
-    cv::Mat fundMatrix;
-    VOCPP::Utils::CalculateFundamentalMatrix8pt(scaledImgPoints, imgPoints, fundMatrix);
+    // Get fundamental matrix
+    std::vector<cv::Mat> solutionVec;
+    VOCPP::DeltaPoseReconstruction::FullFundamentalMat8pt model;
+    model.compute(scaledImgPoints, imgPoints, solutionVec);
+    ASSERT_TRUE(solutionVec.size() == 1);
 
     // Calculate true one
     cv::Mat translatCross;
@@ -81,13 +84,13 @@ TEST(FundamentalMatrix8pt, RotationAndTranslation)
     trueFundMat = trueFundMat / trueFundMat.at<float>(2, 2);
    
     // And check
-    EXPECT_NEAR(fundMatrix.at<float>(0, 0), trueFundMat.at<float>(0, 0), 1e-7);
-    EXPECT_NEAR(fundMatrix.at<float>(0, 1), trueFundMat.at<float>(0, 1), 1e-7);
-    EXPECT_NEAR(fundMatrix.at<float>(0, 2), trueFundMat.at<float>(0, 2), 5e-5);
-    EXPECT_NEAR(fundMatrix.at<float>(1, 0), trueFundMat.at<float>(1, 0), 1e-7);
-    EXPECT_NEAR(fundMatrix.at<float>(1, 1), trueFundMat.at<float>(1, 1), 1e-7);
-    EXPECT_NEAR(fundMatrix.at<float>(1, 2), trueFundMat.at<float>(1, 2), 5e-5);
-    EXPECT_NEAR(fundMatrix.at<float>(2, 0), trueFundMat.at<float>(2, 0), 5e-5);
-    EXPECT_NEAR(fundMatrix.at<float>(2, 1), trueFundMat.at<float>(2, 1), 5e-5);
-    EXPECT_NEAR(fundMatrix.at<float>(2, 2), trueFundMat.at<float>(2, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0].at<float>(0, 0), trueFundMat.at<float>(0, 0), 1e-7);
+    EXPECT_NEAR(solutionVec[0].at<float>(0, 1), trueFundMat.at<float>(0, 1), 1e-7);
+    EXPECT_NEAR(solutionVec[0].at<float>(0, 2), trueFundMat.at<float>(0, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0].at<float>(1, 0), trueFundMat.at<float>(1, 0), 1e-7);
+    EXPECT_NEAR(solutionVec[0].at<float>(1, 1), trueFundMat.at<float>(1, 1), 1e-7);
+    EXPECT_NEAR(solutionVec[0].at<float>(1, 2), trueFundMat.at<float>(1, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0].at<float>(2, 0), trueFundMat.at<float>(2, 0), 5e-5);
+    EXPECT_NEAR(solutionVec[0].at<float>(2, 1), trueFundMat.at<float>(2, 1), 5e-5);
+    EXPECT_NEAR(solutionVec[0].at<float>(2, 2), trueFundMat.at<float>(2, 2), 5e-5);
 }

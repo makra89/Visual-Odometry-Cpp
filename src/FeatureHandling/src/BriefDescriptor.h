@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_BRIEF_DESCRIPTOR_H
+#define VOCPP_BRIEF_DESCRIPTOR_H
 
 #include<Vocpp_FeatureHandling/FeatureDescriptor.h>
 
@@ -25,7 +26,7 @@ public:
       *
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
-    static BriefDescriptor* CreateInstance(const uint32_t in_randomPairDrawRadius = 50, const uint32_t in_numRandomPairs = 128);
+    static BriefDescriptor* CreateInstance(const uint32_t in_randomPairDrawRadius = 50, const uint32_t in_numRandomPairs = 256);
 
     /**
       * /brief Compute descriptions for provided frame
@@ -54,3 +55,4 @@ private:
 } //namespace FeatureHandling
 } //namespace VOCPP
 
+#endif /* VOCPP_BRIEF_DESCRIPTOR_H */

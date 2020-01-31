@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_FEATURE_DESCRIPTOR_H
+#define VOCPP_FEATURE_DESCRIPTOR_H
 
 #include<Vocpp_Utils/Frame.h>
 #include<opencv2/core/types.hpp>
@@ -44,3 +45,5 @@ FeatureDescriptor* InstantiateFeatureDescriptor(std::string in_descriptorName);
 
 } //namespace FeatureHandling
 } //namespace VOCPP
+
+#endif /* VOCPP_FEATURE_DESCRIPTOR_H */

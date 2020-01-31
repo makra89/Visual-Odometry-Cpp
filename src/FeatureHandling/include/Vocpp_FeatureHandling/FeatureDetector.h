@@ -5,9 +5,12 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+
+#ifndef VOCPP_FEATURE_DETECTOR_H
+#define VOCPP_FEATURE_DETECTOR_H
 
 #include<Vocpp_Utils/Frame.h>
+
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
 
@@ -44,3 +47,6 @@ FeatureDetector* InstantiateFeatureDetector(std::string in_detectorName);
 
 } //namespace FeatureHandling
 } //namespace VOCPP
+
+
+#endif /* VOCPP_FEATURE_DETECTOR_H */
