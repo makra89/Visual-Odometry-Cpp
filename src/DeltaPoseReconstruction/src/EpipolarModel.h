@@ -5,7 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#pragma once
+#ifndef VOCPP_EPIPOLAR_MODEL_H
+#define VOCPP_EPIPOLAR_MODEL_H
 
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
@@ -29,13 +30,18 @@ public:
     enum class Types
     {
         FullFundMat8pt,
-            None
+        PureTranslationModel,
+        NoMotionModel,
+        None
     };
 
     /**
       * /brief Constructor
       */
-    EpipolarModel(int in_numCorrespondences) : m_numCorrespondences(in_numCorrespondences)
+    EpipolarModel(int in_numCorrespondences, int in_dimensionModel, int in_degreesOfFreedom) : 
+        m_numCorrespondences(in_numCorrespondences), 
+        m_degreesOfFreedom(in_degreesOfFreedom),
+        m_dimensionModel(in_dimensionModel)
     {
     }
 
@@ -69,12 +75,30 @@ public:
         return m_numCorrespondences;
     }
 
+    EpipolarModel::Types GetModelType()
+    {
+        return m_type;
+    }
+
+    /**
+      * /brief Compute Plunder score based on number of inliers, outliers and degrees of freedom
+      * This score can be used to compare which epipolar model to choose.
+      */
+    int ComputePlunderScore(const int in_numInliers, const int in_numOutliers)
+    {
+        return in_numInliers * m_dimensionModel + 4 * in_numOutliers + m_degreesOfFreedom;
+    }
+
 protected:
 
     const int m_numCorrespondences; ///< number of correspondences needed by this model
+    const int m_degreesOfFreedom; ///< degrees of freedom of the model
+    const int m_dimensionModel; ///< dimension of the variety defined by the model
+    EpipolarModel::Types m_type;
 };
 
 } //namespace DeltaPoseReconstruction
 } //namespace VOCPP
 
 
+#endif /* VOCPP_EPIPOLAR_MODEL_H */

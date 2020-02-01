@@ -8,6 +8,8 @@
 #include <Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <FullFundamentalMat8pt.h>
+#include <PureTranslationModel.h>
+#include <NoMotionModel.h>
 #include<EpipolarModel.h>
 #include<RansacOptimizer.h>
 
@@ -30,7 +32,9 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_optimizer = new RansacOptimizer(static_cast<float>(0.3), static_cast<float>(0.01));
 
     m_epiPolModels.clear();
+    m_epiPolModels.push_back(new PureTranslationModel());
     m_epiPolModels.push_back(new FullFundamentalMat8pt());
+    m_epiPolModels.push_back(new NoMotionModel());
 
     // Instantiate last processed frame as invalid
     m_lastFrame = Utils::Frame();
@@ -81,7 +85,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
             
             for (int it = 0; it < pLastFrameInliers.size(); it++)
             {
-               
+
                 // Draw keypoints from current frame
                 cv::circle(matchImage, pCurrFrameInliers[it], 5, cv::Scalar(0, 0.0, 255.0), 2);
                 // Draw keypoints from last frame

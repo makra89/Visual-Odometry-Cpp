@@ -5,8 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#ifndef VOCPP_FULL_FUNDAMENTAL_8PT_H
-#define VOCPP_FULL_FUNDAMENTAL_8PT_H
+#ifndef VOCPP_PURE_TRANSLATION_MODEL_H
+#define VOCPP_PURE_TRANSLATION_MODEL_H
 
 #include <EpipolarModel.h>
 
@@ -16,18 +16,18 @@ namespace DeltaPoseReconstruction
 {
 
 /**
-  * /brief Tries to reconstruct a full fundamental matrix from provided point matches. 8 correspondences are needed.
+  * /brief Tries to reconstruct a fundamental matrix consisting out of a pure translation
   */
-class FullFundamentalMat8pt : public EpipolarModel
+class PureTranslationModel : public EpipolarModel
 {
 public:
 
     /**
-      * /brief Constructor of model, needed correspondences: 8, dimension = 3, 7 DOF
+      * /brief Constructor of model, needed correspondences: 2,  dimension = 3, 2 DOF
       */
-    FullFundamentalMat8pt() : EpipolarModel(8, 3,  7)
+    PureTranslationModel() : EpipolarModel(2, 3, 2)
     {
-        m_type = EpipolarModel::Types::FullFundMat8pt;
+        m_type = EpipolarModel::Types::PureTranslationModel;
     }
     
     /**
@@ -46,4 +46,4 @@ public:
 } //namespace DeltaPoseReconstruction
 } //namespace VOCPP
 
-#endif /* VOCPP_FULL_FUNDAMENTAL_8PT_H */
+#endif /* VOCPP_PURE_TRANSLATION_MODEL_H */

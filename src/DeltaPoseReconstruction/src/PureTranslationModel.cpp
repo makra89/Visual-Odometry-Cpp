@@ -5,7 +5,7 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include <FullFundamentalMat8pt.h>
+#include <PureTranslationModel.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <Vocpp_Utils/ConversionUtils.h>
 #include <iostream>
@@ -15,7 +15,7 @@ namespace VOCPP
 namespace DeltaPoseReconstruction
 {
 
-bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+bool PureTranslationModel::Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
         std::vector<cv::Mat>& out_solutions)
 {
     bool ret = true;
@@ -23,44 +23,34 @@ bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorr
     if (in_pointCorrLeft.size() != in_pointCorrRight.size())
     {
         ret = false;
-        std::cout << "[FullFundamentalMatrix]: Dimensions of vectors have to be equal " << std::endl;
+        std::cout << "[PureTranslationModel]: Dimensions of vectors have to be equal " << std::endl;
     }
     else
     {
         cv::Mat transLeft;
         cv::Mat transRight;
-        std::vector<cv::Point2f> normLeftPoints;
-        std::vector<cv::Point2f> normRightPoints;
-        normLeftPoints.reserve(in_pointCorrLeft.size());
-        normRightPoints.reserve(in_pointCorrRight.size());
 
-        Utils::NormalizePointSet(in_pointCorrLeft, normLeftPoints, transLeft);
-        Utils::NormalizePointSet(in_pointCorrRight, normRightPoints, transRight);
+        cv::Mat A = cv::Mat::zeros(static_cast<int>(in_pointCorrLeft.size()), 3, CV_64F);
 
-        cv::Mat A = cv::Mat::zeros(static_cast<int>(normRightPoints.size()), 9, CV_64F);
-
-        for (int it = 0; it < static_cast<int>(normRightPoints.size()); it++)
+        for (int it = 0; it < static_cast<int>(in_pointCorrLeft.size()); it++)
         {
-            A.at<double>(it, 0) = static_cast<double>(normRightPoints[it].x)* static_cast<double>(normLeftPoints[it].x);
-            A.at<double>(it, 1) = static_cast<double>(normRightPoints[it].x)* static_cast<double>(normLeftPoints[it].y);
-            A.at<double>(it, 2) = static_cast<double>(normRightPoints[it].x);
-            A.at<double>(it, 3) = static_cast<double>(normRightPoints[it].y)* static_cast<double>(normLeftPoints[it].x);
-            A.at<double>(it, 4) = static_cast<double>(normRightPoints[it].y)* static_cast<double>(normLeftPoints[it].y);
-            A.at<double>(it, 5) = static_cast<double>(normRightPoints[it].y);
-            A.at<double>(it, 6) = static_cast<double>(normLeftPoints[it].x);
-            A.at<double>(it, 7) = static_cast<double>(normLeftPoints[it].y);
-            A.at<double>(it, 8) = 1.0;
+            A.at<double>(it, 0) = static_cast<double>(in_pointCorrLeft[it].y) - static_cast<double>(in_pointCorrRight[it].y);
+            A.at<double>(it, 1) = static_cast<double>(in_pointCorrRight[it].x) - static_cast<double>(in_pointCorrLeft[it].x);
+            A.at<double>(it, 2) = static_cast<double>(in_pointCorrLeft[it].x) * static_cast<double>(in_pointCorrRight[it].y)
+            - static_cast<double>(in_pointCorrLeft[it].y) * static_cast<double>(in_pointCorrRight[it].x);
         }
 
         // Compute SVD
         cv::Mat U, D, V_t;
         cv::SVDecomp(A, D, U, V_t, cv::SVD::FULL_UV);
 
-        // Reshape last row of V_t to fundamental matrix
-        // Don't forget to transpose the matrix
-        cv::Mat F;
-        V_t.row(8).copyTo(F);
-        F = F.reshape(0, 3).t();
+        cv::Mat F = cv::Mat::zeros(3, 3, CV_64F);
+        F.at<double>(1, 2) = V_t.row(2).at<double>(0, 0);
+        F.at<double>(2, 1) = -V_t.row(2).at<double>(0, 0);
+        F.at<double>(2, 0) = V_t.row(2).at<double>(0, 1);
+        F.at<double>(0, 2) = -V_t.row(2).at<double>(0, 1);
+        F.at<double>(0, 1) = V_t.row(2).at<double>(0, 2);
+        F.at<double>(1, 0) = -V_t.row(2).at<double>(0, 2);
 
         // Compute SVD of fundamental matrix and recalculate with smalles singular value = 0
         // This has to be done to ensure rank(F) = 2 --> det(F) = 0
@@ -70,13 +60,10 @@ bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorr
         Diag.at<double>(1, 1) = D.at<double>(1, 0);
         Diag.at<double>(2, 2) = 0.0;
         F = U * (Diag * V_t);
-
+        
         // Convert back to float
         cv::Mat fundMat;
         F.convertTo(fundMat, CV_32F);
-
-        // Apply the normalization transformations used for the image coordinates
-        fundMat = transLeft.t() * fundMat * transRight;
 
         // And normalize matrix
         if (cv::norm(fundMat) > 0.0)
@@ -85,15 +72,15 @@ bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorr
         }
 
         out_solutions.push_back(fundMat);
+
     }
 
     return ret;
 }
 
-void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
+void PureTranslationModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
     cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
 {
-    out_inliers.clear();
     in_solution = in_solution / cv::norm(in_solution);
 
     for (int i = 0; i < in_pointCorrLeft.size(); i++)
@@ -115,6 +102,7 @@ void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLef
             out_inliers.push_back(i);
         }
     }
+
 }
 
 

@@ -10,7 +10,7 @@
 #include <Vocpp_Utils/FrameRotations.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <EpipolarModel.h>
-#include <FullFundamentalMat8pt.h>
+#include <PureTranslationModel.h>
 
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
@@ -22,10 +22,8 @@ using VOCPP::Utils::GetFrameRotationZ;
 using VOCPP::Utils::GetProjectionMatrix;
 using VOCPP::Utils::GetCrossProductMatrix;
 
-/* Most general type of fundamental matrix consisting out of a translation + rotation 
-If additionally the point cloud lies not on a plane we can be sure that for this kind 
-of movement we don't have any kind of degeneracy */
-TEST(FullFundamentalMat8pt, RotationAndTranslation)
+/* We restrict the fundamental matrix to translation */
+TEST(PureTranslationModel, Translation)
 {
     std::vector<cv::Point3f> realWorldPoints;
     std::vector<cv::Point2f> imgPoints;
@@ -59,11 +57,10 @@ TEST(FullFundamentalMat8pt, RotationAndTranslation)
         imgPoints.push_back(cv::Point2f(projPoint.at<float>(0, 0) / projPoint.at<float>(2, 0), projPoint.at<float>(1, 0) / projPoint.at<float>(2, 0)));
     }
 
-    // Projection matrix with nonzero rotation and translation
+    // Projection matrix with translation only
     cv::Mat projMat;
-    cv::Mat rotMat = GetFrameRotationX(DrawFloatInRange(-0.1, 0.1)) * GetFrameRotationY(DrawFloatInRange(-0.1, 0.1)) * GetFrameRotationZ(DrawFloatInRange(-0.1, 0.1));
     cv::Mat translation = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0,5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));   
-    EXPECT_TRUE(GetProjectionMatrix(rotMat, translation, projMat));
+    EXPECT_TRUE(GetProjectionMatrix(cv::Mat::eye(3, 3, CV_32F), translation, projMat));
    
     for (auto coord : realWorldPoints)
     {
@@ -73,17 +70,17 @@ TEST(FullFundamentalMat8pt, RotationAndTranslation)
 
     // Get fundamental matrix
     std::vector<cv::Mat> solutionVec;
-    VOCPP::DeltaPoseReconstruction::FullFundamentalMat8pt model;
+    VOCPP::DeltaPoseReconstruction::PureTranslationModel model;
     model.Compute(scaledImgPoints, imgPoints, solutionVec);
     ASSERT_TRUE(solutionVec.size() == 1);
 
     // Calculate true one
     cv::Mat translatCross;
     GetCrossProductMatrix(translation, translatCross);
-    cv::Mat trueFundMat =  KalMat.t().inv()* ((translatCross * rotMat)* KalMat.inv());
+    cv::Mat trueFundMat =  KalMat.t().inv()* ((translatCross * cv::Mat::eye(3, 3, CV_32F))* KalMat.inv());
     trueFundMat = trueFundMat / cv::norm(trueFundMat);
     //They can differ by a global sign
-    if (trueFundMat.at<float>(2, 2) / solutionVec[0].at<float>(2, 2) < 0.0)
+    if (trueFundMat.at<float>(0, 2) / solutionVec[0].at<float>(0, 2) < 0.0)
     {
         trueFundMat = -trueFundMat;
     }

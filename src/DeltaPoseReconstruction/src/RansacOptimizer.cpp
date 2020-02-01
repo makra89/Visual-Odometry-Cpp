@@ -20,8 +20,8 @@ int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, con
 {
     bool ret = true;
     
-    // Save best model according to Plunder Score (to be implemented)
-    EpipolarModel::Types bestModelType = EpipolarModel::Types::None;
+    // Save best model according to Plunder Score
+    int bestModelId = -1;
     std::vector<int> inliers;
 
     // Set from outside, or set here hardcoded?
@@ -29,9 +29,25 @@ int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, con
     // The models have to scale this value by the number of codimensions of their variety
     const float assumedDistanceError = 1.0;
 
+    int bestPlunderScore = 10000;
+    int testedModels = 0;
     for (auto model : in_testedModels)
     {
-        int bestNumInliers = 0;
+        
+        // The "no motion" model needs a special treatment
+        if (model->GetModelType() == EpipolarModel::Types::NoMotionModel)
+        {
+            std::vector<int> indicesInliers;
+            cv::Mat dummySolution = cv::Mat::zeros(3, 3, CV_32F);
+            model->Test(in_correspondFirst, in_correspondSecond, dummySolution, assumedDistanceError, indicesInliers);
+            int plunderScore = model->ComputePlunderScore(indicesInliers.size(), in_correspondFirst.size() - indicesInliers.size());
+            if (plunderScore < bestPlunderScore)
+            {
+                bestPlunderScore = plunderScore;
+                inliers = indicesInliers;
+                bestModelId = testedModels;
+            }
+        }
 
         // Calculate number of necessary iterations
         // We want 95% certainty to have a pure set
@@ -61,17 +77,19 @@ int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, con
             {
                 std::vector<int> indicesInliers;
                 model->Test(in_correspondFirst, in_correspondSecond, solution, assumedDistanceError, indicesInliers);
-                
-                if (indicesInliers.size() > bestNumInliers)
+                int plunderScore = model->ComputePlunderScore(indicesInliers.size(), in_correspondFirst.size() - indicesInliers.size());
+                if (plunderScore < bestPlunderScore)
                 {
-                    bestNumInliers = static_cast<int>(indicesInliers.size());
+                    bestPlunderScore = plunderScore;
                     inliers = indicesInliers;
+                    bestModelId = testedModels;
                 }
+
             }
         
         }
+        testedModels++;
     }
-
     // Get all inliers and compute best solution given best model
     out_inliersFirst.reserve(inliers.size());
     out_inliersSecond.reserve(inliers.size());
@@ -82,12 +100,12 @@ int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, con
     }
 
     std::vector<cv::Mat> bestSolution;
-    in_testedModels[0]->Compute(out_inliersFirst, out_inliersSecond, bestSolution);
+    in_testedModels[bestModelId]->Compute(out_inliersFirst, out_inliersSecond, bestSolution);
+
     out_bestSolution = bestSolution[0];
 
     // Update outlier ratio estimate
     UpdateOutlierRatio(static_cast<float>(1.0) - static_cast<float>(inliers.size()) / static_cast<float>(in_correspondFirst.size()));
-
     return ret;
 }
 
