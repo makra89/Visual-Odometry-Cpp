@@ -5,8 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#ifndef VOCPP_FULL_FUNDAMENTAL_8PT_H
-#define VOCPP_FULL_FUNDAMENTAL_8PT_H
+#ifndef VOCPP_NO_MOTION_MODEL_H
+#define VOCPP_NO_MOTION_MODEL_H
 
 #include <EpipolarModel.h>
 
@@ -16,25 +16,29 @@ namespace DeltaPoseReconstruction
 {
 
 /**
-  * /brief Tries to reconstruct a full fundamental matrix from provided point matches. 8 correspondences are needed.
+  * /brief In this model we assume no motion at all
   */
-class FullFundamentalMat8pt : public EpipolarModel
+class NoMotionModel : public EpipolarModel
 {
 public:
 
     /**
-      * /brief Constructor of model, needed correspondences: 8, dimension = 3, 7 DOF
+      * /brief Constructor of model, needed correspondences: 0,  dimension = 2, 0 DOF
       */
-    FullFundamentalMat8pt() : EpipolarModel(8, 3,  7)
+    NoMotionModel() : EpipolarModel(0, 2, 0)
     {
-        m_type = EpipolarModel::Types::FullFundMat8pt;
+        m_type = EpipolarModel::Types::NoMotionModel;
     }
     
     /**
-      * /brief Compute fundamental matrix F such that x_left.T * F * x_right = 0
+      * /brief We have nothing to do here
       */
     virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        std::vector<cv::Mat>& out_solutions) override;
+        std::vector<cv::Mat>& out_solutions) override
+    {
+        out_solutions.push_back(cv::Mat::eye(3, 3, CV_32F));
+        return true;
+    }
 
     /**
       * /brief Test model solution given a set of image correspondences
@@ -46,4 +50,4 @@ public:
 } //namespace DeltaPoseReconstruction
 } //namespace VOCPP
 
-#endif /* VOCPP_FULL_FUNDAMENTAL_8PT_H */
+#endif /* VOCPP_NO_MOTION_MODEL_H */

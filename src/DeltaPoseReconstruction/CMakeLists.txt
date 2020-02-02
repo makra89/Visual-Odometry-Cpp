@@ -10,6 +10,10 @@ add_library(Vocpp_DeltaPoseReconstruction STATIC
     ./src/RansacOptimizer.cpp
     ./src/FullFundamentalMat8pt.h
     ./src/FullFundamentalMat8pt.cpp
+    ./src/PureTranslationModel.h
+    ./src/PureTranslationModel.cpp
+    ./src/NoMotionModel.h
+    ./src/NoMotionModel.cpp
 )
 
 

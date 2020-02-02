@@ -2,6 +2,7 @@
 add_executable(Vocpp_DeltaPoseReconstructionTest
     #src
     src/FullFundamentalMat8ptTest.cpp
+    src/PureTranslationModelTest.cpp
     src/main.cpp
 )
 
