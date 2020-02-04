@@ -19,6 +19,7 @@ target_link_libraries(Vocpp_Master
     PRIVATE
         Vocpp_DeltaPoseReconstruction
         Vocpp_FeatureHandling
+        Vocpp_Calibration
         Vocpp_Utils
         ${OpenCV_LIBS} 
 )

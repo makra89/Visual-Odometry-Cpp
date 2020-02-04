@@ -77,7 +77,7 @@ int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, con
             {
                 std::vector<int> indicesInliers;
                 model->Test(in_correspondFirst, in_correspondSecond, solution, assumedDistanceError, indicesInliers);
-                int plunderScore = model->ComputePlunderScore(indicesInliers.size(), in_correspondFirst.size() - indicesInliers.size());
+                int plunderScore = model->ComputePlunderScore(static_cast<int>(indicesInliers.size()), static_cast<int>(in_correspondFirst.size() - indicesInliers.size()));
                 if (plunderScore < bestPlunderScore)
                 {
                     bestPlunderScore = plunderScore;

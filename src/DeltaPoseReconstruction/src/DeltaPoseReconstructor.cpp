@@ -40,7 +40,7 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_lastFrame = Utils::Frame();
 }
 
-bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
+bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame, const cv::Mat& in_calibMat)
 {
     bool ret = true;
 
