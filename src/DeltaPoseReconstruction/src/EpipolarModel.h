@@ -53,7 +53,10 @@ public:
     }
     
     /**
-      * /brief Compute model solution for given image correspondences
+      * /brief Compute model solution for given image correspondences. In dependency which 
+      * model is chosen the terms  "left" and "right" refer to either
+      * x_left.T * F * x_right or x_left = H * x_right. 
+      * F and H are fundamental matrices and homographies, respectively.
       */
     virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
             std::vector<cv::Mat>& out_solutions) = 0;
@@ -63,9 +66,18 @@ public:
       * When comparing the error treshold value to the actual distance error measure, 
       * the model has to scale this value by the 95% value of a chi^2 distribution
       * for either one or two dimensions (depends on the codimension of the variety)
+      * The terms  "left" and "right" refer to either  x_left.T * F * x_right or x_left = H * x_right.
+      * F and H are fundamental matrices and homographies, respectively.
       */
     virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) = 0;
+        const cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) = 0;
+
+    /**
+      * /brief Decompose a model solution into a translation and a rotation matrix
+      * The rotation and translation is defined in such way that x_left = R * x_right + translation
+      */
+    virtual bool DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
+        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation) = 0;
 
     /**
       * /brief Get number of necessary image correspondences to compute a solution for the model

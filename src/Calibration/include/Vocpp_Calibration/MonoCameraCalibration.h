@@ -30,7 +30,7 @@ public:
       */
     explicit MonoCameraCalibration(const cv::Mat& in_calibrationMatrix) : m_validCalib(false)
     {
-        if (!(in_calibrationMatrix.type() != CV_32F))
+        if (in_calibrationMatrix.type() != CV_32F)
         {
             std::cout << "[MonoCameraCalibration]: Invalid calibration matrix provided, must be of type CV_32F" << std::endl;
         }
@@ -51,6 +51,9 @@ public:
         return m_calibrationMatrix;
     }
 
+    /**
+      * /brief Specifies whether the camera calibration is valid
+      */
     bool IsValid() const
     {
         return m_validCalib;

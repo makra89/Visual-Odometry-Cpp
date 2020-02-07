@@ -16,7 +16,7 @@ namespace DeltaPoseReconstruction
 {
 
 void NoMotionModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-    cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
+    const cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
 {
     for (int i = 0; i < in_pointCorrLeft.size(); i++)
     {
@@ -30,6 +30,20 @@ void NoMotionModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const
         }
     }
 
+}
+
+bool NoMotionModel::DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
+    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation)
+{
+    // No motion --> no translation
+    out_translation[0] = 0.0;
+    out_translation[1] = 0.0;
+    out_translation[2] = 0.0;
+
+    // And no rotation
+    out_rotation = cv::Mat::eye(3, 3, CV_32F);
+
+    return true;
 }
 
 
