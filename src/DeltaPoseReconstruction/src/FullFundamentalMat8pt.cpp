@@ -91,10 +91,9 @@ bool FullFundamentalMat8pt::Compute(const std::vector<cv::Point2f>& in_pointCorr
 }
 
 void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-    cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
+    const cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
 {
     out_inliers.clear();
-    in_solution = in_solution / cv::norm(in_solution);
 
     for (int i = 0; i < in_pointCorrLeft.size(); i++)
     {
@@ -115,6 +114,19 @@ void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLef
             out_inliers.push_back(i);
         }
     }
+}
+
+bool FullFundamentalMat8pt::DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
+    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation)
+{
+    cv::Mat essentialMat = in_calibMat.t() * (in_solution * in_calibMat);
+
+    cv::Mat invCalibMat = in_calibMat.inv();
+    cv::Mat leftCamCoord = invCalibMat * Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[0]);
+    cv::Mat rightCamCoord = invCalibMat * Utils::Point2fToMatHomCoordinates(in_pointCorrRight[0]);
+
+    return Utils::DecomposeEssentialMatrix(essentialMat, cv::Point2f(leftCamCoord.at<float>(0,0) / leftCamCoord.at<float>(2, 0), leftCamCoord.at<float>(1, 0) / leftCamCoord.at<float>(2, 0)),
+        cv::Point2f(rightCamCoord.at<float>(0, 0) / rightCamCoord.at<float>(2, 0), rightCamCoord.at<float>(1, 0) / rightCamCoord.at<float>(2, 0)), out_translation, out_rotation);
 }
 
 

@@ -82,9 +82,30 @@ void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv
 bool GetProjectionMatrix(const cv::Mat& in_rotationMatrix, const cv::Mat& in_translation, cv::Mat& out_projMat);
 
 /**
-* /brief Get cross product generating matrix
+* /brief Get cross product generating matrix from a vector
 */
-bool GetCrossProductMatrix(const cv::Mat& in_generatingMat, cv::Mat& out_crossMat);
+void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat& out_crossMat);
+
+/**
+* /brief Decompose an essential matrix into a translation vector and a rotation
+*
+* The provided points have to be in homogenous camera coordinates (Undo multiplication with calib mat).
+* The terms "left" and "right" refer to the formulate x_left * E * x_right = 0
+* \param[in] in_essentialMat essential matrix to be composed
+* \param[in] in_matchPointLeft correspondence point in camera coordinates in left image
+* \param[in] in_matchPointRight correspondence point in camera coordinates in right image
+* \param[out] out_translation translation from left camera center to right camera center in the left camera coordinate system
+* \param[out] out_rotMatrix rotation matrix used to transfrom a point in right camera frame to left camera frame
+*/
+bool DecomposeEssentialMatrix(const cv::Mat& in_essentialMat, const cv::Point2f& in_matchPointLeft,
+    const cv::Point2f& in_matchPointRight, cv::Vec3f& out_translation, cv::Mat& out_rotMatrix);
+
+/**
+* /brief Triangulates a point in 3D given two camera coordinates and two projection matrices
+*
+*/
+bool PointTriangulationLinear(const cv::Mat& in_projMatLeft, const cv::Mat& in_projMatRight, const cv::Point2f& in_cameraCoordLeft,
+    const cv::Point2f& in_cameraCoordRight, cv::Point3f& out_triangulatedPoint);
 
 } //namespace Utils
 } //namespace VOCPP
