@@ -9,8 +9,9 @@
 #define VOCPP_MASTER_H
 
 #include<Vocpp_Utils/Frame.h>
-
 #include<Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
+#include<Vocpp_Calibration/MonoCameraCalibration.h>
+#include<Vocpp_Calibration/CalibrationModule.h>
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -40,9 +41,15 @@ public:
       */
     bool FeedNextFrame(Utils::Frame& in_frame);
 
+    /**
+      * /brief Load a mono camera calibration
+      */
+    bool LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration);
+
 private:
 
     DeltaPoseReconstruction::DeltaPoseReconstructor m_reconstructor; /// reconstructor which provides delta poses between consecutive frames
+    Calibration::CalibrationModule m_calibModule; ///< calibration module which stores a loaded calibration (and in future computes it)
 
 };
 

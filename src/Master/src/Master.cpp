@@ -15,18 +15,21 @@ namespace VOCPP
 namespace Master
 {
 
-Master::Master()
+Master::Master() : m_reconstructor(), m_calibModule()
 {
-    // Intantiate reconstructor
-    m_reconstructor = DeltaPoseReconstruction::DeltaPoseReconstructor();
 }
 
 bool Master::FeedNextFrame(Utils::Frame& in_frame)
 {  
 
-    bool ret = m_reconstructor.FeedNextFrame(in_frame);
+    bool ret = m_reconstructor.FeedNextFrame(in_frame, m_calibModule.GetSavedMonoCalib().GetCalibrationMatrix());
 
     return ret;
+}
+
+bool Master::LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration)
+{
+    return m_calibModule.LoadCalibration(in_monoCalibration);
 }
 
 } //namespace Master

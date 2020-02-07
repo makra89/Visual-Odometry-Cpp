@@ -6,6 +6,7 @@
 */
 
 #include <Vocpp_Utils/ImageProcessingUtils.h>
+#include <Vocpp_Utils/ConversionUtils.h>
 #include<opencv2/imgproc.hpp>
 #include<iostream>
 
@@ -192,27 +193,119 @@ bool GetProjectionMatrix(const cv::Mat& in_rotationMatrix, const cv::Mat& in_tra
     return ret;
 }
 
-bool GetCrossProductMatrix(const cv::Mat& in_generatingMat, cv::Mat& out_crossMat)
+void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat& out_crossMat)
 {
-    bool ret = true;
+    out_crossMat = cv::Mat::zeros(3, 3, CV_32F);
+    out_crossMat.at<float>(0, 1) = -in_vec[2];
+    out_crossMat.at<float>(0, 2) = in_vec[1];
+    out_crossMat.at<float>(1, 0) = in_vec[2];
+    out_crossMat.at<float>(1, 2) = -in_vec[0];
+    out_crossMat.at<float>(2, 0) = -in_vec[1];
+    out_crossMat.at<float>(2, 1) = in_vec[0];
+}
 
-    if (in_generatingMat.rows != 3 || in_generatingMat.cols != 1)
-    {
-        std::cout << "[GetCrossProductMatrix]: cross product generating vector has to be 3x1" << std::endl;
-        ret = false;
-    }
-    else
-    {
-        out_crossMat = cv::Mat::zeros(3, 3, CV_32F);
-        out_crossMat.at<float>(0, 1) = -in_generatingMat.at<float>(2, 0);
-        out_crossMat.at<float>(0, 2) = in_generatingMat.at<float>(1, 0);
-        out_crossMat.at<float>(1, 0) = in_generatingMat.at<float>(2, 0);
-        out_crossMat.at<float>(1, 2) = -in_generatingMat.at<float>(0, 0);
-        out_crossMat.at<float>(2, 0) = -in_generatingMat.at<float>(1, 0);
-        out_crossMat.at<float>(2, 1) = in_generatingMat.at<float>(0, 0);
-    }
+bool DecomposeEssentialMatrix(const cv::Mat& in_essentialMat, const cv::Point2f& in_matchPointLeft,
+    const cv::Point2f& in_matchPointRight, cv::Vec3f& out_translation, cv::Mat& out_rotMatrix)
+{
+    // Compute SVD
+    cv::Mat U, D, V_t;
+    cv::SVDecomp(in_essentialMat, D, U, V_t, cv::SVD::FULL_UV);
+   
+    // Set smallest singular value to zero and recompute SVD
+    cv::Mat newDiag = cv::Mat::zeros(3, 3, CV_32F);
+    newDiag.at<float>(0, 0) = D.at<float>(0, 0);
+    newDiag.at<float>(1, 1) = D.at<float>(1, 0);
+    cv::Mat newEssentialMat = U * (newDiag * V_t);
+    cv::SVDecomp(newEssentialMat, D, U, V_t, cv::SVD::FULL_UV);
 
-    return ret;
+    cv::Mat Y = cv::Mat::zeros(3, 3, CV_32F);
+    Y.at<float>(0, 1) = -1.0;
+    Y.at<float>(1, 0) = 1.0;
+    Y.at<float>(2, 2) = 1.0;
+
+    // Two solutions for rotation matrix
+    cv::Mat R1 = U * (Y * V_t);
+    cv::Mat R2 = U * (Y.t() * V_t);
+    if(cv::determinant(R1) < 0) R1 = -R1;
+    if(cv::determinant(R2) < 0) R2 = -R2;
+
+    // And two for translation
+    cv::Mat t1 = U.col(2);
+    cv::Mat t2 = -t1;
+
+    // Right projection matrix is trivial one
+    cv::Mat projMatRight;
+    GetProjectionMatrix(cv::Mat::eye(3, 3, CV_32F), cv::Mat::zeros(3, 1, CV_32F), projMatRight);
+
+    // Four different projection matrices for right one
+    cv::Mat projMatLeft1;
+    GetProjectionMatrix(R1, t1, projMatLeft1);
+    cv::Mat projMatLeft2;
+    GetProjectionMatrix(R2, t1, projMatLeft2);
+    cv::Mat projMatLeft3;
+    GetProjectionMatrix(R1, t2, projMatLeft3);
+    cv::Mat projMatLeft4;
+    GetProjectionMatrix(R2, t2, projMatLeft4);
+
+    std::vector<cv::Mat> projectionMatCandidates;
+    projectionMatCandidates.push_back(projMatLeft1);
+    projectionMatCandidates.push_back(projMatLeft2);
+    projectionMatCandidates.push_back(projMatLeft3);
+    projectionMatCandidates.push_back(projMatLeft4);
+    
+    // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
+    for (auto candidate : projectionMatCandidates)
+    {
+        cv::Point3f triangPoint;
+        PointTriangulationLinear(candidate, projMatRight, in_matchPointLeft, in_matchPointRight, triangPoint);
+        cv::Mat projPointLeft = candidate * VOCPP::Utils::Point3fToMatHomCoordinates(triangPoint);
+        if (triangPoint.z >= 0.0 && projPointLeft.at<float>(2,0) >= 0)
+        {
+            candidate(cv::Range(0, 3), cv::Range(0, 3)).copyTo(out_rotMatrix);
+            candidate(cv::Range(0, 3), cv::Range(3, 4)).copyTo(out_translation);
+        }
+    }
+  
+
+    return false;
+}
+
+bool PointTriangulationLinear(const cv::Mat& in_projMatLeft, const cv::Mat& in_projMatRight, const cv::Point2f& in_cameraCoordLeft,
+    const cv::Point2f& in_cameraCoordRight, cv::Point3f& out_triangulatedPoint)
+{
+    cv::Mat A = cv::Mat::zeros(4, 4, CV_32F);
+
+    // Construct matrix to decompose (see for example https://www.uio.no/studier/emner/matnat/its/nedlagte-emner/UNIK4690/v16/forelesninger/lecture_7_2-triangulation.pdf)
+    A.at<float>(0, 0) = in_cameraCoordLeft.y * in_projMatLeft.at<float>(2, 0) - in_projMatLeft.at<float>(1, 0);
+    A.at<float>(0, 1) = in_cameraCoordLeft.y * in_projMatLeft.at<float>(2, 1) - in_projMatLeft.at<float>(1, 1);
+    A.at<float>(0, 2) = in_cameraCoordLeft.y * in_projMatLeft.at<float>(2, 2) - in_projMatLeft.at<float>(1, 2);
+    A.at<float>(0, 3) = in_cameraCoordLeft.y * in_projMatLeft.at<float>(2, 3) - in_projMatLeft.at<float>(1, 3);
+
+    A.at<float>(1, 0) = in_cameraCoordLeft.x * in_projMatLeft.at<float>(2, 0) - in_projMatLeft.at<float>(0, 0);
+    A.at<float>(1, 1) = in_cameraCoordLeft.x * in_projMatLeft.at<float>(2, 1) - in_projMatLeft.at<float>(0, 1);
+    A.at<float>(1, 2) = in_cameraCoordLeft.x * in_projMatLeft.at<float>(2, 2) - in_projMatLeft.at<float>(0, 2);
+    A.at<float>(1, 3) = in_cameraCoordLeft.x * in_projMatLeft.at<float>(2, 3) - in_projMatLeft.at<float>(0, 3);
+
+    A.at<float>(2, 0) = in_cameraCoordRight.y * in_projMatRight.at<float>(2, 0) - in_projMatRight.at<float>(1, 0);
+    A.at<float>(2, 1) = in_cameraCoordRight.y * in_projMatRight.at<float>(2, 1) - in_projMatRight.at<float>(1, 1);
+    A.at<float>(2, 2) = in_cameraCoordRight.y * in_projMatRight.at<float>(2, 2) - in_projMatRight.at<float>(1, 2);
+    A.at<float>(2, 3) = in_cameraCoordRight.y * in_projMatRight.at<float>(2, 3) - in_projMatRight.at<float>(1, 3);
+
+    A.at<float>(3, 0) = in_cameraCoordRight.x * in_projMatRight.at<float>(2, 0) - in_projMatRight.at<float>(0, 0);
+    A.at<float>(3, 1) = in_cameraCoordRight.x * in_projMatRight.at<float>(2, 1) - in_projMatRight.at<float>(0, 1);
+    A.at<float>(3, 2) = in_cameraCoordRight.x * in_projMatRight.at<float>(2, 2) - in_projMatRight.at<float>(0, 2);
+    A.at<float>(3, 3) = in_cameraCoordRight.x * in_projMatRight.at<float>(2, 3) - in_projMatRight.at<float>(0, 3);
+
+    // Compute SVD
+    cv::Mat U, D, V_t;
+    cv::SVDecomp(A, D, U, V_t, cv::SVD::FULL_UV);
+
+    // Solution is given by nullspace of A
+    out_triangulatedPoint.x = V_t.row(3).at<float>(0, 0) / V_t.row(3).at<float>(0, 3);
+    out_triangulatedPoint.y = V_t.row(3).at<float>(0, 1) / V_t.row(3).at<float>(0, 3);
+    out_triangulatedPoint.z = V_t.row(3).at<float>(0, 2) / V_t.row(3).at<float>(0, 3);
+
+    return true;
 }
 
 

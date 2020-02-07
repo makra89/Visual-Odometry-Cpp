@@ -20,8 +20,9 @@ namespace DeltaPoseReconstruction
 {
 
 /**
-  * /brief Tries to minimize the error of each EpipolarModel given a set of corresponding image points
-  * and additionally selects the model which fits best to the observed correspondences
+  * /brief Tries to minimize the error of each EpipolarModel given a set of corresponding image points in two frames,
+  * selects the model which fits best to the observed correspondences and reconstructs the translation and 
+  * rotation between the two frames.
   */
 class RansacOptimizer
 {
@@ -37,10 +38,14 @@ public:
     }
     
     /**
-      * /brief Run the RANSAC optimizer given a set of models to be tested
+      * /brief Run the RANSAC optimizer given a set of models to be tested.
+      * The reconstructed rotation and translation is defined in the following way: 
+      * corrFirst = rot * (corrSecond + translation) (in homogenous image coordinates)
+      * The translation propagates the second camera center to the first one and the rotation
+      * aligns the two coordinate system
       */
     int Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat& out_bestSolution);
+        const cv::Mat& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Vec3f& out_translation, cv::Mat& out_rotation);
 
     /**
       * /brief Calculate the number of necessary model iterations

@@ -40,7 +40,7 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_lastFrame = Utils::Frame();
 }
 
-bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
+bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame, const cv::Mat& in_calibMat)
 {
     bool ret = true;
 
@@ -75,8 +75,9 @@ bool DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
 
             std::vector<cv::Point2f> pLastFrameInliers;
             std::vector<cv::Point2f> pCurrFrameInliers;
-            cv::Mat bestSolution;
-            m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, pCurrFrameInliers, pLastFrameInliers, bestSolution);
+            cv::Mat rotation;
+            cv::Vec3f translation;
+            m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, pCurrFrameInliers, pLastFrameInliers, translation, rotation);
             
             tick.stop();
             std::cout << "[Master]: Frame processing time: " << tick.getTimeMilli() << std::endl;
