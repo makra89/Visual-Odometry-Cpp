@@ -15,7 +15,7 @@ namespace VOCPP
 namespace Utils
 {
 
-cv::Mat GetWindowKernel(const uint32_t size)
+cv::Mat GetWindowKernel(const int size)
 {
     return cv::Mat::ones(size, size, CV_32F);
 }
@@ -42,7 +42,7 @@ void Compute2DGradients(const cv::Mat& in_image, cv::Mat& out_gradX, cv::Mat& ou
     cv::sepFilter2D(in_image, out_gradY, CV_32F, sobelRowY, sobelColY);
 }
 
-void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std::vector<cv::Point2f>& out_localMaxima, const uint32_t in_subPixelCalculationDistance)
+void ExtractLocalMaxima(const cv::Mat& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, const int in_subPixelCalculationDistance)
 {
     cv::Mat dilatedImage;
     cv::Mat kernel = GetWindowKernel(2 * in_distance + 1);
@@ -69,9 +69,9 @@ void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std
     {
         for (auto pos = out_localMaxima.begin(); pos != out_localMaxima.end(); pos++)
         {
-            const uint32_t patchDim = 2 * in_subPixelCalculationDistance + 1U;
+            const int patchDim = 2 * in_subPixelCalculationDistance + 1U;
             cv::Mat patch = cv::Mat::zeros(patchDim, patchDim, CV_32F);
-            bool subPixSuccess = ExtractImagePatchAroundPixelPos(in_image, patch, in_subPixelCalculationDistance, static_cast<uint32_t>(pos->x), static_cast<uint32_t>(pos->y));
+            bool subPixSuccess = ExtractImagePatchAroundPixelPos(in_image, patch, in_subPixelCalculationDistance, static_cast<int>(pos->x), static_cast<int>(pos->y));
 
             if (subPixSuccess)
             {
@@ -85,7 +85,7 @@ void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std
 
 }
 
-bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch, const uint32_t in_distanceAroundCenter, const uint32_t in_pixelPosX, const uint32_t in_pixelPosY)
+bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch, const int in_distanceAroundCenter, const int in_pixelPosX, const int in_pixelPosY)
 {
     bool ret = true;
 
@@ -205,7 +205,7 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat& out_crossMat)
 }
 
 bool DecomposeEssentialMatrix(const cv::Mat& in_essentialMat, const cv::Point2f& in_matchPointLeft,
-    const cv::Point2f& in_matchPointRight, cv::Vec3f& out_translation, cv::Mat& out_rotMatrix)
+    const cv::Point2f& in_matchPointRight, cv::Mat& out_translation, cv::Mat& out_rotMatrix)
 {
     // Compute SVD
     cv::Mat U, D, V_t;

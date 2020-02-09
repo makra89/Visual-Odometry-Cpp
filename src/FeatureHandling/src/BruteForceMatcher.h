@@ -29,7 +29,7 @@ public:
       *
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
-    static BruteForceMatcher* CreateInstance(const uint32_t in_maxDistance=50U);
+    static BruteForceMatcher* CreateInstance(const int in_maxDistance=50U);
 
     /**
       * /brief Match feature descriptions in provided frame and return matches. Features and descriptions have to be present!
@@ -37,10 +37,9 @@ public:
       *
       * \param[in, out] inout_frame1 first frame to match
       * \param[in] inout_frame2 second frame to match
-      * \param[in] in_appendMatches specifies whether matches shall be appended to match vectors
       * \return True if feature matching successfull, false otherwise
       */
-    virtual bool matchDesriptions(Utils::Frame& inout_frame1, const Utils::Frame& in_frame2, const bool in_appendMatches = false) override;
+    virtual bool matchDesriptions(Utils::Frame& inout_frame1, Utils::Frame& inout_frame2) override;
 
 private:
     // It is not allowed to copy or instantiate the detector directly
@@ -55,9 +54,9 @@ private:
       * \param[ín] in_right second (binary) description
       * \return True distance of descriptions
       */
-    uint32_t ComputeHammingDistance(const cv::Mat& in_left, const cv::Mat& in_right);
+    int ComputeHammingDistance(const cv::Mat& in_left, const cv::Mat& in_right);
 
-    uint32_t m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
+    int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
 
 
 };

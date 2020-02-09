@@ -21,7 +21,7 @@ BriefDescriptor::BriefDescriptor()
 }
 
 
-BriefDescriptor* BriefDescriptor::CreateInstance(const uint32_t in_randomPairDrawRadius, const uint32_t in_numRandomPairs)
+BriefDescriptor* BriefDescriptor::CreateInstance(const int in_randomPairDrawRadius, const int in_numRandomPairs)
 {
     BriefDescriptor* descriptor = new BriefDescriptor();
 
@@ -57,7 +57,7 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
     for (auto key : inout_frame.GetKeypoints())
     {
         cv::Mat descriptions = cv::Mat::zeros(1, m_numRandomPairs, CV_8U);
-        uint32_t numSucessfulPairs = 0U;
+        int numSucessfulPairs = 0U;
 
         // Loop over pairs
         for (auto pair : m_pairs)
@@ -104,7 +104,7 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
 void BriefDescriptor::DrawPairs()
 {
     
-    for (uint32_t i = 0U; i < m_numRandomPairs; i++)
+    for (int i = 0U; i < m_numRandomPairs; i++)
     {
         // Draw index in range [-radius, radius]
         float index1 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));

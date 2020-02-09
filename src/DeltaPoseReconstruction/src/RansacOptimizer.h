@@ -40,12 +40,12 @@ public:
     /**
       * /brief Run the RANSAC optimizer given a set of models to be tested.
       * The reconstructed rotation and translation is defined in the following way: 
-      * corrFirst = rot * (corrSecond + translation) (in homogenous image coordinates)
+      * corrFirst = rot * (corrSecond - translation) (in homogenous image coordinates)
       * The translation propagates the second camera center to the first one and the rotation
       * aligns the two coordinate system
       */
     int Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Vec3f& out_translation, cv::Mat& out_rotation);
+        const cv::Mat& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat& out_translation, cv::Mat& out_rotation);
 
     /**
       * /brief Calculate the number of necessary model iterations

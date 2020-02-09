@@ -26,7 +26,7 @@ public:
       *
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
-    static BriefDescriptor* CreateInstance(const uint32_t in_randomPairDrawRadius = 50, const uint32_t in_numRandomPairs = 256);
+    static BriefDescriptor* CreateInstance(const int in_randomPairDrawRadius = 50, const int in_numRandomPairs = 256);
 
     /**
       * /brief Compute descriptions for provided frame
@@ -47,8 +47,8 @@ private:
       */
     void DrawPairs();
 
-    uint32_t m_randomPairDrawRadius; ///< radius around a feature that is used for drawing the random pairs
-    uint32_t m_numRandomPairs; ///< number of random pairs used
+    int m_randomPairDrawRadius; ///< radius around a feature that is used for drawing the random pairs
+    int m_numRandomPairs; ///< number of random pairs used
     std::vector<cv::Mat> m_pairs; ///< Point pairs used for intensity comparison
 };
 

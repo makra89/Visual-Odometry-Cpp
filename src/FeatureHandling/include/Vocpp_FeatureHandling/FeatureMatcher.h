@@ -30,10 +30,9 @@ public:
       *
       * \param[in, out] inout_frame1 first frame to match
       * \param[in] inout_frame2 second frame to match
-      * \param[in] in_appendMatches specifies whether matches shall be appended to match vectors
       * \return True if feature matching successfull, false otherwise
       */
-    virtual bool matchDesriptions(Utils::Frame& inout_frame1, const Utils::Frame& in_frame2, const bool in_appendMatches=false) = 0;
+    virtual bool matchDesriptions(Utils::Frame& inout_frame1, Utils::Frame& inout_frame2) = 0;
 };
 
 /**

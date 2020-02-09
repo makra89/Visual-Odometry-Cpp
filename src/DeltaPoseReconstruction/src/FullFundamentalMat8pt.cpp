@@ -117,7 +117,7 @@ void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLef
 }
 
 bool FullFundamentalMat8pt::DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation)
+    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation)
 {
     cv::Mat essentialMat = in_calibMat.t() * (in_solution * in_calibMat);
 

@@ -20,7 +20,7 @@ namespace Utils
 *
 * \param[in] size of window kernel [pixels]
 */
-cv::Mat GetWindowKernel(const uint32_t size);
+cv::Mat GetWindowKernel(const int size);
 
 /**
 * /brief Convolve image with given kernel
@@ -40,7 +40,7 @@ void Compute2DGradients(const cv::Mat& in_image, cv::Mat& out_gradX, cv::Mat& ou
     * \param[out] out_localMaxima vector of extracted local maxima
     * \param[in] in_subPixelCalculationDistance distance used for calculation of subPixel position of local maxima
 */
-void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std::vector<cv::Point2f>& out_localMaxima, const uint32_t in_subPixelCalculationDistance = 0U);
+void ExtractLocalMaxima(const cv::Mat& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, const int in_subPixelCalculationDistance = 0U);
 
 /**
 * /brief Extract patch of an image around a center position with a given distance
@@ -51,7 +51,7 @@ void ExtractLocalMaxima(const cv::Mat& in_image, const uint32_t in_distance, std
 * \param[in] in_pixelPosX center location in X
 * \param[in] in_pixelPosY center location in Y
 */
-bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch, const uint32_t in_distanceAroundCenter, const uint32_t in_pixelPosX, const uint32_t in_pixelPosY);
+bool ExtractImagePatchAroundPixelPos(const cv::Mat& in_image, cv::Mat& out_patch, const int in_distanceAroundCenter, const int in_pixelPosX, const int in_pixelPosY);
 
 
 /**
@@ -98,7 +98,7 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat& out_crossMat);
 * \param[out] out_rotMatrix rotation matrix used to transfrom a point in right camera frame to left camera frame
 */
 bool DecomposeEssentialMatrix(const cv::Mat& in_essentialMat, const cv::Point2f& in_matchPointLeft,
-    const cv::Point2f& in_matchPointRight, cv::Vec3f& out_translation, cv::Mat& out_rotMatrix);
+    const cv::Point2f& in_matchPointRight, cv::Mat& out_translation, cv::Mat& out_rotMatrix);
 
 /**
 * /brief Triangulates a point in 3D given two camera coordinates and two projection matrices

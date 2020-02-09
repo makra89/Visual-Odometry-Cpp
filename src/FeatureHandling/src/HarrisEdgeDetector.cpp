@@ -21,7 +21,7 @@ HarrisEdgeDetector::HarrisEdgeDetector()
 
 
 HarrisEdgeDetector* HarrisEdgeDetector::CreateInstance(const double in_relResponseThresh, const double in_k, const std::string& in_kernelName,
-    const uint32_t in_localMaxDistance, const uint32_t in_subPixelCalculationDistance)
+    const int in_localMaxDistance, const int in_subPixelCalculationDistance)
 {
     HarrisEdgeDetector* det = new HarrisEdgeDetector();
 

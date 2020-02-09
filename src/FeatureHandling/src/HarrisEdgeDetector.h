@@ -24,7 +24,7 @@ public:
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
     static HarrisEdgeDetector* CreateInstance(const double in_relResponseThresh = 0.01, const double in_k = 0.04, const std::string& in_kernelName = "window",
-        const uint32_t in_localMaxDistance = 10U, const uint32_t in_subPixelCalculationDistance = 5U);
+        const int in_localMaxDistance = 10U, const int in_subPixelCalculationDistance = 5U);
 
     /**
     * /brief Extract features from a provided grayscale(!!) image frame. Keypoints will be added to the provided image frame
@@ -42,8 +42,8 @@ private:
 
     double m_relResponseThresh; ///< relative response threshold used to filter out insignificant features [with respect to maximum response]
     double m_k; ///< k factor used for Harris response calculation, see literature
-    uint32_t m_localMaxDistance; ///< minimum distance of reported features [pixel] 
-    uint32_t m_subPixelCalculationDistance; ///< radius that is taken into account for subPixel feature position calculation [pixels]
+    int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
+    int m_subPixelCalculationDistance; ///< radius that is taken into account for subPixel feature position calculation [pixels]
     
     cv::Mat m_smoothingKernel; ///< kernel used for smoothing the gradients
 

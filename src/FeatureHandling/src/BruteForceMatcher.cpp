@@ -19,7 +19,7 @@ BruteForceMatcher::BruteForceMatcher()
 }
 
 
-BruteForceMatcher* BruteForceMatcher::CreateInstance(const uint32_t in_maxDistance)
+BruteForceMatcher* BruteForceMatcher::CreateInstance(const int in_maxDistance)
 {
     BruteForceMatcher* matcher = new BruteForceMatcher();
 
@@ -29,28 +29,26 @@ BruteForceMatcher* BruteForceMatcher::CreateInstance(const uint32_t in_maxDistan
 }
 
 
-bool BruteForceMatcher::matchDesriptions(Utils::Frame& inout_frame1, const Utils::Frame& in_frame2, const bool in_appendMatches)
+bool BruteForceMatcher::matchDesriptions(Utils::Frame& inout_frame1, Utils::Frame& inout_frame2)
 {    
     bool ret = true;
 
-    if (inout_frame1.GetKeypoints().size() == 0 || in_frame2.GetKeypoints().size() == 0)
+    if (inout_frame1.GetKeypoints().size() == 0 || inout_frame2.GetKeypoints().size() == 0)
     {
         std::cout << "[BruteForceMatcher]: No keypoints found in one or both of the provided frames" << std::endl;
         return false;
     }
 
-    if (inout_frame1.GetDescriptions().size() == 0 || in_frame2.GetDescriptions().size() == 0)
+    if (inout_frame1.GetDescriptions().size() == 0 || inout_frame2.GetDescriptions().size() == 0)
     {
         std::cout << "[BruteForceMatcher]: No descriptions found in one or both of the provided frames" << std::endl;
         return false;
     }
 
     std::vector<cv::DMatch> matchesFrame1;
-    // Check whether matches shall be appended
-    if (in_appendMatches)
-    {
-        matchesFrame1 = inout_frame1.GetMatches();
-    }
+    std::vector<cv::DMatch> matchesFrame2;
+    matchesFrame1 = inout_frame1.GetMatches();
+    matchesFrame2 = inout_frame2.GetMatches();
 
     // Loop over all descriptions
     // Look for first-frame features in the second frame
@@ -58,13 +56,13 @@ bool BruteForceMatcher::matchDesriptions(Utils::Frame& inout_frame1, const Utils
     for (auto desc1 : inout_frame1.GetDescriptions())
     {
         
-        uint32_t smallestDist = UINT32_MAX;
+        int smallestDist = INT_MAX;
         int smallestIdx2 = 0;
         
         int idX2 = 0;
-        for (auto desc2 : in_frame2.GetDescriptions())
+        for (auto desc2 : inout_frame2.GetDescriptions())
         {
-            uint32_t distance = ComputeHammingDistance(desc1, desc2);
+            int distance = ComputeHammingDistance(desc1, desc2);
             if (distance < smallestDist)
             {
                 smallestDist = distance;
@@ -77,7 +75,8 @@ bool BruteForceMatcher::matchDesriptions(Utils::Frame& inout_frame1, const Utils
         // Check if distance is smaller than threshold
         if (smallestDist <= m_maxDistance)
         {
-            matchesFrame1.push_back(cv::DMatch(idX1, smallestIdx2, in_frame2.GetId(), static_cast<float>(smallestDist)));
+            matchesFrame1.push_back(cv::DMatch(idX1, smallestIdx2, inout_frame2.GetId(), static_cast<float>(smallestDist)));
+            matchesFrame2.push_back(cv::DMatch(smallestIdx2, idX1, inout_frame1.GetId(), static_cast<float>(smallestDist)));
         }
 
         idX1++;
@@ -85,13 +84,14 @@ bool BruteForceMatcher::matchDesriptions(Utils::Frame& inout_frame1, const Utils
 
     // Append features to first frame
     inout_frame1.SetMatches(std::move(matchesFrame1));
+    inout_frame2.SetMatches(std::move(matchesFrame2));
 
     return ret;
 }
 
-uint32_t BruteForceMatcher::ComputeHammingDistance(const cv::Mat& left, const cv::Mat& right)
+int BruteForceMatcher::ComputeHammingDistance(const cv::Mat& left, const cv::Mat& right)
 {
-    uint32_t distance = 0U;
+    int distance = 0U;
     
     if (!(left.size == right.size))
     {

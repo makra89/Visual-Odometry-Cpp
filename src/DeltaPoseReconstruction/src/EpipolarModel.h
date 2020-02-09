@@ -77,7 +77,7 @@ public:
       * The rotation and translation is defined in such way that x_left = R * x_right + translation
       */
     virtual bool DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation) = 0;
+        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation) = 0;
 
     /**
       * /brief Get number of necessary image correspondences to compute a solution for the model

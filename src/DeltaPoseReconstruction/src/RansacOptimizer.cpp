@@ -15,8 +15,8 @@ namespace VOCPP
 namespace DeltaPoseReconstruction
 {
 
-int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-    const cv::Mat& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Vec3f& out_translation, cv::Mat& out_rotation)
+    int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
+        const cv::Mat& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat &out_translation, cv::Mat& out_rotation)
 {
     // Save best model according to Plunder Score
     int bestModelId = -1;
@@ -105,15 +105,8 @@ int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, con
     // TODO: At some point we have to deal with more than one solution --> for now we only have one
     bool ret = in_testedModels[bestModelId]->DecomposeSolution(bestSolution[0], in_calibMat, out_inliersFirst, out_inliersSecond, out_translation, out_rotation);
     
-    // We want to output the translation vector from second to first camera center in the first camera coordinate system
-    cv::Mat translatDummy = cv::Mat::zeros(3, 1, CV_32F);
-    translatDummy.at<float>(0, 0) = out_translation[0];
-    translatDummy.at<float>(1, 0) = out_translation[1];
-    translatDummy.at<float>(2, 0) = out_translation[2];
-    translatDummy = -(out_rotation.t() * translatDummy);
-    out_translation[0] = translatDummy.at<float>(0, 0);
-    out_translation[1] = translatDummy.at<float>(1, 0);
-    out_translation[2] = translatDummy.at<float>(2, 0);
+    // We want to output the translation vector from second to first camera center in the second camera coordinate system
+    out_translation = -(out_rotation.t() * out_translation);
 
     // Update outlier ratio estimate
     UpdateOutlierRatio(static_cast<float>(1.0) - static_cast<float>(inliers.size()) / static_cast<float>(in_correspondFirst.size()));

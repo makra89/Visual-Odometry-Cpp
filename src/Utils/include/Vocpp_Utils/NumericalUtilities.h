@@ -16,6 +16,11 @@ namespace Utils
 {
 
 /**
+* /brief Simply PI :)
+*/
+static float PI = 3.141592653589793238463;
+
+/**
 * /brief Draw a random int in the range [in_lowerEdge, in_upperEdge]
 */
 int DrawIntInRange(const int in_lowerEdge, const int in_upperEdge);

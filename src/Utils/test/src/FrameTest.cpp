@@ -36,13 +36,13 @@ TEST(FrameTest, Constructor_SupportedImageTypes)
     for (int type = 0; type < 30; type++)
     {
         cv::Mat zeros = cv::Mat::zeros(4, 4, type);
-        Frame f(std::move(zeros), static_cast<uint32_t>(type));
+        Frame f(std::move(zeros), static_cast<int>(type));
 
         // Since no image has been provided it should be marked as invalid
         if (type == CV_32F)
         {
             EXPECT_TRUE(f.isValid());
-            EXPECT_EQ(f.GetId(), static_cast<uint32_t>(type));
+            EXPECT_EQ(f.GetId(), static_cast<int>(type));
             // Image data should have been moved to frame
             EXPECT_TRUE(zeros.empty());
         }

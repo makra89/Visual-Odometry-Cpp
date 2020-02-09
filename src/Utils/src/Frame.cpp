@@ -14,12 +14,17 @@ namespace VOCPP
 namespace Utils
 {
 
-Frame::Frame()
+Frame::Frame() : 
+    m_keypoints(), 
+    m_descriptions(),
+    m_matches(),
+    m_pose(),
+    m_Id(s_invalidFrameId),
+    m_validFrame(false)
 {
-    m_validFrame = false;
 }
 
-Frame::Frame(cv::Mat&& in_imageGray, const uint32_t in_imgId)
+Frame::Frame(cv::Mat&& in_imageGray, const int in_imgId) : Frame::Frame()
 {
     // No image data
     if (!in_imageGray.data)

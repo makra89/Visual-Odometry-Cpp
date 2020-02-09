@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     // Load calibration
     voMaster.LoadCalibration(monoCalib);
 
-    uint32_t frameId = 0U;
+    int frameId = 0U;
     for (auto imageName : imageNames)
     {
         // Convert the image to grayscale CV_32F, here from CV_8U to CV_32F
