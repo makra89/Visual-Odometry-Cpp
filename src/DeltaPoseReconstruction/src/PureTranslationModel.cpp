@@ -90,13 +90,13 @@ void PureTranslationModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft
         cv::Mat epiLineLeft = in_solution * Utils::Point2fToMatHomCoordinates(in_pointCorrRight[i]);
         cv::Mat epiLineRight = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * in_solution;
 
-        const float scale = static_cast<float>(1.0) / (std::pow(epiLineLeft.at<float>(0, 0), 2) + std::pow(epiLineLeft.at<float>(1, 0), 2)) +
-            (static_cast<float>(1.0) / (std::pow(epiLineRight.at<float>(0, 0), 2) + std::pow(epiLineRight.at<float>(1, 0), 2)));
+        const float scale = 1.0F / (std::pow(epiLineLeft.at<float>(0, 0), 2) + std::pow(epiLineLeft.at<float>(1, 0), 2)) +
+            (1.0F / (std::pow(epiLineRight.at<float>(0, 0), 2) + std::pow(epiLineRight.at<float>(1, 0), 2)));
 
         cv::Mat dist = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * epiLineLeft;
 
         // Codimension 1 to R^4 --> divide by 3.84
-        if ((std::pow(dist.at<float>(0, 0), 2) * scale / static_cast<float>(3.84)) < std::pow(in_errorTresh, 2))
+        if ((std::pow(dist.at<float>(0, 0), 2) * scale / 3.84F) < std::pow(in_errorTresh, 2))
         {
             out_inliers.push_back(i);
         }
@@ -105,14 +105,16 @@ void PureTranslationModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft
 }
 
 bool PureTranslationModel::DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation)
+    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation)
 {
     cv::Mat essentialMat = in_calibMat.t() * (in_solution * in_calibMat);
     
+    out_translation = cv::Mat::zeros(3, 1, CV_32F);
+
     // We want the translation from the left frame to the right frame
-    out_translation[0] = essentialMat.at<float>(1, 2);
-    out_translation[1] = essentialMat.at<float>(2, 0);
-    out_translation[2] = essentialMat.at<float>(0, 1);
+    out_translation.at<float>(0, 0) = essentialMat.at<float>(1, 2);
+    out_translation.at<float>(1, 0) = essentialMat.at<float>(2, 0);
+    out_translation.at<float>(2, 0) = essentialMat.at<float>(0, 1);
 
     // No translation
     out_rotation = cv::Mat::eye(3, 3, CV_32F);

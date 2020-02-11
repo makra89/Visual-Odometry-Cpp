@@ -9,7 +9,8 @@
 #include <opencv2/opencv.hpp>
 
 #include<Vocpp_Master/Master.h>
-#include<Vocpp_Utils/Frame.h>
+#include<Vocpp_Interface/Frame.h>
+#include<Vocpp_Interface/DeltaPose.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
 
 using namespace cv;
@@ -34,16 +35,19 @@ int main(int argc, char** argv)
     // Construct MonoCameraCalibration
     // Hardcoded for KITTI data set sequence 0, left image
     cv::Mat calibMat = cv::Mat::eye(3, 3, CV_32F);
-    calibMat.at<float>(0, 0) = 7.18856e+02;
-    calibMat.at<float>(1, 1) = 7.18856e+02;
-    calibMat.at<float>(0, 2) = 6.071928000000e+02;
-    calibMat.at<float>(1, 2) = 1.852157000000e+02;
+    calibMat.at<float>(0, 0) = 7.18856e+02F;
+    calibMat.at<float>(1, 1) = 7.18856e+02F;
+    calibMat.at<float>(0, 2) = 6.071928000000e+02F;
+    calibMat.at<float>(1, 2) = 1.852157000000e+02F;
     VOCPP::Calibration::MonoCameraCalibration monoCalib(calibMat);
 
     // Load calibration
     voMaster.LoadCalibration(monoCalib);
 
-    uint32_t frameId = 0U;
+    int frameId = 0U;
+
+    cv::Mat currentPose = cv::Mat::eye(3, 3, CV_32F);
+    cv::Mat currentCamCenter = cv::Mat::zeros(3, 1, CV_32F);
     for (auto imageName : imageNames)
     {
         // Convert the image to grayscale CV_32F, here from CV_8U to CV_32F
@@ -52,8 +56,16 @@ int main(int argc, char** argv)
         grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
 
         // Feed frame to Master
-        Utils::Frame frame(std::move(grayScaleImg), frameId);
+        Frame frame(std::move(grayScaleImg), frameId);
         voMaster.FeedNextFrame(frame);
+
+        DeltaPose delta = voMaster.GetLastDeltaPose();
+        
+        // Concatenate delta poses to get absolute pose in world coordinate system
+        currentPose = delta.GetDeltaOrientation() * currentPose;
+        // The translation is given from last frame to current frame in the last frame coordinate system
+        // --> Transform the translation vector back to world coordinate system using the inverse rotation of the last frame
+        currentCamCenter = currentPose.t() * delta.GetCamCenterTranslation() + currentCamCenter;
 
         frameId++;
     }

@@ -5,10 +5,10 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include <Vocpp_Utils/Frame.h>
+#include <Vocpp_Interface/Frame.h>
 #include <gtest/gtest.h>
 
-using VOCPP::Utils::Frame;
+using VOCPP::Frame;
 
 TEST(FrameTest, Constructor_Empty)
 {

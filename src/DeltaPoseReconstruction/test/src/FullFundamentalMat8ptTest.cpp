@@ -61,8 +61,8 @@ TEST(FullFundamentalMat8pt, RotationAndTranslation)
 
     // Projection matrix with nonzero rotation and translation
     cv::Mat projMat;
-    cv::Mat rotMat = GetFrameRotationX(DrawFloatInRange(-0.1, 0.1)) * GetFrameRotationY(DrawFloatInRange(-0.1, 0.1)) * GetFrameRotationZ(DrawFloatInRange(-0.1, 0.1));
-    cv::Mat translation = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0,5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));   
+    cv::Mat rotMat = GetFrameRotationX(DrawFloatInRange(-0.1F, 0.1F)) * GetFrameRotationY(DrawFloatInRange(-0.1F, 0.1F)) * GetFrameRotationZ(DrawFloatInRange(-0.1F, 0.1F));
+    cv::Mat translation = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0F,5.0F), DrawFloatInRange(-1.0F, 5.0F), DrawFloatInRange(-5.0F, 5.0F));   
     EXPECT_TRUE(GetProjectionMatrix(rotMat, translation, projMat));
    
     for (auto coord : realWorldPoints)

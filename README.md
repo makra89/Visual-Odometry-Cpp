@@ -18,10 +18,15 @@ The goal is not to create yet another visual odometry pipeline that can easily b
 
 # Current functionality
 
-The only functionality provided so far is very basic feature matching, description and matching:
+So far the goal is to get the whole pipeline running, so no focus on quality at all! 
+The most basic kind of algorithms are in use at the moment.
+With respect to feature detection, description and matching the following functionality is provided:
 - Harris edge detector
 - BRIEF descriptor
 - Brute force matcher
+
+Finally there is some output, looks horrible, but at least its some kind of result =)
+![Image description](doc/results/KITTI_Seq0_HelloWorld.png)
 
 # Usage
 

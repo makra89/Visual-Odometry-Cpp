@@ -33,12 +33,10 @@ void NoMotionModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const
 }
 
 bool NoMotionModel::DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Vec3f& out_translation, cv::Mat& out_rotation)
+    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation)
 {
     // No motion --> no translation
-    out_translation[0] = 0.0;
-    out_translation[1] = 0.0;
-    out_translation[2] = 0.0;
+    out_translation = cv::Mat::zeros(3, 1, CV_32F);
 
     // And no rotation
     out_rotation = cv::Mat::eye(3, 3, CV_32F);

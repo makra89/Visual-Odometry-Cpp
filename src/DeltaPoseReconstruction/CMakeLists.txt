@@ -14,6 +14,8 @@ add_library(Vocpp_DeltaPoseReconstruction STATIC
     ./src/PureTranslationModel.cpp
     ./src/NoMotionModel.h
     ./src/NoMotionModel.cpp
+    ./src/LocalMap.h
+    ./src/LocalMap.cpp
 )
 
 
@@ -25,6 +27,8 @@ target_include_directories(Vocpp_DeltaPoseReconstruction
 )
 
 target_link_libraries(Vocpp_DeltaPoseReconstruction
+    PUBLIC
+        Vocpp_Interface
     PRIVATE
         ${OpenCV_LIBS} 
         Vocpp_FeatureHandling

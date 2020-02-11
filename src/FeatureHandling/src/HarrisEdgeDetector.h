@@ -24,15 +24,17 @@ public:
       * /returns Pointer to object if successful, NULL otherwise. Caller takes ownership of object.
       */
     static HarrisEdgeDetector* CreateInstance(const double in_relResponseThresh = 0.01, const double in_k = 0.04, const std::string& in_kernelName = "window",
-        const uint32_t in_localMaxDistance = 10U, const uint32_t in_subPixelCalculationDistance = 5U);
+        const int in_localMaxDistance = 10U, const int in_subPixelCalculationDistance = 5U);
 
     /**
-    * /brief Extract features from a provided grayscale(!!) image frame. Keypoints will be added to the provided image frame
-    *
-    * \param[in, out] inout_frame grayscale image frame from which features shall be extracted
-    * \return True if feature detection successfull, false otherwise
-    */
-    virtual bool ExtractKeypoints(Utils::Frame& inout_frame) override;
+      * /brief Extract features from a provided image frame. Implementations might place certain
+      * restrictions to the image (like being grayscale).
+      *
+      * \param[in] in_frame image frame from which features shall be extracted
+      * \param[out] out_keypoints keypoints extracted from the frame
+      * \return True if feature detection successfull, false otherwise
+      */
+    virtual bool ExtractKeypoints(const Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints) override;
 
 private:
     // It is not allowed to copy or instantiate the detector directly
@@ -42,8 +44,8 @@ private:
 
     double m_relResponseThresh; ///< relative response threshold used to filter out insignificant features [with respect to maximum response]
     double m_k; ///< k factor used for Harris response calculation, see literature
-    uint32_t m_localMaxDistance; ///< minimum distance of reported features [pixel] 
-    uint32_t m_subPixelCalculationDistance; ///< radius that is taken into account for subPixel feature position calculation [pixels]
+    int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
+    int m_subPixelCalculationDistance; ///< radius that is taken into account for subPixel feature position calculation [pixels]
     
     cv::Mat m_smoothingKernel; ///< kernel used for smoothing the gradients
 

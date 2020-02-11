@@ -16,8 +16,11 @@ target_include_directories(Vocpp_Master
 )
 
 target_link_libraries(Vocpp_Master
+    PUBLIC
+	Vocpp_Interface
     PRIVATE
         Vocpp_DeltaPoseReconstruction
+	Vocpp_DeltaPoseReconstruction
         Vocpp_FeatureHandling
         Vocpp_Calibration
         Vocpp_Utils
