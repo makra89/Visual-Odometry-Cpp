@@ -153,7 +153,7 @@ void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv
         meanDist += ((std::pow(shiftedX, 2) + std::pow(shiftedY, 2)) / in_points.size());
     }
 
-    const float scale = std::sqrt(static_cast<float>(2.0)) / std::sqrt(meanDist);
+    const float scale = std::sqrt(2.0F) / std::sqrt(meanDist);
 
     for (auto element : in_points)
     {

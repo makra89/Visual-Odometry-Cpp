@@ -28,12 +28,13 @@ class FeatureDetector
 public:
     /**
       * /brief Extract features from a provided image frame. Implementations might place certain
-      * restrictions to the image (like being grayscale). Keypoints will be added to the provided image frame
+      * restrictions to the image (like being grayscale).
       *
-      * \param[in, out] inout_frame image frame from which features shall be extracted
+      * \param[in] in_frame image frame from which features shall be extracted
+      * \param[out] out_keypoints keypoints extracted from the frame
       * \return True if feature detection successfull, false otherwise
       */
-    virtual bool ExtractKeypoints(Utils::Frame& inout_frame) = 0;
+    virtual bool ExtractKeypoints(const Utils::Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints) = 0;
 };
 
 /**

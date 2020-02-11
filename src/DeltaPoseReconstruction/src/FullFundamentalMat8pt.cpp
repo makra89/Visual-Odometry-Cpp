@@ -103,13 +103,13 @@ void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLef
         cv::Mat epiLineLeft = in_solution * Utils::Point2fToMatHomCoordinates(in_pointCorrRight[i]);
         cv::Mat epiLineRight = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * in_solution;
 
-        const float scale = static_cast<float>(1.0) / (std::pow(epiLineLeft.at<float>(0, 0), 2) + std::pow(epiLineLeft.at<float>(1, 0), 2)) +
-            (static_cast<float>(1.0) / (std::pow(epiLineRight.at<float>(0, 0), 2) + std::pow(epiLineRight.at<float>(1, 0), 2)));
+        const float scale = 1.0F / (std::pow(epiLineLeft.at<float>(0, 0), 2) + std::pow(epiLineLeft.at<float>(1, 0), 2)) +
+            (1.0F / (std::pow(epiLineRight.at<float>(0, 0), 2) + std::pow(epiLineRight.at<float>(1, 0), 2)));
 
         cv::Mat dist = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * epiLineLeft;
 
         // Codimension 1 to R^4 --> divide by 3.84
-        if ((std::pow(dist.at<float>(0, 0), 2) * scale / static_cast<float>(3.84)) < std::pow(in_errorTresh, 2))
+        if ((std::pow(dist.at<float>(0, 0), 2) * scale / 3.84F) < std::pow(in_errorTresh, 2))
         {
             out_inliers.push_back(i);
         }

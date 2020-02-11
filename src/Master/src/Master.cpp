@@ -19,7 +19,7 @@ Master::Master() : m_reconstructor(), m_calibModule()
 {
 }
 
-bool Master::FeedNextFrame(Utils::Frame& in_frame)
+bool Master::FeedNextFrame(const Utils::Frame& in_frame)
 {  
 
     bool ret = m_reconstructor.FeedNextFrame(in_frame, m_calibModule.GetSavedMonoCalib().GetCalibrationMatrix());

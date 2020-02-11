@@ -45,18 +45,18 @@ HarrisEdgeDetector* HarrisEdgeDetector::CreateInstance(const double in_relRespon
 }
 
 
-bool HarrisEdgeDetector::ExtractKeypoints(Utils::Frame& inout_frame)
+bool HarrisEdgeDetector::ExtractKeypoints(const Utils::Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints)
 {
     bool ret = true;
 
-    if (inout_frame.GetImage().dims != 2)
+    if (in_frame.GetImage().dims != 2)
     {
         ret = false;
         std::cout << "[HarrisEdgeDetector]: Non-grayscale image has been provided" << std::endl;
     }
     
     cv::Mat gradX, gradY;
-    Utils::Compute2DGradients(inout_frame.GetImage(), gradX, gradY);
+    Utils::Compute2DGradients(in_frame.GetImage(), gradX, gradY);
 
     cv::Mat weightedGradxX;
     Utils::ApplyKernelToImage(gradX.mul(gradX), m_smoothingKernel, weightedGradxX);
@@ -80,13 +80,10 @@ bool HarrisEdgeDetector::ExtractKeypoints(Utils::Frame& inout_frame)
     std::vector<cv::Point2f> localMax;
     Utils::ExtractLocalMaxima(response, m_localMaxDistance, localMax, m_subPixelCalculationDistance);
 
-    std::vector<cv::KeyPoint> keypoints;
     for (auto point : localMax)
     {
-        keypoints.push_back(cv::KeyPoint(point, static_cast<float>(m_localMaxDistance)));
+        out_keypoints.push_back(cv::KeyPoint(point, static_cast<float>(m_localMaxDistance)));
     }
-
-    inout_frame.SetKeypoints(std::move(keypoints));
     
     return ret;
 

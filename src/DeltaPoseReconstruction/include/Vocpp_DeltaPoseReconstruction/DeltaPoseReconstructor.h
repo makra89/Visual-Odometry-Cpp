@@ -25,6 +25,7 @@ namespace DeltaPoseReconstruction
 
 class EpipolarModel;
 class RansacOptimizer;
+class LocalMap;
 
 /**
   * /brief Reconstructs epipolar geometry out of feature matches and 
@@ -43,7 +44,7 @@ public:
     /**
       * /brief Provide next image frame to reconstructor together with a calibration matrix
       */
-    bool FeedNextFrame(Utils::Frame& in_frame, const cv::Mat& in_calibMat);
+    bool FeedNextFrame(const Utils::Frame& in_frame, const cv::Mat& in_calibMat);
 
 private:
 
@@ -53,8 +54,11 @@ private:
 
     RansacOptimizer* m_optimizer;
     std::vector<EpipolarModel*> m_epiPolModels;
+    LocalMap* m_localMap;
 
     Utils::Frame m_lastFrame;  ///< last processed frame (fed via DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
+    std::vector<cv::Mat> m_descriptionsLastFrame;  ///< descriptions computed for last frame
+    std::vector<cv::KeyPoint> m_keypointsLastFrame;  ///< keypoints detected in last frame
 };
 
 } //namespace DeltaPoseReconstruction

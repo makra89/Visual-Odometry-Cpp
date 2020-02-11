@@ -25,12 +25,17 @@ class FeatureDescriptor
 {
 public:
     /**
-      * /brief Compute descriptions for provided frame
+      * /brief Compute keypoints descriptions for provided frame
       *
-      * \param[in,out] inout_frame frame for which to compute the descriptions, features must be present!
-      * \return True if feature description for at least one feature successfull, false otherwise
+      * \param[in] in_frame frame out of which the keypoints have been extracted
+      * \param[in] in_keypoints keypoints extracted from frame
+      * \param[out] out_descriptions descriptions computed for provided keypoints
+      * \param[out] out_validKeypoints keypoints for which a description could be computed
+
+      * \return True if feature description for at least one keypoint successfull, false otherwise
       */
-    virtual bool ComputeDescriptions(Utils::Frame& inout_frame) = 0;
+    virtual bool ComputeDescriptions(const Utils::Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
+        std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints) = 0;
 };
 
 /**

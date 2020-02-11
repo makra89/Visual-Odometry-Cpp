@@ -63,7 +63,7 @@ private:
       */
     void UpdateOutlierRatio(const float in_measuredRatio)
     {
-        m_outlierRatio = (static_cast<float>(1.0) - m_smoothingFactor) * m_outlierRatio + m_smoothingFactor * in_measuredRatio;
+        m_outlierRatio = (1.0F - m_smoothingFactor) * m_outlierRatio + m_smoothingFactor * in_measuredRatio;
     }
 
     float m_outlierRatio; ///< ratio of outliers expected in frames, controls number of trials for models

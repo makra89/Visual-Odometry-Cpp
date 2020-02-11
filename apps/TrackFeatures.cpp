@@ -34,10 +34,10 @@ int main(int argc, char** argv)
     // Construct MonoCameraCalibration
     // Hardcoded for KITTI data set sequence 0, left image
     cv::Mat calibMat = cv::Mat::eye(3, 3, CV_32F);
-    calibMat.at<float>(0, 0) = 7.18856e+02;
-    calibMat.at<float>(1, 1) = 7.18856e+02;
-    calibMat.at<float>(0, 2) = 6.071928000000e+02;
-    calibMat.at<float>(1, 2) = 1.852157000000e+02;
+    calibMat.at<float>(0, 0) = 7.18856e+02F;
+    calibMat.at<float>(1, 1) = 7.18856e+02F;
+    calibMat.at<float>(0, 2) = 6.071928000000e+02F;
+    calibMat.at<float>(1, 2) = 1.852157000000e+02F;
     VOCPP::Calibration::MonoCameraCalibration monoCalib(calibMat);
 
     // Load calibration

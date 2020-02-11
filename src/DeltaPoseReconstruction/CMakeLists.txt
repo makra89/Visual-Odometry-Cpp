@@ -14,6 +14,8 @@ add_library(Vocpp_DeltaPoseReconstruction STATIC
     ./src/PureTranslationModel.cpp
     ./src/NoMotionModel.h
     ./src/NoMotionModel.cpp
+    ./src/LocalMap.h
+    ./src/LocalMap.cpp
 )
 
 

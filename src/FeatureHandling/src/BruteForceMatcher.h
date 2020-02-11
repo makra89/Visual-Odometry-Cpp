@@ -32,14 +32,22 @@ public:
     static BruteForceMatcher* CreateInstance(const int in_maxDistance=50U);
 
     /**
-      * /brief Match feature descriptions in provided frame and return matches. Features and descriptions have to be present!
-      * Features in first frame will be searched in second frame.
+      * /brief Compares keypoint descriptions and return matches.
+      * Descriptions in first set of provided descriptions will be compared to the ones in the second set
+      * The fields of the output cv::DMatch structs have the following meaning:
+      *     - queryIdx: Id of the first description (Id == index in vector)
+      *     - trainIdx: Id of the second description (Id == index in vector)
+      *     - imgIdx: Id of the frame belonging to the second frame (map description1 --> description2)
+      *     - distance: distance measure of descriptions
       *
-      * \param[in, out] inout_frame1 first frame to match
-      * \param[in] inout_frame2 second frame to match
+      * \param[in] in_descriptions1 first set of keypoint descriptions
+      * \param[in] in_descriptions2 second set of keypoint descriptions
+      * \param[in] in_secondFrameId Id of the frame belonging to the second set of descriptions
+      * \param[out] out_matches matches between description sets
       * \return True if feature matching successfull, false otherwise
       */
-    virtual bool matchDesriptions(Utils::Frame& inout_frame1, Utils::Frame& inout_frame2) override;
+    virtual bool MatchDesriptions(const std::vector<cv::Mat>& in_descriptions1, const std::vector<cv::Mat>& in_descriptions2,
+        const int& in_secondFrameId, std::vector<cv::DMatch>& out_matches) override;
 
 private:
     // It is not allowed to copy or instantiate the detector directly

@@ -19,7 +19,6 @@ TEST(FrameTest, Constructor_Empty)
     EXPECT_FALSE(emptyFrame.isValid());
 }
 
-
 TEST(FrameTest, Constructor_NoImageData)
 {
     // Construct empty frame
@@ -51,55 +50,4 @@ TEST(FrameTest, Constructor_SupportedImageTypes)
             EXPECT_FALSE(f.isValid());
         }
     }
-}
-
-TEST(FrameTest, SetAndGetKeypoints)
-{
-    // Create keypoint vector with one element
-    std::vector<cv::KeyPoint> keyVec;
-    keyVec.push_back(cv::KeyPoint(cv::Point2f(0.0, 0.0), 1.0));
-    EXPECT_EQ(keyVec.size(), 1U);
-
-    // Create frame and set keypoints
-    cv::Mat zeros = cv::Mat::zeros(4, 4, CV_32F);
-    Frame f(std::move(zeros), 0U);
-    f.SetKeypoints(std::move(keyVec));
-
-    // keypoint vector should have been moved to frame
-    EXPECT_EQ(keyVec.size(), 0U);
-    EXPECT_EQ(f.GetKeypoints().size(), 1U);
-}
-
-TEST(FrameTest, SetAndGetDescriptions)
-{
-    // Create description vector with one element
-    std::vector<cv::Mat> descVec;
-    descVec.push_back(cv::Mat::zeros(2,2,CV_32F));
-    EXPECT_EQ(descVec.size(), 1U);
-
-    // Create frame and set descriptions
-    cv::Mat zeros = cv::Mat::zeros(4, 4, CV_32F);
-    Frame f(std::move(zeros), 0U);
-    f.SetDescriptions(std::move(descVec));
-
-    // description vector should have been moved to frame
-    EXPECT_EQ(descVec.size(), 0U);
-    EXPECT_EQ(f.GetDescriptions().size(), 1U);
-}
-
-TEST(FrameTest, SetAndGetMatches)
-{
-    // Create match vector with one element
-    std::vector<cv::DMatch> matchVec;
-    matchVec.push_back(cv::DMatch(1, 1, 1.0));
-    EXPECT_EQ(matchVec.size(), 1U);
-
-    // Create frame and set matches
-    cv::Mat zeros = cv::Mat::zeros(4, 4, CV_32F);
-    Frame f(std::move(zeros), 0U);
-    f.SetMatches(std::move(matchVec));
-
-    // match vector should have been moved to frame
-    EXPECT_EQ(matchVec.size(), 0U);
-    EXPECT_EQ(f.GetMatches().size(), 1U);
 }

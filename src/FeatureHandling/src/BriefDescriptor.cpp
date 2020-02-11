@@ -34,27 +34,25 @@ BriefDescriptor* BriefDescriptor::CreateInstance(const int in_randomPairDrawRadi
 }
 
 
-bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
+bool BriefDescriptor::ComputeDescriptions(const Utils::Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
+    std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints)
 {
     bool ret = false;
 
-    if (inout_frame.GetKeypoints().size() == 0)
+    if (in_keypoints.size() == 0)
     {    
         std::cout << "[BriefDescriptor]: No keypoints found in provided frame" << std::endl;
         return false;
     }
 
-    if (inout_frame.GetDescriptions().size() != 0)
+    if (out_descriptions.size() != 0)
     {
         std::cout << "[BriefDescriptor]: Frame with non-empty description vector provided, will be erased" << std::endl;
         return false;
     }
 
-    std::vector<cv::KeyPoint> validKeypoints;
-    std::vector<cv::Mat> validDescriptions;
-
     // Loop over keypoints
-    for (auto key : inout_frame.GetKeypoints())
+    for (auto key : in_keypoints)
     {
         cv::Mat descriptions = cv::Mat::zeros(1, m_numRandomPairs, CV_8U);
         int numSucessfulPairs = 0U;
@@ -68,15 +66,15 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
             int indSecY = static_cast<int>(pair.at<float>(0, 3) + key.pt.y);
            
             // Check whether all indices are within range
-            const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < inout_frame.GetImage().size[1]);
-            const bool inRangeFirstY = (indFirstY >= 0) && (indFirstY < inout_frame.GetImage().size[0]);
-            const bool inRangeSecX = (indSecX >= 0) && (indSecX < inout_frame.GetImage().size[1]);
-            const bool inRangeSecY = (indSecY >= 0) && (indSecY < inout_frame.GetImage().size[0]);
+            const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < in_frame.GetImage().size[1]);
+            const bool inRangeFirstY = (indFirstY >= 0) && (indFirstY < in_frame.GetImage().size[0]);
+            const bool inRangeSecX = (indSecX >= 0) && (indSecX < in_frame.GetImage().size[1]);
+            const bool inRangeSecY = (indSecY >= 0) && (indSecY < in_frame.GetImage().size[0]);
 
             if (inRangeFirstX && inRangeFirstY && inRangeSecX && inRangeSecY)
             {
                 // Compare intensities and append bin to description
-                uint8_t bin = inout_frame.GetImage().at<float>(indFirstY, indFirstX) > inout_frame.GetImage().at<float>(indSecY, indSecX) ? 1U : 0U;
+                uint8_t bin = in_frame.GetImage().at<float>(indFirstY, indFirstX) > in_frame.GetImage().at<float>(indSecY, indSecX) ? 1U : 0U;
                 descriptions.at<uint8_t>(0, numSucessfulPairs) = bin;
                 numSucessfulPairs++;
             }
@@ -88,14 +86,11 @@ bool BriefDescriptor::ComputeDescriptions(Utils::Frame& inout_frame)
 
         if (numSucessfulPairs == m_numRandomPairs)
         {
-            validDescriptions.push_back(descriptions);
-            validKeypoints.push_back(key);
+            out_descriptions.push_back(descriptions);
+            out_validKeypoints.push_back(key);
             ret = true;
         }
     }
-
-    inout_frame.SetKeypoints(std::move(validKeypoints));
-    inout_frame.SetDescriptions(std::move(validDescriptions));
 
     return ret;
 }

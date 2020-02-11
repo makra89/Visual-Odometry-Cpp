@@ -29,12 +29,16 @@ public:
     static BriefDescriptor* CreateInstance(const int in_randomPairDrawRadius = 50, const int in_numRandomPairs = 256);
 
     /**
-      * /brief Compute descriptions for provided frame
+      * /brief Compute keypoints descriptions for provided frame
       *
-      * \param[in,out] inout_frame frame for which to compute the descriptions, features must be present!
-      * \return True if feature description for at least one feature successfull, false otherwise
+      * \param[in] in_frame frame out of which the keypoints have been extracted
+      * \param[in] in_keypoints keypoints extracted from frame
+      * \param[out] out_descriptions descriptions computed for provided keypoints
+
+      * \return True if feature description for at least one keypoint successfull, false otherwise
       */
-    virtual bool ComputeDescriptions(Utils::Frame& inout_frame);
+    virtual bool ComputeDescriptions(const Utils::Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
+        std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints) override;
 
 private:
     // It is not allowed to copy or instantiate the descriptor directly

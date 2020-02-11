@@ -39,7 +39,7 @@ public:
     /**
       * /brief Provide next image frame to master
       */
-    bool FeedNextFrame(Utils::Frame& in_frame);
+    bool FeedNextFrame(const Utils::Frame& in_frame);
 
     /**
       * /brief Load a mono camera calibration

@@ -14,11 +14,7 @@ namespace VOCPP
 namespace Utils
 {
 
-Frame::Frame() : 
-    m_keypoints(), 
-    m_descriptions(),
-    m_matches(),
-    m_pose(),
+Frame::Frame() :
     m_Id(s_invalidFrameId),
     m_validFrame(false)
 {
@@ -45,21 +41,6 @@ Frame::Frame(cv::Mat&& in_imageGray, const int in_imgId) : Frame::Frame()
         m_Id = in_imgId;
         m_validFrame = true;
     }
-}
-
-void Frame::SetKeypoints(std::vector<cv::KeyPoint>&& in_keypoints)
-{
-    m_keypoints = std::move(in_keypoints);
-}
-
-void Frame::SetDescriptions(std::vector<cv::Mat>&& in_descriptions)
-{
-    m_descriptions = std::move(in_descriptions);
-}
-
-void Frame::SetMatches(std::vector<cv::DMatch>&& in_matches)
-{
-    m_matches = std::move(in_matches);
 }
 
 } //namespace Utils

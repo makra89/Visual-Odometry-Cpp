@@ -49,7 +49,7 @@ namespace DeltaPoseReconstruction
 
         // Calculate number of necessary iterations
         // We want 95% certainty to have a pure set
-        int N = CalculateNecessaryIterations(static_cast<float>(0.95), m_outlierRatio, model->GetNumCorrespondences());
+        int N = CalculateNecessaryIterations(0.95F, m_outlierRatio, model->GetNumCorrespondences());
         for (int modelIt = 0; modelIt < N; modelIt++)
         {
                         
@@ -109,7 +109,7 @@ namespace DeltaPoseReconstruction
     out_translation = -(out_rotation.t() * out_translation);
 
     // Update outlier ratio estimate
-    UpdateOutlierRatio(static_cast<float>(1.0) - static_cast<float>(inliers.size()) / static_cast<float>(in_correspondFirst.size()));
+    UpdateOutlierRatio(1.0F - static_cast<float>(inliers.size()) / static_cast<float>(in_correspondFirst.size()));
     return ret;
 }
 

@@ -18,7 +18,7 @@ namespace Utils
 /**
 * /brief Simply PI :)
 */
-static float PI = 3.141592653589793238463;
+static float PI = 3.141592653589793238463F;
 
 /**
 * /brief Draw a random int in the range [in_lowerEdge, in_upperEdge]

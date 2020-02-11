@@ -101,40 +101,9 @@ public:
     Frame(cv::Mat&& in_grayImage, const int in_imgId);
 
     /**
-      * /brief Keypoint setter, input argument will be moved
-      */
-    void SetKeypoints(std::vector<cv::KeyPoint>&& in_keypoints);
-    
-    /**
-      * /brief Description setter, input argument will be moved
-      */
-    void SetDescriptions(std::vector<cv::Mat>&& in_descriptions);
-    
-    /**
-      * /brief Match setter, input argument will be moved
-      */
-    void SetMatches(std::vector<cv::DMatch>&& in_matches);
-
-    /**
-      * /brief Set Camera Pose
-      */
-    void SetCameraPose(const CameraPose& in_pose)
-    {
-        m_pose = in_pose;
-    }
-
-    /**
-      * /brief Get Camera Pose
-      */
-    const CameraPose& GetCameraPose() const
-    {
-        return m_pose;
-    }
-
-    /**
       * /brief Get image data (const reference), either raw or grayscale
       */
-    const cv::Mat& GetImage()
+    const cv::Mat& GetImage() const
     {
         return m_grayImage;
     }
@@ -142,41 +111,17 @@ public:
     /**
       * /brief Get copy of image data, either raw or grayscale
       */
-    cv::Mat GetImageCopy()
+    cv::Mat GetImageCopy() const
     {
         return m_grayImage;
     }
 
     /**
-      * /brief Keypoint getter (const reference)
+      * /brief Returns frame ID
       */
-    const std::vector<cv::KeyPoint>& GetKeypoints() const
+    const int GetId() const
     {
-        return m_keypoints;
-    }
-
-    /**
-      * /brief Keypoint getter (copy)
-      */
-    std::vector<cv::KeyPoint> GetKeypoints()
-    {
-        return m_keypoints;
-    }
-
-    /**
-      * /brief Description getter
-      */
-    const std::vector<cv::Mat>& GetDescriptions() const
-    {
-        return m_descriptions;
-    }
-
-    /**
-      * /brief Matches getter
-      */
-    const std::vector<cv::DMatch>& GetMatches() const
-    {
-        return m_matches;
+        return m_Id;
     }
 
     /**
@@ -187,32 +132,9 @@ public:
         return m_validFrame;
     }
 
-    /**
-      * /brief Returns frame ID
-      */
-    const int GetId() const
-    {
-        return m_Id;
-    }
-    
-    /**
-      * /brief Specifies whether the frame has a valid camera pose
-      */
-    const bool HasValidPose() const
-    {
-        return m_pose.IsValid();
-    }
-
-
 private:
 
     cv::Mat m_grayImage; ///< grayscale image data
-
-    std::vector<cv::KeyPoint> m_keypoints; ///< keypoints found in this frame
-    std::vector<cv::Mat> m_descriptions; ///< descriptions for the found keypoints
-    std::vector<cv::DMatch> m_matches; ///< matches to other frames
-
-    CameraPose m_pose;
 
     int m_Id; ///< Id of the frame, must be a unique one!
     bool m_validFrame; ///< indicated whether this frame is a valid one
