@@ -9,7 +9,7 @@
 #ifndef VOCPP_FEATURE_DETECTOR_H
 #define VOCPP_FEATURE_DETECTOR_H
 
-#include<Vocpp_Utils/Frame.h>
+#include<Vocpp_Interface/Frame.h>
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -34,7 +34,7 @@ public:
       * \param[out] out_keypoints keypoints extracted from the frame
       * \return True if feature detection successfull, false otherwise
       */
-    virtual bool ExtractKeypoints(const Utils::Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints) = 0;
+    virtual bool ExtractKeypoints(const Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints) = 0;
 };
 
 /**

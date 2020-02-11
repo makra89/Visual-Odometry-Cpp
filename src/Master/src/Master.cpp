@@ -19,12 +19,17 @@ Master::Master() : m_reconstructor(), m_calibModule()
 {
 }
 
-bool Master::FeedNextFrame(const Utils::Frame& in_frame)
+bool Master::FeedNextFrame(const Frame& in_frame)
 {  
 
     bool ret = m_reconstructor.FeedNextFrame(in_frame, m_calibModule.GetSavedMonoCalib().GetCalibrationMatrix());
 
     return ret;
+}
+
+DeltaPose Master::GetLastDeltaPose()
+{
+    return m_reconstructor.GetLastDeltaPose();
 }
 
 bool Master::LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration)

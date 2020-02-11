@@ -34,7 +34,7 @@ BriefDescriptor* BriefDescriptor::CreateInstance(const int in_randomPairDrawRadi
 }
 
 
-bool BriefDescriptor::ComputeDescriptions(const Utils::Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
+bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
     std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints)
 {
     bool ret = false;

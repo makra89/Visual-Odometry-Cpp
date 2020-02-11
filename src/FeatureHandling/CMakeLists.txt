@@ -26,6 +26,8 @@ target_include_directories(Vocpp_FeatureHandling
 )
 
 target_link_libraries(Vocpp_FeatureHandling
+    PUBLIC
+        Vocpp_Interface
     PRIVATE
         Vocpp_Utils
         ${OpenCV_LIBS} 

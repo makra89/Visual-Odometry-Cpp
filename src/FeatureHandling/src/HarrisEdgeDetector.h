@@ -34,7 +34,7 @@ public:
       * \param[out] out_keypoints keypoints extracted from the frame
       * \return True if feature detection successfull, false otherwise
       */
-    virtual bool ExtractKeypoints(const Utils::Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints) override;
+    virtual bool ExtractKeypoints(const Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints) override;
 
 private:
     // It is not allowed to copy or instantiate the detector directly

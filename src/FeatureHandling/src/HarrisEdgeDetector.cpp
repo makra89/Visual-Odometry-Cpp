@@ -45,7 +45,7 @@ HarrisEdgeDetector* HarrisEdgeDetector::CreateInstance(const double in_relRespon
 }
 
 
-bool HarrisEdgeDetector::ExtractKeypoints(const Utils::Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints)
+bool HarrisEdgeDetector::ExtractKeypoints(const Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints)
 {
     bool ret = true;
 

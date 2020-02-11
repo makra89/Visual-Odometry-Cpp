@@ -8,7 +8,7 @@
 #ifndef VOCPP_FEATURE_DESCRIPTOR_H
 #define VOCPP_FEATURE_DESCRIPTOR_H
 
-#include<Vocpp_Utils/Frame.h>
+#include<Vocpp_Interface/Frame.h>
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
 
@@ -34,7 +34,7 @@ public:
 
       * \return True if feature description for at least one keypoint successfull, false otherwise
       */
-    virtual bool ComputeDescriptions(const Utils::Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
+    virtual bool ComputeDescriptions(const Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
         std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints) = 0;
 };
 

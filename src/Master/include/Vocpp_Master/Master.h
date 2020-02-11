@@ -8,7 +8,9 @@
 #ifndef VOCPP_MASTER_H
 #define VOCPP_MASTER_H
 
-#include<Vocpp_Utils/Frame.h>
+#include<Vocpp_Interface/Frame.h>
+#include<Vocpp_Interface/DeltaPose.h>
+
 #include<Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
 #include<Vocpp_Calibration/CalibrationModule.h>
@@ -39,7 +41,13 @@ public:
     /**
       * /brief Provide next image frame to master
       */
-    bool FeedNextFrame(const Utils::Frame& in_frame);
+    bool FeedNextFrame(const Frame& in_frame);
+
+    /**
+      * /brief Get computed delta pose of last frame to the frame before
+      * Be sure to check the delta pose for validity!
+      */
+    DeltaPose GetLastDeltaPose();
 
     /**
       * /brief Load a mono camera calibration

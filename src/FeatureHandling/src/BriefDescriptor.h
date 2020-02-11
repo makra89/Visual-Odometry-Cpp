@@ -37,7 +37,7 @@ public:
 
       * \return True if feature description for at least one keypoint successfull, false otherwise
       */
-    virtual bool ComputeDescriptions(const Utils::Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
+    virtual bool ComputeDescriptions(const Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
         std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints) override;
 
 private:

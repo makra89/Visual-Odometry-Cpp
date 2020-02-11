@@ -8,7 +8,8 @@
 #ifndef VOCPP_DELTA_POSE_RECONSTRUCTOR_H
 #define VOCPP_DELTA_POSE_RECONSTRUCTOR_H
 
-#include <Vocpp_Utils/Frame.h>
+#include <Vocpp_Interface/Frame.h>
+#include <Vocpp_Interface/DeltaPose.h>
 
 #include<Vocpp_FeatureHandling/FeatureDescriptor.h>
 #include<Vocpp_FeatureHandling/FeatureMatcher.h>
@@ -44,7 +45,15 @@ public:
     /**
       * /brief Provide next image frame to reconstructor together with a calibration matrix
       */
-    bool FeedNextFrame(const Utils::Frame& in_frame, const cv::Mat& in_calibMat);
+    bool FeedNextFrame(const Frame& in_frame, const cv::Mat& in_calibMat);
+
+    /**
+      * /brief Get computed delta pose of last frame to the frame before
+      */
+    DeltaPose GetLastDeltaPose()
+    {
+        return m_lastDeltaPose;
+    }
 
 private:
 
@@ -56,9 +65,12 @@ private:
     std::vector<EpipolarModel*> m_epiPolModels;
     LocalMap* m_localMap;
 
-    Utils::Frame m_lastFrame;  ///< last processed frame (fed via DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
+    Frame m_lastFrame;  ///< last processed frame (fed via DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
     std::vector<cv::Mat> m_descriptionsLastFrame;  ///< descriptions computed for last frame
     std::vector<cv::KeyPoint> m_keypointsLastFrame;  ///< keypoints detected in last frame
+
+    DeltaPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
+
 };
 
 } //namespace DeltaPoseReconstruction
