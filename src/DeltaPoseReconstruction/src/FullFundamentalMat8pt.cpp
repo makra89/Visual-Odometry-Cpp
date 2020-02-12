@@ -124,9 +124,14 @@ bool FullFundamentalMat8pt::DecomposeSolution(const cv::Mat& in_solution, const 
     cv::Mat invCalibMat = in_calibMat.inv();
     cv::Mat leftCamCoord = invCalibMat * Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[0]);
     cv::Mat rightCamCoord = invCalibMat * Utils::Point2fToMatHomCoordinates(in_pointCorrRight[0]);
-
-    return Utils::DecomposeEssentialMatrix(essentialMat, cv::Point2f(leftCamCoord.at<float>(0,0) / leftCamCoord.at<float>(2, 0), leftCamCoord.at<float>(1, 0) / leftCamCoord.at<float>(2, 0)),
+    
+    bool ret = Utils::DecomposeEssentialMatrix(essentialMat, cv::Point2f(leftCamCoord.at<float>(0,0) / leftCamCoord.at<float>(2, 0), leftCamCoord.at<float>(1, 0) / leftCamCoord.at<float>(2, 0)),
         cv::Point2f(rightCamCoord.at<float>(0, 0) / rightCamCoord.at<float>(2, 0), rightCamCoord.at<float>(1, 0) / rightCamCoord.at<float>(2, 0)), out_translation, out_rotation);
+
+    // Normalize translation
+    out_translation = out_translation / cv::norm(out_translation);
+
+    return ret;
 }
 
 

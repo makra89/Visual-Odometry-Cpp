@@ -75,6 +75,7 @@ public:
     /**
       * /brief Decompose a model solution into a translation and a rotation matrix
       * The rotation and translation is defined in such way that x_left = R * x_right + translation
+      * It has to be ensured that ||translation|| = 1 (in order to not have scaling issues for different models)
       */
     virtual bool DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
         const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation) = 0;

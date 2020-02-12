@@ -39,8 +39,7 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_localMap = new LocalMap();
 
     m_epiPolModels.clear();
-    // TODO: This model does not do any image point normalization and show bad behavior
-    //m_epiPolModels.push_back(new PureTranslationModel());
+    m_epiPolModels.push_back(new PureTranslationModel());
     m_epiPolModels.push_back(new FullFundamentalMat8pt());
     m_epiPolModels.push_back(new NoMotionModel());
 }

@@ -27,17 +27,26 @@ bool PureTranslationModel::Compute(const std::vector<cv::Point2f>& in_pointCorrL
     }
     else
     {
-        cv::Mat transLeft;
-        cv::Mat transRight;
+        cv::Mat normTransform;
+        
+        // In theory we should normalize feature points for both images independently
+        // However we want to guarantee a certain shape of the fundamental matrix.
+        // This is only possible if we have the same transformation for left and right image
+        std::vector< cv::Point2f> combinedPoints = in_pointCorrLeft;
+        combinedPoints.insert(combinedPoints.end(), in_pointCorrRight.begin(), in_pointCorrRight.end());
+        std::vector< cv::Point2f> normCombinedPoints;  
+        Utils::NormalizePointSet(combinedPoints, normCombinedPoints, normTransform);
+        std::vector<cv::Point2f> normLeftPoints(normCombinedPoints.begin(), normCombinedPoints.begin() + normCombinedPoints.size() / 2);
+        std::vector<cv::Point2f> normRightPoints(normCombinedPoints.begin() + normCombinedPoints.size() / 2, normCombinedPoints.end());
 
-        cv::Mat A = cv::Mat::zeros(static_cast<int>(in_pointCorrLeft.size()), 3, CV_64F);
+        cv::Mat A = cv::Mat::zeros(static_cast<int>(normLeftPoints.size()), 3, CV_64F);
 
-        for (int it = 0; it < static_cast<int>(in_pointCorrLeft.size()); it++)
+        for (int it = 0; it < static_cast<int>(normLeftPoints.size()); it++)
         {
-            A.at<double>(it, 0) = static_cast<double>(in_pointCorrLeft[it].y) - static_cast<double>(in_pointCorrRight[it].y);
-            A.at<double>(it, 1) = static_cast<double>(in_pointCorrRight[it].x) - static_cast<double>(in_pointCorrLeft[it].x);
-            A.at<double>(it, 2) = static_cast<double>(in_pointCorrLeft[it].x) * static_cast<double>(in_pointCorrRight[it].y)
-            - static_cast<double>(in_pointCorrLeft[it].y) * static_cast<double>(in_pointCorrRight[it].x);
+            A.at<double>(it, 0) = static_cast<double>(normLeftPoints[it].y) - static_cast<double>(normRightPoints[it].y);
+            A.at<double>(it, 1) = static_cast<double>(normRightPoints[it].x) - static_cast<double>(normLeftPoints[it].x);
+            A.at<double>(it, 2) = static_cast<double>(normLeftPoints[it].x) * static_cast<double>(normRightPoints[it].y)
+            - static_cast<double>(normLeftPoints[it].y) * static_cast<double>(normRightPoints[it].x);
         }
 
         // Compute SVD
@@ -65,6 +74,9 @@ bool PureTranslationModel::Compute(const std::vector<cv::Point2f>& in_pointCorrL
         cv::Mat fundMat;
         F.convertTo(fundMat, CV_32F);
 
+        // Apply the normalization transformations used for the image coordinates
+        fundMat = normTransform.t() * fundMat * normTransform;
+
         // And normalize matrix
         if (cv::norm(fundMat) > 0.0)
         {
@@ -72,7 +84,6 @@ bool PureTranslationModel::Compute(const std::vector<cv::Point2f>& in_pointCorrL
         }
 
         out_solutions.push_back(fundMat);
-
     }
 
     return ret;
@@ -115,6 +126,8 @@ bool PureTranslationModel::DecomposeSolution(const cv::Mat& in_solution, const c
     out_translation.at<float>(0, 0) = essentialMat.at<float>(1, 2);
     out_translation.at<float>(1, 0) = essentialMat.at<float>(2, 0);
     out_translation.at<float>(2, 0) = essentialMat.at<float>(0, 1);
+
+    out_translation = out_translation / cv::norm(out_translation);
 
     // No translation
     out_rotation = cv::Mat::eye(3, 3, CV_32F);
