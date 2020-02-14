@@ -37,6 +37,11 @@ public:
       * /brief Constructor
       */
     Master();
+
+    /**
+      * /brief Destructor
+      */
+    ~Master();
     
     /**
       * /brief Provide next image frame to master

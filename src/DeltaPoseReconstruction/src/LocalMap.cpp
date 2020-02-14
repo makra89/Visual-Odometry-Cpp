@@ -12,6 +12,10 @@ namespace VOCPP
 namespace DeltaPoseReconstruction
 {
 
+LocalMap::~LocalMap()
+{
+}
+
 void LocalMap::InsertLandmark(const cv::Vec3f& in_position, const cv::DMatch& in_match, int in_currentFrameId)
 {
     // Check whether this landmark has been observed before

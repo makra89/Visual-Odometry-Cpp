@@ -44,6 +44,23 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_epiPolModels.push_back(new NoMotionModel());
 }
 
+
+DeltaPoseReconstructor::~DeltaPoseReconstructor()
+{
+    for (auto model : m_epiPolModels)
+    {
+        delete model;
+    }
+    m_epiPolModels.clear();
+
+    delete m_localMap;
+    delete m_optimizer;
+
+    delete m_matcher;
+    delete m_descriptor;
+    delete m_detector;
+}
+
 bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat& in_calibMat)
 {
     bool ret = true;

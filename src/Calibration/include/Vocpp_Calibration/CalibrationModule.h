@@ -32,6 +32,11 @@ public:
       */
     CalibrationModule();
 
+    /**
+      * /brief Destructor
+      */
+    ~CalibrationModule();
+
     bool LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalib)
     {
         bool ret = false;

@@ -84,6 +84,12 @@ class LocalMap
 
 public:
     
+    
+    /**
+      * /brief Destructor
+      */
+    ~LocalMap();
+    
     /**
       * /brief Insert landmark given a cv::DMatch and a frame Id. It will be checked whether this landmark has been seen before.
       * If it has been seen before, the existing landmark will be updated

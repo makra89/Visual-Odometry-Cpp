@@ -19,6 +19,10 @@ Master::Master() : m_reconstructor(), m_calibModule()
 {
 }
 
+Master::~Master()
+{
+}
+
 bool Master::FeedNextFrame(const Frame& in_frame)
 {  
 

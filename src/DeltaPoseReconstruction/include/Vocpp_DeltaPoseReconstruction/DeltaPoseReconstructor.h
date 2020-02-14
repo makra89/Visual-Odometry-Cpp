@@ -43,6 +43,11 @@ public:
     DeltaPoseReconstructor();
 
     /**
+      * /brief Destructor
+      */
+    ~DeltaPoseReconstructor();
+
+    /**
       * /brief Provide next image frame to reconstructor together with a calibration matrix
       */
     bool FeedNextFrame(const Frame& in_frame, const cv::Mat& in_calibMat);
