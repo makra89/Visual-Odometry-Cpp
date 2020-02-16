@@ -13,7 +13,7 @@ namespace VOCPP
 namespace Calibration
 {
 
-CalibrationModule::CalibrationModule() : m_monoCalib(cv::Mat::eye(3, 3, CV_32F))
+CalibrationModule::CalibrationModule() : m_monoCalib()
 {
 }
 

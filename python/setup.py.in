@@ -1,0 +1,36 @@
+
+import setuptools.command.install
+import shutil
+from distutils.sysconfig import get_python_lib
+import os
+
+class CompiledLibInstall(setuptools.command.install.install):
+    """
+    Specialized install to install to python libs
+    """
+
+    def run(self):
+        """
+        Run method called by setup
+        :return:
+        """
+
+        # Get package directory in build system
+        packageDir = '${VOCPP_PACKAGE_DIR}'
+
+        # Directory to install to (Python sitepackages)
+        install_dir = get_python_lib()
+        
+        # Install files
+        for file in os.listdir(packageDir):
+            shutil.copy(packageDir + "/" + file, install_dir)
+
+if __name__ == '__main__':
+
+    setuptools.setup(
+        name='Vocpp',
+        version='0.0',
+        packages=['Vocpp'],
+        author='Manuel Kraus',
+        cmdclass={'install': CompiledLibInstall}
+    )

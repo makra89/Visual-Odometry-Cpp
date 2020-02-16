@@ -37,7 +37,10 @@ public:
       */
     ~CalibrationModule();
 
-    bool LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalib)
+    /**
+      * /brief Load a mono camera calibration and save it (if the camera calibration is valid)
+      */
+    bool LoadCalibration(const MonoCameraCalibration& in_monoCalib)
     {
         bool ret = false;
 
@@ -50,9 +53,20 @@ public:
         return ret;
     }
 
-    const MonoCameraCalibration& GetSavedMonoCalib() const
+    /**
+      * /brief Get the saved mono camera calibration (if it is valid)
+      */
+    bool GetSavedMonoCalib(MonoCameraCalibration& out_monocalib) const
     {
-        return m_monoCalib;
+        bool ret = false;
+
+        if (m_monoCalib.IsValid())
+        {
+            out_monocalib = m_monoCalib;
+            ret = true;
+        }
+
+        return ret;
     }
 
 private:

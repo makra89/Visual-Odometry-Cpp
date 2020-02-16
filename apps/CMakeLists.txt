@@ -1,6 +1,6 @@
-add_executable( TrackFeatures TrackFeatures.cpp )
+add_executable( runKittiDemo runKittiDemo.cpp )
 
-target_link_libraries( TrackFeatures 
+target_link_libraries( runKittiDemo
     ${OpenCV_LIBS} 
     Vocpp_FeatureHandling
     Vocpp_DeltaPoseReconstruction
