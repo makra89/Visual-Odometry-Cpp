@@ -26,24 +26,29 @@ class MonoCameraCalibration
 public:
     
     /**
-      * /brief Constructor
+      * /brief Default constructor for an invalid camera calibration
       */
-    explicit MonoCameraCalibration(const cv::Mat& in_calibrationMatrix) : m_validCalib(false)
+    MonoCameraCalibration() : m_calibrationMatrix(cv::Mat::ones(3,3,CV_32F)),
+        m_validCalib(false)
     {
-        if (in_calibrationMatrix.type() != CV_32F)
-        {
-            std::cout << "[MonoCameraCalibration]: Invalid calibration matrix provided, must be of type CV_32F" << std::endl;
-        }
-        else if (in_calibrationMatrix.rows != 3 || in_calibrationMatrix.cols != 3)
-        {
-            std::cout << "[MonoCameraCalibration]: Invalid calibration matrix provided, must be 3x3" << std::endl;
+    }
+    
+    /**
+      * /brief Constructor specifying parameters for calibration matrix
+      */
+    MonoCameraCalibration(const float& in_focLength, const float& in_cameraCentX
+        ,
+        const float& in_cameraCentY, const float& in_skew) : m_validCalib(false)
+    {
+        m_calibrationMatrix = cv::Mat::zeros(3, 3, CV_32F);
+        m_calibrationMatrix.at<float>(0, 0) = in_focLength;
+        m_calibrationMatrix.at<float>(0, 1) = in_skew;
+        m_calibrationMatrix.at<float>(1, 1) = in_focLength;
+        m_calibrationMatrix.at<float>(0, 2) = in_cameraCentX;
+        m_calibrationMatrix.at<float>(1, 2) = in_cameraCentY;
+        m_calibrationMatrix.at<float>(2, 2) = 1.0F;
 
-        }
-        else
-        {
-            m_calibrationMatrix = in_calibrationMatrix;
-            m_validCalib = true;
-        }
+        m_validCalib = true;
     }
 
     cv::Mat GetCalibrationMatrix() const

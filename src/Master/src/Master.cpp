@@ -25,8 +25,11 @@ Master::~Master()
 
 bool Master::FeedNextFrame(const Frame& in_frame)
 {  
-
-    bool ret = m_reconstructor.FeedNextFrame(in_frame, m_calibModule.GetSavedMonoCalib().GetCalibrationMatrix());
+    // Try to get a valid mono camera calibration from the calibration module
+    Calibration::MonoCameraCalibration monoCalib;
+    bool ret = m_calibModule.GetSavedMonoCalib(monoCalib);
+    // Only if a valid calibration is there we can feed the frame to the reconstructor
+    ret = ret && m_reconstructor.FeedNextFrame(in_frame, monoCalib.GetCalibrationMatrix());
 
     return ret;
 }
