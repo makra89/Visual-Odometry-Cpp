@@ -213,53 +213,57 @@ bool DecomposeEssentialMatrix(const cv::Mat& in_essentialMat, const cv::Point2f&
    
     // Set smallest singular value to zero and recompute SVD
     cv::Mat newDiag = cv::Mat::zeros(3, 3, CV_32F);
-    newDiag.at<float>(0, 0) = D.at<float>(0, 0);
-    newDiag.at<float>(1, 1) = D.at<float>(1, 0);
+    newDiag.at<float>(0, 0) = 1.0;
+    newDiag.at<float>(1, 1) = 1.0;
+
     cv::Mat newEssentialMat = U * (newDiag * V_t);
     cv::SVDecomp(newEssentialMat, D, U, V_t, cv::SVD::FULL_UV);
+    if (cv::determinant(U * V_t) < 0.0)
+    {
+        V_t = -V_t;
+    }
 
     cv::Mat Y = cv::Mat::zeros(3, 3, CV_32F);
     Y.at<float>(0, 1) = -1.0;
     Y.at<float>(1, 0) = 1.0;
     Y.at<float>(2, 2) = 1.0;
 
+    // Two solutions for translation
+    cv::Mat t1 = U.col(2);
+    cv::Mat t2 = -t1;
+
     // Two solutions for rotation matrix
     cv::Mat R1 = U * (Y * V_t);
     cv::Mat R2 = U * (Y.t() * V_t);
-    if(cv::determinant(R1) < 0) R1 = -R1;
-    if(cv::determinant(R2) < 0) R2 = -R2;
-
-    // And two for translation
-    cv::Mat t1 = U.col(2);
-    cv::Mat t2 = -t1;
 
     // Right projection matrix is trivial one
     cv::Mat projMatRight;
     GetProjectionMatrix(cv::Mat::eye(3, 3, CV_32F), cv::Mat::zeros(3, 1, CV_32F), projMatRight);
 
     // Four different projection matrices for right one
-    cv::Mat projMatLeft1;
-    GetProjectionMatrix(R1, t1, projMatLeft1);
-    cv::Mat projMatLeft2;
-    GetProjectionMatrix(R2, t1, projMatLeft2);
-    cv::Mat projMatLeft3;
-    GetProjectionMatrix(R1, t2, projMatLeft3);
-    cv::Mat projMatLeft4;
-    GetProjectionMatrix(R2, t2, projMatLeft4);
-
     std::vector<cv::Mat> projectionMatCandidates;
+
+    cv::Mat projMatLeft1;
+    cv::Mat projMatLeft2;
+    GetProjectionMatrix(R1, t1, projMatLeft1);
+    GetProjectionMatrix(R1, t2, projMatLeft2);
     projectionMatCandidates.push_back(projMatLeft1);
     projectionMatCandidates.push_back(projMatLeft2);
+ 
+    cv::Mat projMatLeft3;
+    cv::Mat projMatLeft4;
+    GetProjectionMatrix(R2, t1, projMatLeft3);
+    GetProjectionMatrix(R2, t2, projMatLeft4);
     projectionMatCandidates.push_back(projMatLeft3);
     projectionMatCandidates.push_back(projMatLeft4);
-    
+
     // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
     for (auto candidate : projectionMatCandidates)
     {
         cv::Point3f triangPoint;
         PointTriangulationLinear(candidate, projMatRight, in_matchPointLeft, in_matchPointRight, triangPoint);
-        cv::Mat projPointLeft = candidate * VOCPP::Utils::Point3fToMatHomCoordinates(triangPoint);
-        if (triangPoint.z >= 0.0 && projPointLeft.at<float>(2,0) >= 0)
+        cv::Mat projPointLeft = candidate * VOCPP::Utils::Point3fToMatHomCoordinates(triangPoint);        
+        if (triangPoint.z > 0.0 && projPointLeft.at<float>(2,0) > 0)
         {
             candidate(cv::Range(0, 3), cv::Range(0, 3)).copyTo(out_rotMatrix);
             candidate(cv::Range(0, 3), cv::Range(3, 4)).copyTo(out_translation);

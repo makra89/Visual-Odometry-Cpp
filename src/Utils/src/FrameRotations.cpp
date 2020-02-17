@@ -55,5 +55,22 @@ cv::Mat GetFrameRotationZ(const float in_angleRad)
     return frameRotZ;
 }
 
+cv::Vec3f ExtractRollPitchYaw(const cv::Mat& in_rotationMat)
+{
+    cv::Vec3f eulerAngles;
+    // Roll angle
+    eulerAngles[0] = std::atan2(in_rotationMat.at<float>(1, 2), in_rotationMat.at<float>(2, 2));
+    const float c2 = std::sqrt(std::pow(in_rotationMat.at<float>(0, 0), 2) + std::pow(in_rotationMat.at<float>(0, 1), 2));
+    // Pitch angle
+    eulerAngles[1] = std::atan2(-in_rotationMat.at<float>(0, 2), c2);
+    const float s1 = std::sin(eulerAngles[0]);
+    const float c1 = std::cos(eulerAngles[0]);
+    // Yaw angle
+    eulerAngles[2] = std::atan2(s1 * in_rotationMat.at<float>(2, 0) - c1 * in_rotationMat.at<float>(1, 0), 
+        c1 * in_rotationMat.at<float>(1, 1) - s1 * in_rotationMat.at<float>(2, 1));
+
+    return eulerAngles;
+}
+
 } //namespace Utils
 } //namespace VOCPP
