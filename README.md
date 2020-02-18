@@ -28,6 +28,8 @@ With respect to feature detection, description and matching the following functi
 Finally there is some output, looks horrible, but at least its some kind of result =)
 ![Image description](doc/results/KITTI_Seq0_HelloWorld.png)
 
+![Feature Detection](doc/results/FeatureDetection.gif)
+
 # Usage
 
 Using the application TrackFeatures.exe in apps/ it is possible to visualize matched features in an camera image stream:
