@@ -42,41 +42,34 @@ public:
         m_validFrame(false)
     {
     }
-    
+
     /**
-      * /brief Constructor with grayscale(!) image data of type CV_32F.
-      * No other type will currently be accepted
-      *
-      * \param[in] in_grayImage image will be moved to frame object !!!
-      * \param[in] in_imgId ID of frame to be created
+      * /brief Frame constructor using a pointer to the image data. Constructing a frame this way 
+      * no memory is allocated. The frame is just a view on the data. The pointer has to be valid
+      * for the whole lifetime of the frame object.
       */
-    Frame(cv::Mat&& in_grayImage, const int in_imgId)
+    Frame(float* const in_grayImgData, int in_width, int in_height, int in_frameId) : m_Id(s_invalidFrameId)
     {
         // No image data
-        if (!in_grayImage.data)
+        if (in_grayImgData == NULL)
         {
             std::cout << "[Frame]: No image data provided" << std::endl;
-            m_validFrame = false;
-        }
-        // No grayscale image data
-        else if (in_grayImage.type() != CV_32F)
-        {
-            std::cout << "[Frame]: Only images with type CV_32F are accepted" << std::endl;
             m_validFrame = false;
         }
         // Valid image data
         else
         {
-            m_grayImage = std::move(in_grayImage);
-            m_Id = in_imgId;
+            m_grayImage = cv::Mat_<float>(in_height, in_width, in_grayImgData);
+            m_Id = in_frameId;
             m_validFrame = true;
         }
     }
 
+
     /**
       * /brief Get image data (const reference), either raw or grayscale
       */
-    const cv::Mat& GetImage() const
+    const cv::Mat_<float>& GetImage() const
     {
         return m_grayImage;
     }
@@ -84,9 +77,9 @@ public:
     /**
       * /brief Get copy of image data, either raw or grayscale
       */
-    cv::Mat GetImageCopy() const
+    cv::Mat_<float> GetImageCopy() const
     {
-        return m_grayImage;
+        return m_grayImage.clone();
     }
 
     /**
@@ -100,14 +93,14 @@ public:
     /**
       * /brief Returns whether image frame data is valid
       */
-    const bool isValid() const
+    const bool IsValid() const
     {
         return m_validFrame;
     }
 
 private:
 
-    cv::Mat m_grayImage; ///< grayscale image data
+    cv::Mat_<float> m_grayImage; ///< grayscale image data
 
     int m_Id; ///< Id of the frame, must be a unique one!
     bool m_validFrame; ///< indicated whether this frame is a valid one

@@ -9,7 +9,8 @@
 #define VOCPP_DELTA_POSE_RECONSTRUCTOR_H
 
 #include <Vocpp_Interface/Frame.h>
-#include <Vocpp_Interface/DeltaPose.h>
+#include <Vocpp_Interface/DeltaCameraPose.h>
+#include <Vocpp_Interface/CameraPose.h>
 
 #include<Vocpp_FeatureHandling/FeatureDescriptor.h>
 #include<Vocpp_FeatureHandling/FeatureMatcher.h>
@@ -55,9 +56,17 @@ public:
     /**
       * /brief Get computed delta pose of last frame to the frame before
       */
-    DeltaPose GetLastDeltaPose()
+    DeltaCameraPose GetLastDeltaPose()
     {
         return m_lastDeltaPose;
+    }
+
+    /**
+      * /brief Get computed pose for last frame
+      */
+    CameraPose GetLastPose()
+    {
+        return m_lastPose;
     }
 
 private:
@@ -70,11 +79,14 @@ private:
     std::vector<EpipolarModel*> m_epiPolModels;
     LocalMap* m_localMap;
 
-    Frame m_lastFrame;  ///< last processed frame (fed via DeltaPoseReconstructor::FeedNextFrame(Utils::Frame& in_frame)
     std::vector<cv::Mat> m_descriptionsLastFrame;  ///< descriptions computed for last frame
     std::vector<cv::KeyPoint> m_keypointsLastFrame;  ///< keypoints detected in last frame
+    int m_lastFrameId;
 
-    DeltaPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
+    DeltaCameraPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
+    CameraPose m_lastPose; ///< Current Pose in world coordinate system calculated for last frame
+    cv::Mat m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
+    cv::Mat m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
 
 };
 

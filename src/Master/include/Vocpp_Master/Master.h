@@ -9,7 +9,8 @@
 #define VOCPP_MASTER_H
 
 #include<Vocpp_Interface/Frame.h>
-#include<Vocpp_Interface/DeltaPose.h>
+#include<Vocpp_Interface/DeltaCameraPose.h>
+#include<Vocpp_Interface/CameraPose.h>
 
 #include<Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
@@ -49,10 +50,14 @@ public:
     bool FeedNextFrame(const Frame& in_frame);
 
     /**
-      * /brief Get computed delta pose of last frame to the frame before
-      * Be sure to check the delta pose for validity!
+      * /brief Get computed delta pose in body frame of last frame to the frame before
       */
-    DeltaPose GetLastDeltaPose();
+    DeltaCameraPose GetLastDeltaPose();
+
+    /**
+      * /brief Get current pose in world coordinate system
+      */
+    CameraPose GetLastPose();
 
     /**
       * /brief Load a mono camera calibration

@@ -161,7 +161,7 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         // Projection matrix for left image, the translation is measured in the system of the left frame
         cv::Mat projMatLeft;
         cv::Mat translationLeft = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-5.0F, 5.0F));
-        cv::Mat rotMat = GetFrameRotationX(DrawFloatInRange(-0.3F, 0.3F)) * GetFrameRotationY(DrawFloatInRange(-0.3F, 0.3F)) * GetFrameRotationZ(DrawFloatInRange(-0.3F, 0.3F));
+        cv::Mat rotMat = GetFrameRotationX(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationY(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationZ(DrawFloatInRange(-0.2F, 0.2F));
         EXPECT_TRUE(GetProjectionMatrix(rotMat, translationLeft, projMatLeft));
 
         // Get projected points in both camera frames, the right ones uses a trivial projection matrix
@@ -185,10 +185,10 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         cv::Mat eye = cv::Mat::eye(3, 3, CV_32F);
         for (int rowIt = 0; rowIt < 3; rowIt++)
         {
-            EXPECT_NEAR(decompTranslat.at<float>(rowIt, 0), translationLeft.at<float>(rowIt, 0), 1e-2);
+            EXPECT_NEAR(decompTranslat.at<float>(rowIt, 0), translationLeft.at<float>(rowIt, 0), std::abs(1e-2 * translationLeft.at<float>(rowIt, 0)));
             for (int colIt = 0; colIt < 3; colIt++)
             {
-                EXPECT_NEAR(decompRotMat.at<float>(rowIt, colIt), rotMat.at<float>(rowIt, colIt), 1e-2);
+                EXPECT_NEAR(decompRotMat.at<float>(rowIt, colIt), rotMat.at<float>(rowIt, colIt), 1e-4);
             }
         }
     }

@@ -42,6 +42,12 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_epiPolModels.push_back(new PureTranslationModel());
     m_epiPolModels.push_back(new FullFundamentalMat8pt());
     m_epiPolModels.push_back(new NoMotionModel());
+
+    m_lastFrameId = s_invalidFrameId;
+    m_lastDeltaPose = DeltaCameraPose();
+    m_lastPose = CameraPose();
+    m_lastOrientationWcs = cv::Mat::eye(3, 3, CV_32F);
+    m_lastPosWcs = cv::Mat::zeros(3, 1, CV_32F);
 }
 
 
@@ -70,7 +76,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
         std::cout << "[DeltaPoseReconstructor]: Feature handling members could not be instantiated" << std::endl;
         ret = false;
     }
-    else if (!in_frame.isValid())
+    else if (!in_frame.IsValid())
     {
         std::cout << "[DeltaPoseReconstructor]: Invalid frame provided" << std::endl;
         ret = false;
@@ -87,24 +93,26 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
         std::vector<cv::KeyPoint> validKeypoints;
         std::vector<cv::Mat> descriptions;
         ret = ret && m_descriptor->ComputeDescriptions(in_frame, keypoints, descriptions, validKeypoints);
-
+        
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose the the center of the world coordinate system
         // TODO: Set it to the last valid pose
-        //if (ret && (!m_lastFrame.isValid() || !m_lastFrame.HasValidPose()))
-        if (ret && !m_lastFrame.isValid())
+        //if (ret && (!m_lastFrame.IsValid() || !m_lastFrame.HasValidPose()))
+        if (ret && !IsValidFrameId(m_lastFrameId))
         {
             // Return valid delta pose for first processed frame, but indicate no movement
-            m_lastDeltaPose = DeltaPose(cv::Mat::eye(3, 3, CV_32F), cv::Mat::zeros(3, 1, CV_32F));
+            m_lastDeltaPose = DeltaCameraPose();
+            m_lastOrientationWcs = cv::Mat::eye(3, 3, CV_32F);
+            m_lastPosWcs = cv::Mat::zeros(3, 1, CV_32F);
         }
-        else if (ret && m_lastFrame.isValid())
+        else if (ret && IsValidFrameId(m_lastFrameId))
         {
             // Get matches and draw them
             std::vector<cv::DMatch> matches;
-            ret = m_matcher->MatchDesriptions(descriptions, m_descriptionsLastFrame, m_lastFrame.GetId(), matches);
+            ret = m_matcher->MatchDesriptions(descriptions, m_descriptionsLastFrame, m_lastFrameId, matches);
             std::vector<cv::Point2f> pLastFrame;
             std::vector<cv::Point2f> pCurrFrame;
-            Utils::ComputeMatchingPoints(validKeypoints, m_keypointsLastFrame, matches, m_lastFrame.GetId(), pCurrFrame, pLastFrame);
+            Utils::ComputeMatchingPoints(validKeypoints, m_keypointsLastFrame, matches, m_lastFrameId, pCurrFrame, pLastFrame);
 
             // Calculate rotation and translation from the matches of the two frames
             std::vector<cv::Point2f> pLastFrameInliers;
@@ -112,11 +120,33 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
             cv::Mat rotation;
             cv::Mat translation;
             m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, pCurrFrameInliers, pLastFrameInliers, translation, rotation);
+
+            // Up to now the rotation and translation are in the camera coordinate system
+            // We want to transform it into the body system in which the x-Axis is aligned
+            // with the longitudinal body axis
+            cv::Mat rotBodyToCamera = Utils::GetFrameRotationZ(-Utils::PI / 2.0F) * Utils::GetFrameRotationY(Utils::PI / 2.0F);
+            cv::Mat rotationBodySyst = rotBodyToCamera.t() * (rotation * rotBodyToCamera);
+            translation = rotBodyToCamera.t() * translation;
             
-            m_lastDeltaPose = DeltaPose(rotation, translation);
+            cv::Vec3f eulerAngles = Utils::ExtractRollPitchYaw(rotationBodySyst);
+            DeltaOrientation deltaOrientation = { eulerAngles[0], eulerAngles[1] , eulerAngles[2] };
+            DeltaTranslation deltaTranslation = { translation.at<float>(0,0), translation.at<float>(1,0) , translation.at<float>(2,0) };
+            m_lastDeltaPose = DeltaCameraPose(deltaTranslation, deltaOrientation);
+
+            // Concatenate delta poses to get absolute pose in world coordinate system
+            m_lastOrientationWcs = rotationBodySyst * m_lastOrientationWcs;
+            cv::Vec3f eulerAnglesWcs = Utils::ExtractRollPitchYaw(m_lastOrientationWcs);
+            // The translation is given from last frame to current frame in the last frame coordinate system
+            // --> Transform the translation vector back to world coordinate system using the inverse rotation of the last frame
+            m_lastPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
+
+
+            Orientation currentOrientWcs = { eulerAnglesWcs[0], eulerAnglesWcs[1] , eulerAnglesWcs[2] };
+            Translation currentPosWcs = { m_lastPosWcs.at<float>(0,0), m_lastPosWcs.at<float>(1,0) , m_lastPosWcs.at<float>(2,0) };
+            m_lastPose = CameraPose(currentPosWcs, currentOrientWcs);
 
             tick.stop();
-            std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
+            //std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
             cv::Mat matchImage = in_frame.GetImageCopy();
             cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
             
@@ -137,7 +167,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
         }
 
         // Save last frame, descriptions and keypoints
-        m_lastFrame = std::move(in_frame);
+        m_lastFrameId = in_frame.GetId();
         m_descriptionsLastFrame = std::move(descriptions);
         m_keypointsLastFrame = std::move(validKeypoints);
     }

@@ -8,6 +8,9 @@ set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
 find_package(PythonLibs REQUIRED)
 include_directories(${PYTHON_INCLUDE_DIRS})
 
+find_package(Python COMPONENTS NumPy)
+include_directories(${Python_NumPy_INCLUDE_DIRS})
+
 set_property(SOURCE Vocpp.i PROPERTY CPLUSPLUS ON)
 
 swig_add_library(Vocpp_python
