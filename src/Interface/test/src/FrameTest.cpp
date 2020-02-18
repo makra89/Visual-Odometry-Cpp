@@ -16,38 +16,25 @@ TEST(FrameTest, Constructor_Empty)
     Frame emptyFrame;
 
     // Since no image has been provided it should be marked as invalid
-    EXPECT_FALSE(emptyFrame.isValid());
+    EXPECT_FALSE(emptyFrame.IsValid());
 }
 
 TEST(FrameTest, Constructor_NoImageData)
 {
     // Construct empty frame
     cv::Mat emptyImage;
-    Frame f(std::move(emptyImage), 0U);
+    Frame f(NULL, 3, 3, 1);
 
     // Since no image has been provided it should be marked as invalid
-    EXPECT_FALSE(f.isValid());
+    EXPECT_FALSE(f.IsValid());
 }
 
-TEST(FrameTest, Constructor_SupportedImageTypes)
+TEST(FrameTest, Constructor_Valid)
 {
-    // Construct empty frame
-    for (int type = 0; type < 30; type++)
-    {
-        cv::Mat zeros = cv::Mat::zeros(4, 4, type);
-        Frame f(std::move(zeros), static_cast<int>(type));
+    // Creating a valid frame
+    float img[] = { 1, 3 ,4 ,5 };    
+    Frame f(img, 2, 2, 1);
 
-        // Since no image has been provided it should be marked as invalid
-        if (type == CV_32F)
-        {
-            EXPECT_TRUE(f.isValid());
-            EXPECT_EQ(f.GetId(), static_cast<int>(type));
-            // Image data should have been moved to frame
-            EXPECT_TRUE(zeros.empty());
-        }
-        else
-        {
-            EXPECT_FALSE(f.isValid());
-        }
-    }
+    EXPECT_TRUE(f.IsValid());
+    EXPECT_EQ(f.GetId(), 1);
 }

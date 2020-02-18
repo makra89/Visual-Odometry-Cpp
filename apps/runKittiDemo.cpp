@@ -10,7 +10,8 @@
 
 #include<Vocpp_Master/Master.h>
 #include<Vocpp_Interface/Frame.h>
-#include<Vocpp_Interface/DeltaPose.h>
+#include<Vocpp_Interface/DeltaCameraPose.h>
+#include<Vocpp_Interface/CameraPose.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
 
 using namespace cv;
@@ -48,6 +49,7 @@ int main(int argc, char** argv)
 
     cv::Mat currentPose = cv::Mat::eye(3, 3, CV_32F);
     cv::Mat currentCamCenter = cv::Mat::zeros(3, 1, CV_32F);
+    
     for (auto imageName : imageNames)
     {
         // Convert the image to grayscale CV_32F, here from CV_8U to CV_32F
@@ -56,16 +58,12 @@ int main(int argc, char** argv)
         grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
 
         // Feed frame to Master
-        Frame frame(std::move(grayScaleImg), frameId);
-        voMaster.FeedNextFrame(frame);
-
-        DeltaPose delta = voMaster.GetLastDeltaPose();
+        const float* buffer = grayScaleImg.ptr<float>(0);
+        Frame frame2(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+        voMaster.FeedNextFrame(frame2);
         
-        // Concatenate delta poses to get absolute pose in world coordinate system
-        currentPose = delta.GetDeltaOrientation() * currentPose;
-        // The translation is given from last frame to current frame in the last frame coordinate system
-        // --> Transform the translation vector back to world coordinate system using the inverse rotation of the last frame
-        currentCamCenter = currentPose.t() * delta.GetCamCenterTranslation() + currentCamCenter;
+        DeltaCameraPose delta = voMaster.GetLastDeltaPose();
+        CameraPose pose = voMaster.GetLastPose();
 
         frameId++;
     }
