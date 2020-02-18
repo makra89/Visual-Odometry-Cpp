@@ -25,15 +25,25 @@ With respect to feature detection, description and matching the following functi
 - BRIEF descriptor
 - Brute force matcher
 
+Additionally, fundamental matrix estimation and essential matrix decomposition is implemented. 
+Having this functionality at least some (low quality) delta poses can be computed. 
+
+A python package can be built optionally that exposes the Master interface.
+
 Finally there is some output, looks horrible, but at least its some kind of result =)
-![Image description](doc/results/KITTI_Seq0_HelloWorld.png)
 
 ![Feature Detection](doc/results/FeatureDetection.gif)
 
+![Pose Comparison](doc/results/PoseComparison.gif)
+
 # Usage
 
-Using the application TrackFeatures.exe in apps/ it is possible to visualize matched features in an camera image stream:
-`TrackFeatures.exe <path-to-camera-images> e.g. TrackFeatures.exe ./test/*.jpg` 
+Using the application runKittiDemo.exe in apps/ it is possible to visualize matched features in an camera image stream.
+This app is currently hard coded to KITTI image sequence 0:
+`TrackFeatures.exe <path-to-camera-images> e.g. runKittiDemo.exe ./test/*.jpg` 
+
+Additionally there is a python script for running the KITTI sequence + comparing it to the ground truth
+`python runKittiDemp.py -i <camera-images-dir> -r <ground_truth_textfile> ` 
 
 # Dependencies
 
@@ -45,4 +55,5 @@ The following dependencies are placed in the folder 3rdparty and included as sou
 The following dependencies are required as CMake package:
 
 - [opencv](https://opencv.org/license/)
-
+- [swig] (optionally for python package)
+- [spython] (optionally for python package)
