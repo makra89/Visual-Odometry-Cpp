@@ -40,59 +40,59 @@ TEST(PureTranslationModel, Translation)
     }
 
     // Kalibration matrix with shifted image center
-    cv::Mat KalMat = cv::Mat::zeros(3, 3, CV_32F);
-    KalMat.at<float>(0, 0) = 5.0;
-    KalMat.at<float>(1, 1) = 5.0;
-    KalMat.at<float>(2, 2) = 1.0;
-    KalMat.at<float>(0, 2) = centerX;
-    KalMat.at<float>(1, 2) = centerY;
+    cv::Mat1f KalMat = cv::Mat1f::zeros(3, 3);
+    KalMat(0, 0) = 5.0;
+    KalMat(1, 1) = 5.0;
+    KalMat(2, 2) = 1.0;
+    KalMat(0, 2) = centerX;
+    KalMat(1, 2) = centerY;
     
     // Projection matrix assuming we are at the center of the world coord. system
-    cv::Mat trivialProjMat;
-    EXPECT_TRUE(GetProjectionMatrix(cv::Mat::eye(3, 3, CV_32F), cv::Mat::zeros(3, 1, CV_32F), trivialProjMat));
+    cv::Mat1f trivialProjMat;
+    EXPECT_TRUE(GetProjectionMatrix(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), trivialProjMat));
 
     for (auto coord : realWorldPoints)
     {
-        cv::Mat projPoint = KalMat * (trivialProjMat * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        imgPoints.push_back(cv::Point2f(projPoint.at<float>(0, 0) / projPoint.at<float>(2, 0), projPoint.at<float>(1, 0) / projPoint.at<float>(2, 0)));
+        cv::Mat1f projPoint = KalMat * (trivialProjMat * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
+        imgPoints.push_back(cv::Point2f(projPoint(0, 0) / projPoint(2, 0), projPoint(1, 0) / projPoint(2, 0)));
     }
 
     // Projection matrix with translation only
-    cv::Mat projMat;
-    cv::Mat translation = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0,5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));   
-    EXPECT_TRUE(GetProjectionMatrix(cv::Mat::eye(3, 3, CV_32F), translation, projMat));
+    cv::Mat1f projMat;
+    cv::Mat1f translation = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0,5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));   
+    EXPECT_TRUE(GetProjectionMatrix(cv::Mat1f::eye(3, 3), translation, projMat));
    
     for (auto coord : realWorldPoints)
     {
-        cv::Mat projPoint = KalMat * (projMat * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        scaledImgPoints.push_back(cv::Point2f(projPoint.at<float>(0, 0) / projPoint.at<float>(2, 0), projPoint.at<float>(1, 0) / projPoint.at<float>(2, 0)));
+        cv::Mat1f projPoint = KalMat * (projMat * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
+        scaledImgPoints.push_back(cv::Point2f(projPoint(0, 0) / projPoint(2, 0), projPoint(1, 0) / projPoint(2, 0)));
     }
 
     // Get fundamental matrix
-    std::vector<cv::Mat> solutionVec;
+    std::vector<cv::Mat1f> solutionVec;
     VOCPP::DeltaPoseReconstruction::PureTranslationModel model;
     model.Compute(scaledImgPoints, imgPoints, solutionVec);
     ASSERT_TRUE(solutionVec.size() == 1);
 
     // Calculate true one
-    cv::Mat translatCross;
+    cv::Mat1f translatCross;
     GetCrossProductMatrix(translation, translatCross);
-    cv::Mat trueFundMat =  KalMat.t().inv()* ((translatCross * cv::Mat::eye(3, 3, CV_32F))* KalMat.inv());
+    cv::Mat1f trueFundMat =  KalMat.t().inv()* ((translatCross * cv::Mat1f::eye(3, 3))* KalMat.inv());
     trueFundMat = trueFundMat / cv::norm(trueFundMat);
     //They can differ by a global sign
-    if (trueFundMat.at<float>(0, 2) / solutionVec[0].at<float>(0, 2) < 0.0)
+    if (trueFundMat(0, 2) / solutionVec[0](0, 2) < 0.0)
     {
         trueFundMat = -trueFundMat;
     }
 
     // And check
-    EXPECT_NEAR(solutionVec[0].at<float>(0, 0), trueFundMat.at<float>(0, 0), 1e-7);
-    EXPECT_NEAR(solutionVec[0].at<float>(0, 1), trueFundMat.at<float>(0, 1), 1e-7);
-    EXPECT_NEAR(solutionVec[0].at<float>(0, 2), trueFundMat.at<float>(0, 2), 5e-5);
-    EXPECT_NEAR(solutionVec[0].at<float>(1, 0), trueFundMat.at<float>(1, 0), 1e-7);
-    EXPECT_NEAR(solutionVec[0].at<float>(1, 1), trueFundMat.at<float>(1, 1), 1e-7);
-    EXPECT_NEAR(solutionVec[0].at<float>(1, 2), trueFundMat.at<float>(1, 2), 5e-5);
-    EXPECT_NEAR(solutionVec[0].at<float>(2, 0), trueFundMat.at<float>(2, 0), 5e-5);
-    EXPECT_NEAR(solutionVec[0].at<float>(2, 1), trueFundMat.at<float>(2, 1), 5e-5);
-    EXPECT_NEAR(solutionVec[0].at<float>(2, 2), trueFundMat.at<float>(2, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0](0, 0), trueFundMat(0, 0), 1e-7);
+    EXPECT_NEAR(solutionVec[0](0, 1), trueFundMat(0, 1), 1e-7);
+    EXPECT_NEAR(solutionVec[0](0, 2), trueFundMat(0, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0](1, 0), trueFundMat(1, 0), 1e-7);
+    EXPECT_NEAR(solutionVec[0](1, 1), trueFundMat(1, 1), 1e-7);
+    EXPECT_NEAR(solutionVec[0](1, 2), trueFundMat(1, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0](2, 0), trueFundMat(2, 0), 5e-5);
+    EXPECT_NEAR(solutionVec[0](2, 1), trueFundMat(2, 1), 5e-5);
+    EXPECT_NEAR(solutionVec[0](2, 2), trueFundMat(2, 2), 5e-5);
 }

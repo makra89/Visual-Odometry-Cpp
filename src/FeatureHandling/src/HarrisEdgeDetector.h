@@ -47,7 +47,7 @@ private:
     int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
     int m_subPixelCalculationDistance; ///< radius that is taken into account for subPixel feature position calculation [pixels]
     
-    cv::Mat m_smoothingKernel; ///< kernel used for smoothing the gradients
+    cv::Mat1f m_smoothingKernel; ///< kernel used for smoothing the gradients
 
 };
 

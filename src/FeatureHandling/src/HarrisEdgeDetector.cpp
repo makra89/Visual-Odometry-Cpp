@@ -55,19 +55,19 @@ bool HarrisEdgeDetector::ExtractKeypoints(const Frame& in_frame, std::vector<cv:
         std::cout << "[HarrisEdgeDetector]: Non-grayscale image has been provided" << std::endl;
     }
     
-    cv::Mat gradX, gradY;
+    cv::Mat1f gradX, gradY;
     Utils::Compute2DGradients(in_frame.GetImage(), gradX, gradY);
 
-    cv::Mat weightedGradxX;
+    cv::Mat1f weightedGradxX;
     Utils::ApplyKernelToImage(gradX.mul(gradX), m_smoothingKernel, weightedGradxX);
-    cv::Mat weightedGradxY;
+    cv::Mat1f weightedGradxY;
     Utils::ApplyKernelToImage(gradX.mul(gradY), m_smoothingKernel, weightedGradxY);
-    cv::Mat weightedGradyY;
+    cv::Mat1f weightedGradyY;
     Utils::ApplyKernelToImage(gradY.mul(gradY), m_smoothingKernel, weightedGradyY);
 
-    cv::Mat trace = (weightedGradxX + weightedGradxY);
+    cv::Mat1f trace = (weightedGradxX + weightedGradxY);
 
-    cv::Mat response = (weightedGradxX.mul(weightedGradyY) - weightedGradxY.mul(weightedGradxY))
+    cv::Mat1f response = (weightedGradxX.mul(weightedGradyY) - weightedGradxY.mul(weightedGradxY))
         - ((trace).mul(trace) * m_k);
 
     // Define response threshold using the relative response value    

@@ -59,7 +59,7 @@ public:
       * F and H are fundamental matrices and homographies, respectively.
       */
     virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight, 
-            std::vector<cv::Mat>& out_solutions) = 0;
+            std::vector<cv::Mat1f>& out_solutions) = 0;
 
     /**
       * /brief Tests a particular model solution with a set of correspondendec and computes the inliers given an error treshold.
@@ -70,15 +70,15 @@ public:
       * F and H are fundamental matrices and homographies, respectively.
       */
     virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        const cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) = 0;
+        const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) = 0;
 
     /**
       * /brief Decompose a model solution into a translation and a rotation matrix
       * The rotation and translation is defined in such way that x_left = R * x_right + translation
       * It has to be ensured that ||translation|| = 1 (in order to not have scaling issues for different models)
       */
-    virtual bool DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation) = 0;
+    virtual bool DecomposeSolution(const cv::Mat1f& in_solution, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
+        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotation) = 0;
 
     /**
       * /brief Get number of necessary image correspondences to compute a solution for the model

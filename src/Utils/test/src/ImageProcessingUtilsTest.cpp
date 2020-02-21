@@ -17,7 +17,7 @@ using namespace VOCPP::Utils;
 TEST(ExtractLocalMaximaTest, BlockMatrix)
 {
     // Construct frame filled with ones
-    cv::Mat ones = GetWindowKernel(5);
+    cv::Mat1f ones = GetWindowKernel(5);
 
     std::vector<cv::Point2f> max;
     ExtractLocalMaxima(ones, 2U, max, 0U);
@@ -29,8 +29,8 @@ TEST(ExtractLocalMaximaTest, BlockMatrix)
 TEST(ExtractLocalMaximaTest, OneMax)
 {
     // Construct image with one center maxima
-    cv::Mat ones = cv::Mat::zeros(5, 5, CV_32F);
-    ones.at<float>(2, 2) = 1.0;
+    cv::Mat1f ones = cv::Mat1f::zeros(5, 5);
+    ones(2, 2) = 1.0;
 
     std::vector<cv::Point2f> max;
     ExtractLocalMaxima(ones, 2U, max, 0U);
@@ -44,10 +44,10 @@ TEST(ExtractLocalMaximaTest, OneMax)
 TEST(ExtractLocalMaximaTest, TestDistanceCheck)
 {
     // Construct image with three close-by maxima
-    cv::Mat ones = cv::Mat::zeros(5, 5, CV_32F);
-    ones.at<float>(2, 2) = 1.0;
-    ones.at<float>(2, 3) = 3.0;
-    ones.at<float>(3, 2) = 4.0;
+    cv::Mat1f ones = cv::Mat1f::zeros(5, 5);
+    ones(2, 2) = 1.0;
+    ones(2, 3) = 3.0;
+    ones(3, 2) = 4.0;
 
     std::vector<cv::Point2f> max;
     ExtractLocalMaxima(ones, 0U, max, 0U);
@@ -74,9 +74,9 @@ TEST(ExtractLocalMaximaTest, TestDistanceCheck)
 TEST(ExtractLocalMaximaTest, SubPixPrecisionTest)
 {
     // Construct image with two maxima
-    cv::Mat ones = cv::Mat::zeros(5, 5, CV_32F);
-    ones.at<float>(2, 2) = 2.0;
-    ones.at<float>(2, 3) = 1.0;
+    cv::Mat1f ones = cv::Mat1f::zeros(5, 5);
+    ones(2, 2) = 2.0;
+    ones(2, 3) = 1.0;
 
     std::vector<cv::Point2f> max;
     //Average of a pixel distance of 1
@@ -110,35 +110,35 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
     for (auto coord : realWorldPoints)
     {
         // Projection matrix for left image, the translation is measured in the system of the left frame
-        cv::Mat projMatLeft;
-        cv::Mat translationLeft = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0, 1.0), DrawFloatInRange(-1.0, 1.0), DrawFloatInRange(-5.0, 5.0));
-        EXPECT_TRUE(GetProjectionMatrix(cv::Mat::eye(3, 3, CV_32F), translationLeft, projMatLeft));
+        cv::Mat1f projMatLeft;
+        cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0, 1.0), DrawFloatInRange(-1.0, 1.0), DrawFloatInRange(-5.0, 5.0));
+        EXPECT_TRUE(GetProjectionMatrix(cv::Mat1f::eye(3, 3), translationLeft, projMatLeft));
 
         // Get projected points in both camera frames, the right ones uses a trivial projection matrix
-        cv::Mat projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        cv::Point2f imgPointsLeft = cv::Point2f(projPointLeft.at<float>(0, 0) / projPointLeft.at<float>(2, 0), projPointLeft.at<float>(1, 0) / projPointLeft.at<float>(2, 0));
+        cv::Mat1f projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
+        cv::Point2f imgPointsLeft = cv::Point2f(projPointLeft(0, 0) / projPointLeft(2, 0), projPointLeft(1, 0) / projPointLeft(2, 0));
         cv::Point2f imgPointsRight = cv::Point2f(coord.x / coord.z, coord.y / coord.z);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
-        cv::Mat translatCross;
+        cv::Mat1f translatCross;
         GetCrossProductMatrix(translationLeft, translatCross);
-        cv::Mat essentialMat = translatCross;
+        cv::Mat1f essentialMat = translatCross;
 
         // Decompose the essential matrix
-        cv::Mat decompTranslat;
-        cv::Mat decompRotMat;
+        cv::Mat1f decompTranslat;
+        cv::Mat1f decompRotMat;
         DecomposeEssentialMatrix(essentialMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
         // The true translation and the extracted one may differ by a global scale
-        decompTranslat = decompTranslat * (translationLeft.at<float>(0, 0) / decompTranslat.at<float>(0, 0));
+        decompTranslat = decompTranslat * (translationLeft(0, 0) / decompTranslat(0, 0));
 
         // And check both extracted translation and rotation
-        cv::Mat eye = cv::Mat::eye(3, 3, CV_32F);
+        cv::Mat1f eye = cv::Mat1f::eye(3, 3);
         for (int rowIt = 0; rowIt < 3; rowIt++)
         {
-            EXPECT_NEAR(decompTranslat.at<float>(rowIt, 0), translationLeft.at<float>(rowIt, 0), 1e-2);
+            EXPECT_NEAR(decompTranslat.at<float>(rowIt, 0), translationLeft(rowIt, 0), 1e-2);
             for (int colIt = 0; colIt < 3; colIt++)
             {
-                EXPECT_NEAR(decompRotMat.at<float>(rowIt, colIt), eye.at<float>(rowIt, colIt), 1e-2);
+                EXPECT_NEAR(decompRotMat.at<float>(rowIt, colIt), eye(rowIt, colIt), 1e-2);
             }
         }
     }
@@ -159,36 +159,36 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
     for (auto coord : realWorldPoints)
     {
         // Projection matrix for left image, the translation is measured in the system of the left frame
-        cv::Mat projMatLeft;
-        cv::Mat translationLeft = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-5.0F, 5.0F));
-        cv::Mat rotMat = GetFrameRotationX(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationY(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationZ(DrawFloatInRange(-0.2F, 0.2F));
+        cv::Mat1f projMatLeft;
+        cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-5.0F, 5.0F));
+        cv::Mat1f rotMat = GetFrameRotationX(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationY(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationZ(DrawFloatInRange(-0.2F, 0.2F));
         EXPECT_TRUE(GetProjectionMatrix(rotMat, translationLeft, projMatLeft));
 
         // Get projected points in both camera frames, the right ones uses a trivial projection matrix
-        cv::Mat projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        cv::Point2f imgPointsLeft = cv::Point2f(projPointLeft.at<float>(0, 0) / projPointLeft.at<float>(2, 0), projPointLeft.at<float>(1, 0) / projPointLeft.at<float>(2, 0));
+        cv::Mat1f projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
+        cv::Point2f imgPointsLeft = cv::Point2f(projPointLeft(0, 0) / projPointLeft(2, 0), projPointLeft(1, 0) / projPointLeft(2, 0));
         cv::Point2f imgPointsRight = cv::Point2f(coord.x / coord.z, coord.y / coord.z);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
-        cv::Mat translatCross;
+        cv::Mat1f translatCross;
         GetCrossProductMatrix(translationLeft, translatCross);
-        cv::Mat essentialMat = translatCross * rotMat;
+        cv::Mat1f essentialMat = translatCross * rotMat;
 
         // Decompose the essential matrix
-        cv::Mat decompTranslat;
-        cv::Mat decompRotMat;
+        cv::Mat1f decompTranslat;
+        cv::Mat1f decompRotMat;
         DecomposeEssentialMatrix(essentialMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
         // The true translation and the extracted one may differ by a global scale
-        decompTranslat = decompTranslat * (translationLeft.at<float>(0, 0) / decompTranslat.at<float>(0, 0));
+        decompTranslat = decompTranslat * (translationLeft(0, 0) / decompTranslat(0, 0));
 
         // And check both extracted translation and rotation
-        cv::Mat eye = cv::Mat::eye(3, 3, CV_32F);
+        cv::Mat1f eye = cv::Mat1f::eye(3, 3);
         for (int rowIt = 0; rowIt < 3; rowIt++)
         {
-            EXPECT_NEAR(decompTranslat.at<float>(rowIt, 0), translationLeft.at<float>(rowIt, 0), std::abs(1e-2 * translationLeft.at<float>(rowIt, 0)));
+            EXPECT_NEAR(decompTranslat(rowIt, 0), translationLeft(rowIt, 0), std::abs(1e-2 * translationLeft(rowIt, 0)));
             for (int colIt = 0; colIt < 3; colIt++)
             {
-                EXPECT_NEAR(decompRotMat.at<float>(rowIt, colIt), rotMat.at<float>(rowIt, colIt), 1e-4);
+                EXPECT_NEAR(decompRotMat(rowIt, colIt), rotMat(rowIt, colIt), 1e-4);
             }
         }
     }
@@ -209,26 +209,26 @@ TEST(PointTriangulationLinearTest, TwoCamerasRotationAndTranslation)
     std::vector<cv::Point2f> imgPointsRight;
 
     // Projection matrix for left image
-    cv::Mat projMatLeft;
-    cv::Mat rotMatLeft = GetFrameRotationX(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationY(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationZ(DrawFloatInRange(-0.5, 0.5));
-    cv::Mat translationLeft = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));
+    cv::Mat1f projMatLeft;
+    cv::Mat1f rotMatLeft = GetFrameRotationX(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationY(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationZ(DrawFloatInRange(-0.5, 0.5));
+    cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));
     EXPECT_TRUE(GetProjectionMatrix(rotMatLeft, translationLeft, projMatLeft));
     
     // Projection matrix for right image
-    cv::Mat projMatRight;
-    cv::Mat rotMatRight = GetFrameRotationX(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationY(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationZ(DrawFloatInRange(-0.5, 0.5));
-    cv::Mat translationRight = (cv::Mat_<float>(3, 1) << DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));
+    cv::Mat1f projMatRight;
+    cv::Mat1f rotMatRight = GetFrameRotationX(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationY(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationZ(DrawFloatInRange(-0.5, 0.5));
+    cv::Mat1f translationRight = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));
     EXPECT_TRUE(GetProjectionMatrix(rotMatRight, translationRight, projMatRight));
 
 
     // Get camera coordinates of real world points
     for (auto coord : realWorldPoints)
     {
-        cv::Mat projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        imgPointsLeft.push_back(cv::Point2f(projPointLeft.at<float>(0, 0) / projPointLeft.at<float>(2, 0), projPointLeft.at<float>(1, 0) / projPointLeft.at<float>(2, 0)));
+        cv::Mat1f projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
+        imgPointsLeft.push_back(cv::Point2f(projPointLeft(0, 0) / projPointLeft(2, 0), projPointLeft(1, 0) / projPointLeft(2, 0)));
 
-        cv::Mat projPointRight = (projMatRight * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        imgPointsRight.push_back(cv::Point2f(projPointRight.at<float>(0, 0) / projPointRight.at<float>(2, 0), projPointRight.at<float>(1, 0) / projPointRight.at<float>(2, 0)));
+        cv::Mat1f projPointRight = (projMatRight * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
+        imgPointsRight.push_back(cv::Point2f(projPointRight(0, 0) / projPointRight(2, 0), projPointRight(1, 0) / projPointRight(2, 0)));
     }
 
     // Triangulate points and check

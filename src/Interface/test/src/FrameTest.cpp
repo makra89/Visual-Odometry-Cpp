@@ -22,7 +22,7 @@ TEST(FrameTest, Constructor_Empty)
 TEST(FrameTest, Constructor_NoImageData)
 {
     // Construct empty frame
-    cv::Mat emptyImage;
+    cv::Mat1f emptyImage;
     Frame f(NULL, 3, 3, 1);
 
     // Since no image has been provided it should be marked as invalid

@@ -46,8 +46,8 @@ DeltaPoseReconstructor::DeltaPoseReconstructor()
     m_lastFrameId = s_invalidFrameId;
     m_lastDeltaPose = DeltaCameraPose();
     m_lastPose = CameraPose();
-    m_lastOrientationWcs = cv::Mat::eye(3, 3, CV_32F);
-    m_lastPosWcs = cv::Mat::zeros(3, 1, CV_32F);
+    m_lastOrientationWcs = cv::Mat1f::eye(3, 3);
+    m_lastPosWcs = cv::Mat1f::zeros(3, 1);
 }
 
 
@@ -67,7 +67,7 @@ DeltaPoseReconstructor::~DeltaPoseReconstructor()
     delete m_detector;
 }
 
-bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat& in_calibMat)
+bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat)
 {
     bool ret = true;
 
@@ -102,8 +102,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
         {
             // Return valid delta pose for first processed frame, but indicate no movement
             m_lastDeltaPose = DeltaCameraPose();
-            m_lastOrientationWcs = cv::Mat::eye(3, 3, CV_32F);
-            m_lastPosWcs = cv::Mat::zeros(3, 1, CV_32F);
+            m_lastOrientationWcs = cv::Mat1f::eye(3, 3);
+            m_lastPosWcs = cv::Mat1f::zeros(3, 1);
         }
         else if (ret && IsValidFrameId(m_lastFrameId))
         {
@@ -117,20 +117,20 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
             // Calculate rotation and translation from the matches of the two frames
             std::vector<cv::Point2f> pLastFrameInliers;
             std::vector<cv::Point2f> pCurrFrameInliers;
-            cv::Mat rotation;
-            cv::Mat translation;
+            cv::Mat1f rotation;
+            cv::Mat1f translation;
             m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, pCurrFrameInliers, pLastFrameInliers, translation, rotation);
 
             // Up to now the rotation and translation are in the camera coordinate system
             // We want to transform it into the body system in which the x-Axis is aligned
             // with the longitudinal body axis
-            cv::Mat rotBodyToCamera = Utils::GetFrameRotationZ(-Utils::PI / 2.0F) * Utils::GetFrameRotationY(Utils::PI / 2.0F);
-            cv::Mat rotationBodySyst = rotBodyToCamera.t() * (rotation * rotBodyToCamera);
+            cv::Mat1f rotBodyToCamera = Utils::GetFrameRotationZ(-Utils::PI / 2.0F) * Utils::GetFrameRotationY(Utils::PI / 2.0F);
+            cv::Mat1f rotationBodySyst = rotBodyToCamera.t() * (rotation * rotBodyToCamera);
             translation = rotBodyToCamera.t() * translation;
-            
+
             cv::Vec3f eulerAngles = Utils::ExtractRollPitchYaw(rotationBodySyst);
             DeltaOrientation deltaOrientation = { eulerAngles[0], eulerAngles[1] , eulerAngles[2] };
-            DeltaTranslation deltaTranslation = { translation.at<float>(0,0), translation.at<float>(1,0) , translation.at<float>(2,0) };
+            DeltaTranslation deltaTranslation = { translation(0,0), translation(1,0) , translation(2,0) };
             m_lastDeltaPose = DeltaCameraPose(deltaTranslation, deltaOrientation);
 
             // Concatenate delta poses to get absolute pose in world coordinate system
@@ -140,16 +140,15 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat&
             // --> Transform the translation vector back to world coordinate system using the inverse rotation of the last frame
             m_lastPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
 
-
             Orientation currentOrientWcs = { eulerAnglesWcs[0], eulerAnglesWcs[1] , eulerAnglesWcs[2] };
-            Translation currentPosWcs = { m_lastPosWcs.at<float>(0,0), m_lastPosWcs.at<float>(1,0) , m_lastPosWcs.at<float>(2,0) };
+            Translation currentPosWcs = { m_lastPosWcs(0,0), m_lastPosWcs(1,0) , m_lastPosWcs(2,0) };
             m_lastPose = CameraPose(currentPosWcs, currentOrientWcs);
 
             tick.stop();
             //std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
             cv::Mat matchImage = in_frame.GetImageCopy();
             cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
-            
+
             for (int it = 0; it < pLastFrameInliers.size(); it++)
             {
 

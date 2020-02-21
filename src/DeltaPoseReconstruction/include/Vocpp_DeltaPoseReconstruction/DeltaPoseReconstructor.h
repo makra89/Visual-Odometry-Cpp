@@ -51,7 +51,7 @@ public:
     /**
       * /brief Provide next image frame to reconstructor together with a calibration matrix
       */
-    bool FeedNextFrame(const Frame& in_frame, const cv::Mat& in_calibMat);
+    bool FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat);
 
     /**
       * /brief Get computed delta pose of last frame to the frame before
@@ -85,8 +85,8 @@ private:
 
     DeltaCameraPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
     CameraPose m_lastPose; ///< Current Pose in world coordinate system calculated for last frame
-    cv::Mat m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
-    cv::Mat m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
+    cv::Mat1f m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
+    cv::Mat1f m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
 
 };
 

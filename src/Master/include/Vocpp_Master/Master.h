@@ -16,9 +16,6 @@
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
 #include<Vocpp_Calibration/CalibrationModule.h>
 
-#include<opencv2/core/types.hpp>
-#include<opencv2/core/core.hpp>
-
 namespace VOCPP
 {
 namespace Master

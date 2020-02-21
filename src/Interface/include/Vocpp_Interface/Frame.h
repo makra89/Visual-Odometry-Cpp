@@ -10,7 +10,9 @@
 
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
+
 #include <iostream>
+
 namespace VOCPP
 {
 
@@ -59,7 +61,7 @@ public:
         // Valid image data
         else
         {
-            m_grayImage = cv::Mat_<float>(in_height, in_width, in_grayImgData);
+            m_grayImage = cv::Mat1f(in_height, in_width, in_grayImgData);
             m_Id = in_frameId;
             m_validFrame = true;
         }
@@ -69,7 +71,7 @@ public:
     /**
       * /brief Get image data (const reference), either raw or grayscale
       */
-    const cv::Mat_<float>& GetImage() const
+    const cv::Mat1f& GetImage() const
     {
         return m_grayImage;
     }
@@ -77,7 +79,7 @@ public:
     /**
       * /brief Get copy of image data, either raw or grayscale
       */
-    cv::Mat_<float> GetImageCopy() const
+    cv::Mat1f GetImageCopy() const
     {
         return m_grayImage.clone();
     }
@@ -100,7 +102,7 @@ public:
 
 private:
 
-    cv::Mat_<float> m_grayImage; ///< grayscale image data
+    cv::Mat1f m_grayImage; ///< grayscale image data
 
     int m_Id; ///< Id of the frame, must be a unique one!
     bool m_validFrame; ///< indicated whether this frame is a valid one

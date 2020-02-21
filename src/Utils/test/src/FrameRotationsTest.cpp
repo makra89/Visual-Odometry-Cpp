@@ -10,10 +10,10 @@
 
 TEST(ExtractRollPitchYawTest, ExtractAngles)
 {
-    cv::Mat rotX = VOCPP::Utils::GetFrameRotationX(0.51F);
-    cv::Mat rotY = VOCPP::Utils::GetFrameRotationY(-0.33F);
-    cv::Mat rotZ = VOCPP::Utils::GetFrameRotationZ(0.85F);
-    cv::Mat combinedRot = rotX * rotY * rotZ;
+    cv::Mat1f rotX = VOCPP::Utils::GetFrameRotationX(0.51F);
+    cv::Mat1f rotY = VOCPP::Utils::GetFrameRotationY(-0.33F);
+    cv::Mat1f rotZ = VOCPP::Utils::GetFrameRotationZ(0.85F);
+    cv::Mat1f combinedRot = rotX * rotY * rotZ;
 
     cv::Vec3f eulerAngles = VOCPP::Utils::ExtractRollPitchYaw(combinedRot);
 

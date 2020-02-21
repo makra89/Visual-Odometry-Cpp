@@ -40,9 +40,11 @@ Finally there is some output, looks horrible, but at least its some kind of resu
 
 Using the application runKittiDemo.exe in apps/ it is possible to visualize matched features in an camera image stream.
 This app is currently hard coded to KITTI image sequence 0:
-`TrackFeatures.exe <path-to-camera-images> e.g. runKittiDemo.exe ./test/*.jpg` 
+
+`runKittiDemo.exe <path-to-camera-images> e.g. runKittiDemo.exe ./test/*.jpg` 
 
 Additionally there is a python script for running the KITTI sequence + comparing it to the ground truth
+
 `python runKittiDemp.py -i <camera-images-dir> -r <ground_truth_textfile> ` 
 
 # Dependencies
@@ -55,5 +57,5 @@ The following dependencies are placed in the folder 3rdparty and included as sou
 The following dependencies are required as CMake package:
 
 - [opencv](https://opencv.org/license/)
-- [swig] (optionally for python package)
-- [spython] (optionally for python package)
+- swig (optionally for python package)
+- python (optionally for python package)

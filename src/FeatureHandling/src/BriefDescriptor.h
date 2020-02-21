@@ -53,7 +53,7 @@ private:
 
     int m_randomPairDrawRadius; ///< radius around a feature that is used for drawing the random pairs
     int m_numRandomPairs; ///< number of random pairs used
-    std::vector<cv::Mat> m_pairs; ///< Point pairs used for intensity comparison
+    std::vector<cv::Mat1f> m_pairs; ///< Point pairs used for intensity comparison
 };
 
 } //namespace FeatureHandling

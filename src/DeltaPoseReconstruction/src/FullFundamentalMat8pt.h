@@ -37,7 +37,7 @@ public:
       * F and H are fundamental matrices and homographies, respectively.
       */
     virtual bool Compute(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        std::vector<cv::Mat>& out_solutions) override;
+        std::vector<cv::Mat1f>& out_solutions) override;
 
     /**
      * /brief Tests a particular model solution with a set of correspondendec and computes the inliers given an error treshold.
@@ -48,14 +48,14 @@ public:
      * F and H are fundamental matrices and homographies, respectively.
      */
     virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        const cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) override;
+        const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) override;
 
     /**
       * /brief Decompose a model solution into a translation and a rotation matrix
       * The rotation and translation is defined in such way that x_left = R * x_right + translation
       */
-    virtual bool DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation) override;
+    virtual bool DecomposeSolution(const cv::Mat1f& in_solution, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
+        const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotation) override;
 };
 
 } //namespace DeltaPoseReconstruction

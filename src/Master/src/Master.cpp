@@ -32,7 +32,6 @@ bool Master::FeedNextFrame(const Frame& in_frame)
 
     // Only if a valid calibration is there we can feed the frame to the reconstructor
     ret = ret && m_reconstructor.FeedNextFrame(in_frame, monoCalib.GetCalibrationMatrix());
-
     return ret;
 }
 

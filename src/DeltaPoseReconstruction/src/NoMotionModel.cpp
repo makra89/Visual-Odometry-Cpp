@@ -16,7 +16,7 @@ namespace DeltaPoseReconstruction
 {
 
 void NoMotionModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-    const cv::Mat& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
+    const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
 {
     for (int i = 0; i < in_pointCorrLeft.size(); i++)
     {
@@ -32,14 +32,14 @@ void NoMotionModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const
 
 }
 
-bool NoMotionModel::DecomposeSolution(const cv::Mat& in_solution, const cv::Mat& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
-    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat& out_translation, cv::Mat& out_rotation)
+bool NoMotionModel::DecomposeSolution(const cv::Mat1f& in_solution, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_pointCorrLeft,
+    const std::vector<cv::Point2f>& in_pointCorrRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotation)
 {
     // No motion --> no translation
-    out_translation = cv::Mat::zeros(3, 1, CV_32F);
+    out_translation = cv::Mat1f::zeros(3, 1);
 
     // And no rotation
-    out_rotation = cv::Mat::eye(3, 3, CV_32F);
+    out_rotation = cv::Mat1f::eye(3, 3);
 
     return true;
 }

@@ -35,7 +35,6 @@ int main(int argc, char** argv)
 
     // Construct MonoCameraCalibration
     // Hardcoded for KITTI data set sequence 0, left image
-    cv::Mat calibMat = cv::Mat::eye(3, 3, CV_32F);
     const float focLength = 7.18856e+02F;
     const float camCenterX = 6.071928000000e+02F;
     const float camCenterY = 1.852157000000e+02F;
@@ -47,8 +46,8 @@ int main(int argc, char** argv)
 
     int frameId = 0U;
 
-    cv::Mat currentPose = cv::Mat::eye(3, 3, CV_32F);
-    cv::Mat currentCamCenter = cv::Mat::zeros(3, 1, CV_32F);
+    cv::Mat1f currentPose = cv::Mat1f::eye(3, 3);
+    cv::Mat1f currentCamCenter = cv::Mat1f::zeros(3, 1);
     
     for (auto imageName : imageNames)
     {
@@ -59,8 +58,8 @@ int main(int argc, char** argv)
 
         // Feed frame to Master
         const float* buffer = grayScaleImg.ptr<float>(0);
-        Frame frame2(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
-        voMaster.FeedNextFrame(frame2);
+        Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+        voMaster.FeedNextFrame(frame);
         
         DeltaCameraPose delta = voMaster.GetLastDeltaPose();
         CameraPose pose = voMaster.GetLastPose();

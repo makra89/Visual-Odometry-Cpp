@@ -16,7 +16,7 @@ namespace DeltaPoseReconstruction
 {
 
     int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat &out_translation, cv::Mat& out_rotation)
+        const cv::Mat1f& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat1f &out_translation, cv::Mat1f& out_rotation)
 {
     // Save best model according to Plunder Score
     int bestModelId = -1;
@@ -36,7 +36,7 @@ namespace DeltaPoseReconstruction
         if (model->GetModelType() == EpipolarModel::Types::NoMotionModel)
         {
             std::vector<int> indicesInliers;
-            cv::Mat dummySolution = cv::Mat::zeros(3, 3, CV_32F);
+            cv::Mat1f dummySolution = cv::Mat1f::zeros(3, 3);
             model->Test(in_correspondFirst, in_correspondSecond, dummySolution, assumedDistanceError, indicesInliers);
             int plunderScore = model->ComputePlunderScore(static_cast<int>(indicesInliers.size()), static_cast<int>(in_correspondFirst.size() - indicesInliers.size()));
             if (plunderScore < bestPlunderScore)
@@ -67,7 +67,7 @@ namespace DeltaPoseReconstruction
             }
 
             // Compute solution(s) for model
-            std::vector<cv::Mat> solutions;
+            std::vector<cv::Mat1f> solutions;
             model->Compute(corrFirstDrawn, corrSecondDrawn, solutions);
 
             // Test with full set for all solutions and get Inlier
@@ -99,7 +99,7 @@ namespace DeltaPoseReconstruction
 
     // TODO: Here we should do something like a "refinement" step and calculate a better estimate
     // using a more sophisticated method starting from the best solution
-    std::vector<cv::Mat> bestSolution;
+    std::vector<cv::Mat1f> bestSolution;
     in_testedModels[bestModelId]->Compute(out_inliersFirst, out_inliersSecond, bestSolution);
 
     // TODO: At some point we have to deal with more than one solution --> for now we only have one

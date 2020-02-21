@@ -60,10 +60,10 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
         // Loop over pairs
         for (auto pair : m_pairs)
         {
-            int indFirstX = static_cast<int>(pair.at<float>(0, 0) + key.pt.x);
-            int indFirstY = static_cast<int>(pair.at<float>(0, 1) + key.pt.y);
-            int indSecX = static_cast<int>(pair.at<float>(0, 2) + key.pt.x);
-            int indSecY = static_cast<int>(pair.at<float>(0, 3) + key.pt.y);
+            int indFirstX = static_cast<int>(pair(0, 0) + key.pt.x);
+            int indFirstY = static_cast<int>(pair(0, 1) + key.pt.y);
+            int indSecX = static_cast<int>(pair(0, 2) + key.pt.x);
+            int indSecY = static_cast<int>(pair(0, 3) + key.pt.y);
            
             // Check whether all indices are within range
             const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < in_frame.GetImage().size[1]);
@@ -74,7 +74,7 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
             if (inRangeFirstX && inRangeFirstY && inRangeSecX && inRangeSecY)
             {
                 // Compare intensities and append bin to description
-                uint8_t bin = in_frame.GetImage().at<float>(indFirstY, indFirstX) > in_frame.GetImage().at<float>(indSecY, indSecX) ? 1U : 0U;
+                uint8_t bin = in_frame.GetImage()(indFirstY, indFirstX) > in_frame.GetImage()(indSecY, indSecX) ? 1U : 0U;
                 descriptions.at<uint8_t>(0, numSucessfulPairs) = bin;
                 numSucessfulPairs++;
             }
@@ -107,12 +107,12 @@ void BriefDescriptor::DrawPairs()
         float index3 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
         float index4 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
 
-        cv::Mat pairs = cv::Mat::zeros(1, 4, CV_32F);
+        cv::Mat1f pairs = cv::Mat1f::zeros(1, 4);
 
-        pairs.at<float>(0, 0) = index1;
-        pairs.at<float>(0, 1) = index2;
-        pairs.at<float>(0, 2) = index3;
-        pairs.at<float>(0, 3) = index4;
+        pairs(0, 0) = index1;
+        pairs(0, 1) = index2;
+        pairs(0, 2) = index3;
+        pairs(0, 3) = index4;
 
         m_pairs.push_back(pairs);
     }
