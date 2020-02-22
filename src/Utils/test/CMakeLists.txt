@@ -16,6 +16,7 @@ target_link_libraries(Vocpp_UtilsTest
     PRIVATE
         Vocpp_Utils    
         gtest
+        ${OpenCV_LIBS} 
 )
 
 add_test(NAME UtilsTest COMMAND Vocpp_UtilsTest)

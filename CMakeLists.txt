@@ -8,6 +8,12 @@ project(VisualOdometryCpp)
 # =========================
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_PYTHON_WRAPPER "Generate Python Wrapper" OFF)
+option(BUILD_OPENCV "Build opencv as external project" ON)
+
+# Check for build type, if nothing set, choose Release
+if(NOT DEFINED CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release )
+endif()
 
 if(BUILD_TESTS)
     # Add and configure gtest
@@ -18,13 +24,38 @@ if(BUILD_TESTS)
     enable_testing()
 endif()
 
-# Find opencv package
+# Optionally build opencv as external project
+# Opencv is build during the CMake configure step
+if(BUILD_OPENCV)
+    
+    set(OpenCV_Install_Dir ${CMAKE_BINARY_DIR}/opencv-install)
+    
+    # Check for multiconfig generator
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)   
+    if(NOT ${_isMultiConfig})
+        set(OpenCV_LinuxBuildTypeArgs "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+    endif()
+    
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/OpenCV-Download/CMakeLists.txt.in
+        ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/OpenCV-Download/CMakeLists.txt)
+
+    execute_process( COMMAND ${CMAKE_COMMAND} -S ${CMAKE_SOURCE_DIR}/3rdParty/OpenCV-Download -B ${CMAKE_BINARY_DIR}/OpenCV-Download)
+    # I did not found another way than always building both Debug and Release for MultiConfig generators
+    if(NOT ${_isMultiConfig})
+        execute_process( COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/OpenCV-Download )
+    else()
+        execute_process( COMMAND ${CMAKE_COMMAND} --build . --config Release WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/OpenCV-Download )
+        execute_process( COMMAND ${CMAKE_COMMAND} --build . --config Debug WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/OpenCV-Download )
+    endif()
+    
+    set(OpenCV_DIR ${OpenCV_Install_Dir} CACHE PATH "OpenCV CMake Package Path" FORCE)
+endif()
+
 find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Add project source
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
-
 
 # Add applications
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/apps)
