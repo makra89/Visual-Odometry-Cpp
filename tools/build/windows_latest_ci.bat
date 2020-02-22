@@ -1,1 +1,1 @@
-setx path "%PATH%;D:\a\Visual-Odometry-Cpp\Visual-Odometry-Cpp\opencv-install\x64\vc16\bin"
+setx path "D:\a\Visual-Odometry-Cpp\Visual-Odometry-Cpp\opencv-install\x64\vc16\bin;%PATH%"
