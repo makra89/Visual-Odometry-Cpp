@@ -1,0 +1,23 @@
+name: Verification Build
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  windows-build:
+
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: build
+      run: cmake --build build --config Release
+    - name: test
+      run: cd build && ctest
