@@ -34,6 +34,6 @@ jobs:
     - name: build
       run: cmake --build . --config Release
     - name: add opencv bin to Path
-      run: ./tools/build/windows_latest_ci.bat
+      run: ::add-path::{opencv-install/}
     - name: run Tests
       run: ctest -C Release
