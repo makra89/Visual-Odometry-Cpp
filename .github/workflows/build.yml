@@ -20,7 +20,7 @@ jobs:
       id: cache-opencv
       uses: actions/cache@v1
       with:
-        path: "~/opencv-install" 
+        path: "./opencv-install" 
         key: ${{ runner.os }}-opencvWindows
         restore-keys: |
           ${{ runner.os }}-opencvWindows
