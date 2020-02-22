@@ -21,6 +21,8 @@ jobs:
       run: mkdir build 
     - name: goto build dir
       run: cd build
+    - name: test
+      run: ls ../
     - name: cmake configure
       run: cmake ../
     - name: build
