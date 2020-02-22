@@ -1,4 +1,4 @@
-name: Verification Build
+name: CI Windows
 
 on:
   push:
@@ -15,9 +15,18 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+
+    - name: Cache OpenCV
+      id: cache-opencv
+      uses: actions/cache@v1
+      with:
+        path: "./opencv-install" 
+        key: ${{ runner.os }}-opencvWindows
+        restore-keys: |
+          ${{ runner.os }}-opencvWindows
+
     - name: cmake configure
-      run: cmake -S . -B build
+      run: cmake . 
     - name: build
-      run: cmake --build build --config Release
-    - name: test
-      run: ctest
+      run: cmake --build . --config Release
+
