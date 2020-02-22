@@ -1,4 +1,5 @@
-![Verification Build](https://github.com/makra89/Visual-Odometry-Cpp/workflows/Verification%20Build/badge.svg)
+
+![CI Windows](https://github.com/makra89/Visual-Odometry-Cpp/workflows/CI%20Windows/badge.svg?branch=master)
 
 # Visual-Odometry-Cpp
 Visual Odometry pipeline implementation in C++
