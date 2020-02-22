@@ -20,10 +20,10 @@ jobs:
       id: cache-opencv
       uses: actions/cache@v1
       with:
-        path: "./opencv-install" 
+        path: ./opencv-install
         key: ${{ runner.os }}-opencvWin
         restore-keys: |
-          ${{ runner.os }}-opencvWin
+          ${{ runner.os }}-opencv
 
     - name: cmake configure
       run: cmake . 
