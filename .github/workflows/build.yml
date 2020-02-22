@@ -15,9 +15,19 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+
+    - name: Cache OpenCV
+      id: cache-opencv
+      uses: actions/cache@v1
+      with:
+        path: build/opencv-install
+        key: ${{ runner.os }}-opencvWindows
+        restore-keys: |
+          ${{ runner.os }}-opencvWindows
+
     - name: cmake configure
       run: cmake -S . -B build
     - name: build
       run: cmake --build build --config Release
     - name: test
-      run: ctest
+      run: cmake --build build --config Release --target test
