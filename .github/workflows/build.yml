@@ -25,8 +25,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-opencv
 
-    - name: cmake configure
+    - name: cmake configure without opencv
+      if: steps.cache-opencv.outputs.cache-hit != 'true'
       run: cmake . 
+    - name: cmake configure with opencv
+      if: steps.cache-opencv.outputs.cache-hit == 'true'
+      run: cmake . -DBUILD_OPENCV=OFF -DOpenCV_DIR=./opencv-install
     - name: build
       run: cmake --build . --config Release
 
