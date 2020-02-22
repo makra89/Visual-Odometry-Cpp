@@ -33,4 +33,7 @@ jobs:
       run: cmake . -DOpenCV_DIR=opencv-install/ -DBUILD_OPENCV=OFF
     - name: build
       run: cmake --build . --config Release
-
+    - name: add opencv bin to Path
+      run: ./tools/build/windows_latest_ci.bat
+    - name: run Tests
+      run: ctest -C Release
