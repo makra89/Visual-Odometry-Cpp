@@ -49,6 +49,7 @@ if(BUILD_OPENCV)
     endif()
     
     set(OpenCV_DIR ${OpenCV_Install_Dir} CACHE PATH "OpenCV CMake Package Path" FORCE)
+    list(APPEND CMAKE_PREFIX_PATH ${OpenCV_Install_Dir})
 endif()
 
 find_package( OpenCV REQUIRED )
