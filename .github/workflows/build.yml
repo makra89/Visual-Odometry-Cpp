@@ -15,18 +15,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: ls
-      run: ls
-    - name: makedir
-      run: mkdir build 
-    - name: goto build dir
-      run: cd build/
-    - name: test
-      run: ls ../
-    - name: test2
-      run: ls
     - name: cmake configure
-      run: cmake ../
+      run: cmake -S . -B build
     - name: build
       run: cmake --build build --config Release
     - name: test
