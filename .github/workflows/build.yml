@@ -34,6 +34,6 @@ jobs:
     - name: build
       run: cmake --build . --config Release
     - name: add opencv bin to Path
-      run: ::add-path::/opencv-install/x64/vc16/bin
+      run: ::add-path::D:\a\Visual-Odometry-Cpp\Visual-Odometry-Cpp\opencv-install\x64\vc16\bin
     - name: run Tests
       run: ctest -C Release
