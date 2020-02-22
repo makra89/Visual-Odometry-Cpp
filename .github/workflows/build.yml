@@ -20,9 +20,11 @@ jobs:
     - name: makedir
       run: mkdir build 
     - name: goto build dir
-      run: cd build
+      run: cd build/
     - name: test
       run: ls ../
+    - name: test2
+      run: ls
     - name: cmake configure
       run: cmake ../
     - name: build
