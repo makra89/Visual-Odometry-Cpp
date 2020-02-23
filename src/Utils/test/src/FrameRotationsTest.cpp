@@ -17,7 +17,7 @@ TEST(ExtractRollPitchYawTest, ExtractAngles)
 
     cv::Vec3f eulerAngles = VOCPP::Utils::ExtractRollPitchYaw(combinedRot);
 
-    EXPECT_NEAR(eulerAngles[0], 0.51F, 1e-8);
-    EXPECT_NEAR(eulerAngles[1], -0.33F, 1e-8);
-    EXPECT_NEAR(eulerAngles[2], 0.85F, 1e-8);
+    EXPECT_NEAR(eulerAngles[0], 0.51F, 1e-6);
+    EXPECT_NEAR(eulerAngles[1], -0.33F, 1e-6);
+    EXPECT_NEAR(eulerAngles[2], 0.85F, 1e-6);
 }
