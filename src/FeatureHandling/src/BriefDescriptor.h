@@ -42,7 +42,7 @@ public:
 
 private:
     // It is not allowed to copy or instantiate the descriptor directly
-    BriefDescriptor::BriefDescriptor();
+    BriefDescriptor();
     BriefDescriptor& operator=(const BriefDescriptor&);
     BriefDescriptor(const BriefDescriptor&);
 
