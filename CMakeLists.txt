@@ -51,8 +51,6 @@ if(BUILD_OPENCV)
     set(OpenCV_DIR ${OpenCV_Install_Dir} CACHE PATH "OpenCV CMake Package Path" FORCE)
 endif()
 
-find_package( OpenCV OPTIONAL )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Add project source
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
