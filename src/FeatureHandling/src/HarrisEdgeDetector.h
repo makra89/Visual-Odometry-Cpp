@@ -38,7 +38,7 @@ public:
 
 private:
     // It is not allowed to copy or instantiate the detector directly
-    HarrisEdgeDetector::HarrisEdgeDetector();
+    HarrisEdgeDetector();
     HarrisEdgeDetector& operator=(const HarrisEdgeDetector&);
     HarrisEdgeDetector(const HarrisEdgeDetector&);
 

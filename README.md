@@ -1,5 +1,6 @@
 
 ![CI Windows](https://github.com/makra89/Visual-Odometry-Cpp/workflows/CI%20Windows/badge.svg?branch=master)
+![CI Ubuntu](https://github.com/makra89/Visual-Odometry-Cpp/workflows/CI%20Ubuntu/badge.svg)
 
 # Visual-Odometry-Cpp
 Visual Odometry pipeline implementation in C++

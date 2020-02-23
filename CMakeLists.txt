@@ -47,11 +47,14 @@ if(BUILD_OPENCV)
         execute_process( COMMAND ${CMAKE_COMMAND} --build . --config Release WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/OpenCV-Download )
         execute_process( COMMAND ${CMAKE_COMMAND} --build . --config Debug WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/OpenCV-Download )
     endif()
-    
-    set(OpenCV_DIR ${OpenCV_Install_Dir} CACHE PATH "OpenCV CMake Package Path" FORCE)
+    if(WIN32) 
+        set(OpenCV_DIR ${OpenCV_Install_Dir} CACHE PATH "OpenCV CMake Package Path" FORCE)
+    else() 
+        set(OpenCV_DIR ${OpenCV_Install_Dir}/lib/cmake/opencv4 CACHE PATH "OpenCV CMake Package Path" FORCE)
+    endif() 
 endif()
 
-find_package( OpenCV REQUIRED )
+find_package( OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Add project source
