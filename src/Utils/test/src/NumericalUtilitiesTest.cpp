@@ -39,7 +39,7 @@ TEST(DrawIntInRange, ProbabilityCheck)
         int rand = DrawIntInRange(lowerEdge, upperEdge);
 
         int elIndex = 10 + rand;
-        ASSERT_TRUE(elIndex < 0);
+        ASSERT_TRUE(elIndex >= 0);
         ASSERT_TRUE(elIndex < 21);
 
         elCount[elIndex]++;
