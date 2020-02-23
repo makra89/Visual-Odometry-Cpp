@@ -21,7 +21,7 @@ jobs:
       uses: actions/cache@v1
       with:
         path: ./opencv-install
-        key: ${{ runner.os }}-opencvWin
+        key: ${{ runner.os }}-opencvUb
         restore-keys: |
           ${{ runner.os }}-opencv
 
