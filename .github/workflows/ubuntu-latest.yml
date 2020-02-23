@@ -34,4 +34,4 @@ jobs:
     - name: build
       run: cmake --build . 
     - name: run tests
-      run: ctest
+      run: ctest --verbose
