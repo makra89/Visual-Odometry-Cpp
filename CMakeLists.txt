@@ -50,12 +50,11 @@ if(BUILD_OPENCV)
     if(WIN32) 
         set(OpenCV_DIR ${OpenCV_Install_Dir} CACHE PATH "OpenCV CMake Package Path" FORCE)
     else() 
-        set(OpenCV_DIR ${OpenCV_Install_Dir}/lib/cmake/opencv4/ CACHE PATH "OpenCV CMake Package Path" FORCE)
+        set(OpenCV_DIR ${OpenCV_Install_Dir}/lib/cmake/opencv4 CACHE PATH "OpenCV CMake Package Path" FORCE)
     endif() 
 endif()
 
-find_package( OpenCV 
-PATHS ${OpenCV_Install_Dir} )
+find_package( OpenCV REQUIRED)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Add project source
