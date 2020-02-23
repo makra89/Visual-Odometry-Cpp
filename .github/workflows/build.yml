@@ -34,4 +34,6 @@ jobs:
     - name: build
       run: cmake --build . --config Release
     - name: run tests
-      run: ./tools/build/windows_latest_ci.bat  
+      run:  |
+       SET PATH=C:\Users\Mannorok\Desktop\VisualOdometry\build\opencv-install\x64\vc16\bin;%PATH
+       ctest -C Release
