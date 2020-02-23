@@ -51,15 +51,15 @@ public:
 
 private:
     // It is not allowed to copy or instantiate the detector directly
-    BruteForceMatcher::BruteForceMatcher();
+    BruteForceMatcher();
     BruteForceMatcher& operator=(const BruteForceMatcher&);
     BruteForceMatcher(const BruteForceMatcher&);
 
     /**
       * /brief Compute Hamming Distance for two descriptors
       *
-      * \param[ín] in_left first (binary) description
-      * \param[ín] in_right second (binary) description
+      * \param[Ã­n] in_left first (binary) description
+      * \param[Ã­n] in_right second (binary) description
       * \return True distance of descriptions
       */
     int ComputeHammingDistance(const cv::Mat& in_left, const cv::Mat& in_right);
