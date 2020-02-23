@@ -34,4 +34,4 @@ jobs:
     - name: build
       run: cmake --build . --config Release
     - name: run tests
-      run:  /tools/build/windows_latest_ci.bat
+      run:  tools/build/windows_latest_ci.bat
