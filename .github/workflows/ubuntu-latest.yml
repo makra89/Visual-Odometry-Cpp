@@ -31,3 +31,5 @@ jobs:
     - name: cmake configure with opencv
       if: steps.cache-opencv.outputs.cache-hit == 'true'
       run: cmake . -DOpenCV_DIR=opencv-install/ -DBUILD_OPENCV=OFF
+    - name: ls
+      run: ls opencv-install
