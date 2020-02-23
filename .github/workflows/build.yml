@@ -33,7 +33,5 @@ jobs:
       run: cmake . -DOpenCV_DIR=opencv-install/ -DBUILD_OPENCV=OFF
     - name: build
       run: cmake --build . --config Release
-    - name: add opencv bin to Path
-      run: ::add-path::D:\a\Visual-Odometry-Cpp\Visual-Odometry-Cpp\opencv-install\x64\vc16\bin
-    - name: run Tests
-      run: ctest -C Release
+    - name: run tests
+      run: ./tools/build/windows_latest_ci.bat  
