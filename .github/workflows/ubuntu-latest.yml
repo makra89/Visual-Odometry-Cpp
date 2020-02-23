@@ -24,14 +24,3 @@ jobs:
         key: ${{ runner.os }}-opencvWin
         restore-keys: |
           ${{ runner.os }}-opencv
-          
-    - name: cmake configure without opencv
-      if: steps.cache-opencv.outputs.cache-hit != 'true'
-      run: cmake . -DCMAKE_BUILD_TYPE=Release
-    - name: cmake configure with opencv
-      if: steps.cache-opencv.outputs.cache-hit == 'true'
-      run: cmake . -DOpenCV_DIR=opencv-install/ -DBUILD_OPENCV=OFF
-    - name: build
-      run: cmake --build .
-    - name: run tests
-      run:  ctest
