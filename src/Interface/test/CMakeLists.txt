@@ -14,6 +14,7 @@ target_link_libraries(Vocpp_InterfaceTest
     PRIVATE
         Vocpp_Interface  
         gtest
+        ${OpenCV_LIBS} 
 )
 
 add_test(NAME InterfaceTest COMMAND Vocpp_InterfaceTest)
