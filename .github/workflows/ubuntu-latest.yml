@@ -1,0 +1,37 @@
+name: CI Windows
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  windows-build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache OpenCV
+      id: cache-opencv
+      uses: actions/cache@v1
+      with:
+        path: ./opencv-install
+        key: ${{ runner.os }}-opencvWin
+        restore-keys: |
+          ${{ runner.os }}-opencv
+          
+    - name: cmake configure without opencv
+      if: steps.cache-opencv.outputs.cache-hit != 'true'
+      run: cmake . 
+    - name: cmake configure with opencv
+      if: steps.cache-opencv.outputs.cache-hit == 'true'
+      run: cmake . -DOpenCV_DIR=opencv-install/ -DBUILD_OPENCV=OFF
+    - name: build
+      run: cmake --build . --DCMAKE_BUILD_TYPE=Release
+    - name: run tests
+      run:  tools/build/windows_latest_ci.bat
