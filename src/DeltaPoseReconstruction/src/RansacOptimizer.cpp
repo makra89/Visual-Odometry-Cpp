@@ -16,7 +16,7 @@ namespace DeltaPoseReconstruction
 {
 
     int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat1f& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat1f &out_translation, cv::Mat1f& out_rotation)
+        const cv::Mat1f& in_calibMat, std::vector<int>& out_inlierMatchIndices, cv::Mat1f &out_translation, cv::Mat1f& out_rotation)
 {
     // Save best model according to Plunder Score
     int bestModelId = -1;
@@ -61,7 +61,7 @@ namespace DeltaPoseReconstruction
 
             for (int it = 0; it < static_cast<int>(model->GetNumCorrespondences()); it++)
             {
-                int index = Utils::DrawIntInRange(0, static_cast<int>(in_correspondFirst.size()));
+                int index = Utils::DrawIntInRange(0, static_cast<int>(in_correspondFirst.size()) - 1);
                 corrFirstDrawn.push_back(in_correspondFirst[index]);
                 corrSecondDrawn.push_back(in_correspondSecond[index]);
             }
@@ -89,24 +89,28 @@ namespace DeltaPoseReconstruction
         testedModels++;
     }
     // Get all inliers and compute best solution given best model
-    out_inliersFirst.reserve(inliers.size());
-    out_inliersSecond.reserve(inliers.size());
+    std::vector<cv::Point2f> inliersFirst;
+    std::vector<cv::Point2f> inliersSecond;
+
     for (auto it : inliers)
     {
-        out_inliersFirst.push_back(in_correspondFirst[it]);
-        out_inliersSecond.push_back(in_correspondSecond[it]);
+        inliersFirst.push_back(in_correspondFirst[it]);
+        inliersSecond.push_back(in_correspondSecond[it]);
     }
 
     // TODO: Here we should do something like a "refinement" step and calculate a better estimate
     // using a more sophisticated method starting from the best solution
     std::vector<cv::Mat1f> bestSolution;
-    in_testedModels[bestModelId]->Compute(out_inliersFirst, out_inliersSecond, bestSolution);
+    in_testedModels[bestModelId]->Compute(inliersFirst, inliersSecond, bestSolution);
 
     // TODO: At some point we have to deal with more than one solution --> for now we only have one
-    bool ret = in_testedModels[bestModelId]->DecomposeSolution(bestSolution[0], in_calibMat, out_inliersFirst, out_inliersSecond, out_translation, out_rotation);
+    bool ret = in_testedModels[bestModelId]->DecomposeSolution(bestSolution[0], in_calibMat, inliersFirst, inliersSecond, out_translation, out_rotation);
     
     // We want to output the translation vector from second to first camera center in the second camera coordinate system
     out_translation = -(out_rotation.t() * out_translation);
+
+    // Output inlier match indices
+    out_inlierMatchIndices = inliers;
 
     // Update outlier ratio estimate
     UpdateOutlierRatio(1.0F - static_cast<float>(inliers.size()) / static_cast<float>(in_correspondFirst.size()));

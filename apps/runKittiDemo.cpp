@@ -55,10 +55,10 @@ int main(int argc, char** argv)
         cv::Mat grayScaleImg;
         cv::cvtColor(imread(imageName, 1), grayScaleImg, COLOR_BGR2GRAY);
         grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
-
+        
         // Feed frame to Master
         const float* buffer = grayScaleImg.ptr<float>(0);
-        Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+        Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, frameId);
         voMaster.FeedNextFrame(frame);
         
         DeltaCameraPose delta = voMaster.GetLastDeltaPose();

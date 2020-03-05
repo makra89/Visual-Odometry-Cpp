@@ -12,9 +12,9 @@
 #include <Vocpp_Interface/DeltaCameraPose.h>
 #include <Vocpp_Interface/CameraPose.h>
 
-#include<Vocpp_FeatureHandling/FeatureDescriptor.h>
-#include<Vocpp_FeatureHandling/FeatureMatcher.h>
-#include<Vocpp_FeatureHandling/FeatureDetector.h>
+#include<Vocpp_FeatureHandling/HarrisEdgeDetector.h>
+#include<Vocpp_FeatureHandling/BriefDescriptor.h>
+#include<Vocpp_FeatureHandling/BruteForceBinaryMatcher.h>
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -71,23 +71,23 @@ public:
 
 private:
 
-    FeatureHandling::FeatureDetector* m_detector; ///< feature detector
-    FeatureHandling::FeatureDescriptor* m_descriptor; ///< feature descriptor
-    FeatureHandling::FeatureMatcher* m_matcher; ///< feature matcher
+    FeatureHandling::HarrisEdgeDetector m_detector; ///< feature detector
+    FeatureHandling::BriefDescriptor m_descriptor; ///< feature descriptor
+    FeatureHandling::BruteForceBinaryMatcher m_matcher; ///< feature matcher
 
     RansacOptimizer* m_optimizer;
     std::vector<EpipolarModel*> m_epiPolModels;
     LocalMap* m_localMap;
 
-    std::vector<cv::Mat> m_descriptionsLastFrame;  ///< descriptions computed for last frame
-    std::vector<cv::KeyPoint> m_keypointsLastFrame;  ///< keypoints detected in last frame
+    std::vector<FeatureHandling::BinaryFeatureDescription> m_descriptionsLastFrame;  ///< descriptions computed for last frame
+    std::vector<FeatureHandling::Feature> m_featuresLastFrame;  ///< features detected in last frame
     int m_lastFrameId;
 
     DeltaCameraPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
     CameraPose m_lastPose; ///< Current Pose in world coordinate system calculated for last frame
     cv::Mat1f m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
     cv::Mat1f m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
-
+    cv::Mat1f m_lastProjectionMat; ///< projection matrix of last frame defined as x_image = Rx_wcs - T
 };
 
 } //namespace DeltaPoseReconstruction

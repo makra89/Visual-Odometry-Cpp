@@ -45,7 +45,7 @@ public:
       * aligns the two coordinate system
       */
     int Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat1f& in_calibMat, std::vector<cv::Point2f>& out_inliersFirst, std::vector<cv::Point2f>& out_inliersSecond, cv::Mat1f& out_translation, cv::Mat1f& out_rotation);
+        const cv::Mat1f& in_calibMat, std::vector<int>& out_inlierMatchIndices, cv::Mat1f& out_translation, cv::Mat1f& out_rotation);
 
     /**
       * /brief Calculate the number of necessary model iterations

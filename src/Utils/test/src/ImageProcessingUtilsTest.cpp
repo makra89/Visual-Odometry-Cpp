@@ -20,7 +20,8 @@ TEST(ExtractLocalMaximaTest, BlockMatrix)
     cv::Mat1f ones = GetWindowKernel(5);
 
     std::vector<cv::Point2f> max;
-    ExtractLocalMaxima(ones, 2U, max, 0U);
+    std::vector<float> maxVal;
+    ExtractLocalMaxima(ones, 2U, max, maxVal, 0U);
     
     // We expect 5 * 5 maxima since all values are equal
     EXPECT_EQ(max.size(), 25);
@@ -33,7 +34,8 @@ TEST(ExtractLocalMaximaTest, OneMax)
     ones(2, 2) = 1.0;
 
     std::vector<cv::Point2f> max;
-    ExtractLocalMaxima(ones, 2U, max, 0U);
+    std::vector<float> maxVal;
+    ExtractLocalMaxima(ones, 2U, max, maxVal, 0U);
 
     // We expect one single maximum
     EXPECT_EQ(max.size(), 1);
@@ -50,7 +52,8 @@ TEST(ExtractLocalMaximaTest, TestDistanceCheck)
     ones(3, 2) = 4.0;
 
     std::vector<cv::Point2f> max;
-    ExtractLocalMaxima(ones, 0U, max, 0U);
+    std::vector<float> maxVal;
+    ExtractLocalMaxima(ones, 0U, max, maxVal, 0U);
 
     // Without any distance check we expect three maxima
     EXPECT_EQ(max.size(), 3);
@@ -63,7 +66,7 @@ TEST(ExtractLocalMaximaTest, TestDistanceCheck)
 
     max.clear();
     // Do it again, this time with a minimum distance
-    ExtractLocalMaxima(ones, 1U, max, 0U);
+    ExtractLocalMaxima(ones, 1U, max, maxVal, 0U);
 
     // Only one maximum survives
     EXPECT_EQ(max.size(), 1);
@@ -79,8 +82,9 @@ TEST(ExtractLocalMaximaTest, SubPixPrecisionTest)
     ones(2, 3) = 1.0;
 
     std::vector<cv::Point2f> max;
+    std::vector<float> maxVal;
     //Average of a pixel distance of 1
-    ExtractLocalMaxima(ones, 1U, max, 1U);
+    ExtractLocalMaxima(ones, 1U, max, maxVal, 1U);
 
     // Test averaged pixel position
     EXPECT_EQ(max.size(), 1);
@@ -90,7 +94,7 @@ TEST(ExtractLocalMaximaTest, SubPixPrecisionTest)
     max.clear();
     // Now test what happens when the averaging distance
     // exceeds the image range, we expect to have one maximum
-    ExtractLocalMaxima(ones, 1U, max, 3U);
+    ExtractLocalMaxima(ones, 1U, max, maxVal, 3U);
     EXPECT_EQ(max.size(), 1);
     EXPECT_FLOAT_EQ(max[0].y, 2.0);
     EXPECT_FLOAT_EQ(max[0].y, 2.0);

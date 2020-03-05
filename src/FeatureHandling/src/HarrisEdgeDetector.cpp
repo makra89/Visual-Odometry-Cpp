@@ -5,9 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include<HarrisEdgeDetector.h>
-#include<Vocpp_Utils/ImageProcessingUtils.h>
-#include <opencv2/imgproc.hpp>
+#include <Vocpp_FeatureHandling/HarrisEdgeDetector.h>
+#include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <iostream>
 
 namespace VOCPP
@@ -15,37 +14,19 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
-HarrisEdgeDetector::HarrisEdgeDetector()
-{
-}
 
-
-HarrisEdgeDetector* HarrisEdgeDetector::CreateInstance(const double in_relResponseThresh, const double in_k, const std::string& in_kernelName,
+HarrisEdgeDetector::HarrisEdgeDetector(const int in_maxNumFeatures, const float in_k, const std::string& in_kernelName,
     const int in_localMaxDistance, const int in_subPixelCalculationDistance)
 {
-    HarrisEdgeDetector* det = new HarrisEdgeDetector();
-
-    det->m_relResponseThresh = in_relResponseThresh;
-    det->m_k = in_k;
-    det->m_localMaxDistance = in_localMaxDistance;
-    det->m_subPixelCalculationDistance = in_subPixelCalculationDistance;
-
-    if (in_kernelName == "window")
-    {
-        det->m_smoothingKernel = Utils::GetWindowKernel(3);
-    }
-    else
-    {
-        std::cout << "[HarrisEdgeDetector]: Specified unknown smoothing kernel" << std::endl;
-        delete det;
-        det = NULL;
-    }
-
-    return det;
+    m_maxNumFeatures = in_maxNumFeatures;
+    m_k = in_k;
+    m_localMaxDistance = in_localMaxDistance;
+    m_subPixelCalculationDistance = in_subPixelCalculationDistance;
+    m_smoothingKernel = Utils::GetWindowKernel(3);
 }
 
 
-bool HarrisEdgeDetector::ExtractKeypoints(const Frame& in_frame, std::vector<cv::KeyPoint>& out_keypoints)
+bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feature>& out_features)
 {
     bool ret = true;
 
@@ -70,23 +51,26 @@ bool HarrisEdgeDetector::ExtractKeypoints(const Frame& in_frame, std::vector<cv:
     cv::Mat1f response = (weightedGradxX.mul(weightedGradyY) - weightedGradxY.mul(weightedGradxY))
         - ((trace).mul(trace) * m_k);
 
-    // Define response threshold using the relative response value    
-    double maxResponse = 0;
-    cv::minMaxLoc(response, NULL, &maxResponse);
-    const double thresh = maxResponse * m_relResponseThresh;
-    cv::threshold(response, response, thresh, maxResponse, cv::THRESH_TOZERO);
-
     // Extract local maxima
     std::vector<cv::Point2f> localMax;
-    Utils::ExtractLocalMaxima(response, m_localMaxDistance, localMax, m_subPixelCalculationDistance);
+    std::vector<float> localMaxVal;
+    Utils::ExtractLocalMaxima(response, m_localMaxDistance, localMax, localMaxVal,m_subPixelCalculationDistance);
 
+    int featureId = 0;
     for (auto point : localMax)
     {
-        out_keypoints.push_back(cv::KeyPoint(point, static_cast<float>(m_localMaxDistance)));
+        out_features.push_back(Feature{ featureId, in_frame.GetId(), point.x, point.y, localMaxVal[featureId] });
+        featureId++;
     }
-    
-    return ret;
 
+    // Sort according to feature response and throw away weakest features if we have more than we need
+    std::sort(out_features.begin(), out_features.end(), std::greater<Feature>());
+    if (out_features.size() > m_maxNumFeatures)
+    {
+        out_features.resize(m_maxNumFeatures);
+    }
+
+    return ret;
 }
 
 } //namespace FeatureHandling
