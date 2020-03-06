@@ -102,10 +102,11 @@ void FullFundamentalMat8pt::Test(const std::vector<cv::Point2f>& in_pointCorrLef
         // See https://www.robots.ox.ac.uk/~vgg/publications/1998/Torr98c/torr98c.pdf
         // There it is called "Luongs distance"
         cv::Mat1f epiLineLeft = in_solution * Utils::Point2fToMatHomCoordinates(in_pointCorrRight[i]);
+        // Note: This is a (1,3) vector!
         cv::Mat1f epiLineRight = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * in_solution;
 
         const float scale = 1.0F / (std::pow(epiLineLeft(0, 0), 2) + std::pow(epiLineLeft(1, 0), 2)) +
-            (1.0F / (std::pow(epiLineRight(0, 0), 2) + std::pow(epiLineRight(1, 0), 2)));
+            (1.0F / (std::pow(epiLineRight(0, 0), 2) + std::pow(epiLineRight(0, 1), 2)));
 
         cv::Mat1f dist = Utils::Point2fToMatHomCoordinates(in_pointCorrLeft[i]).t() * epiLineLeft;
 

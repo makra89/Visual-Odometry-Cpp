@@ -42,13 +42,13 @@ void Compute2DGradients(const cv::Mat1f& in_image, cv::Mat1f& out_gradX, cv::Mat
     cv::sepFilter2D(in_image, out_gradY, CV_32F, sobelRowY, sobelColY);
 }
 
-void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, const int in_subPixelCalculationDistance)
+void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, 
+    std::vector<float>& out_localMaximaValue, const int in_subPixelCalculationDistance)
 {
     cv::Mat1f dilatedImage;
     cv::Mat1f kernel = GetWindowKernel(2 * in_distance + 1);
     cv::dilate(in_image, dilatedImage, kernel);
 
-    const int patchSize = 1;
     for (int i = 0; i < in_image.size[1]; i++)
     {
         for (int j = 0; j < in_image.size[0]; j++)
@@ -58,8 +58,8 @@ void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::v
             // this pixel has the maximum value
             if (greaterZero && in_image(j, i) == dilatedImage(j, i))
             {
-
                 out_localMaxima.push_back(cv::Point2f(static_cast<float>(i), static_cast<float>(j)));
+                out_localMaximaValue.push_back(in_image(j, i));
             }
         }
     }
@@ -120,19 +120,6 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat1f& in_image, cv::Mat1f& out_p
 
     return ret;
 
-}
-
-void ComputeMatchingPoints(const std::vector<cv::KeyPoint>& in_left, const std::vector<cv::KeyPoint>& in_right, const std::vector<cv::DMatch>& in_matchesLeftRight,
-    const int in_imgIdx, std::vector<cv::Point2f>& out_leftPoints, std::vector<cv::Point2f>& out_rightPoints)
-{
-    for (auto match : in_matchesLeftRight)
-    {
-        if (match.imgIdx == in_imgIdx)
-        {
-            out_leftPoints.push_back(in_left[match.queryIdx].pt);
-            out_rightPoints.push_back(in_right[match.trainIdx].pt);
-        }
-    }
 }
 
 void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv::Point2f>& out_normPoints, cv::Mat1f& out_transform)

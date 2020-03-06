@@ -16,7 +16,21 @@ LocalMap::~LocalMap()
 {
 }
 
-void LocalMap::InsertLandmark(const cv::Vec3f& in_position, const cv::DMatch& in_match, int in_currentFrameId)
+void LocalMap::Initialize(const std::vector<cv::KeyPoint>& in_keypoints, const cv::Mat& in_projectionMat, const int in_currentFrameId)
+{
+    if (m_status == Status::TrackingLost)
+    {
+       // m_landmarks.clear();
+        
+       // for (auto keypoint : in_keypoints)
+       // {
+       //     m_landmarks.push_back(Landmark(in_currentFrameId, ))
+      //  }
+    }
+}
+
+/*
+void LocalMap::InsertLandmark(const LandmarkPosition& in_position, const cv::DMatch& in_match, int in_currentFrameId)
 {
     // Check whether this landmark has been observed before
     bool found = false;
@@ -34,7 +48,7 @@ void LocalMap::InsertLandmark(const cv::Vec3f& in_position, const cv::DMatch& in
     {
         m_landmarks.push_back(Landmark(in_position, in_currentFrameId, in_match.queryIdx, in_match.imgIdx, in_match.trainIdx));
     }
-}
+}*/
 
 } //namespace DeltaPoseReconstruction
 } //namespace VOCPP

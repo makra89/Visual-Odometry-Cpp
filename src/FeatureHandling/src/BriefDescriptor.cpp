@@ -5,7 +5,7 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include<BriefDescriptor.h>
+#include <Vocpp_FeatureHandling/BriefDescriptor.h>
 #include<Vocpp_Utils/NumericalUtilities.h>
 
 #include <iostream>
@@ -16,30 +16,19 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
-BriefDescriptor::BriefDescriptor()
+BriefDescriptor::BriefDescriptor(const int in_randomPairDrawRadius)
 {
+    m_randomPairDrawRadius = in_randomPairDrawRadius;
+    DrawPairs();
 }
 
 
-BriefDescriptor* BriefDescriptor::CreateInstance(const int in_randomPairDrawRadius, const int in_numRandomPairs)
-{
-    BriefDescriptor* descriptor = new BriefDescriptor();
-
-    descriptor->m_randomPairDrawRadius = in_randomPairDrawRadius;
-    descriptor->m_numRandomPairs = in_numRandomPairs;
-
-    descriptor->DrawPairs();
-
-    return descriptor;
-}
-
-
-bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vector<cv::KeyPoint>& in_keypoints,
-    std::vector<cv::Mat>& out_descriptions, std::vector<cv::KeyPoint>& out_validKeypoints)
+bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vector<Feature>& in_features,
+    std::vector<BinaryFeatureDescription>& out_descriptions)
 {
     bool ret = false;
 
-    if (in_keypoints.size() == 0)
+    if (in_features.size() == 0)
     {    
         std::cout << "[BriefDescriptor]: No keypoints found in provided frame" << std::endl;
         return false;
@@ -52,18 +41,19 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
     }
 
     // Loop over keypoints
-    for (auto key : in_keypoints)
+    for (auto feature : in_features)
     {
-        cv::Mat descriptions = cv::Mat::zeros(1, m_numRandomPairs, CV_8U);
+        std::vector<bool> description;
+        description.reserve(s_numRandomPairs);
         int numSucessfulPairs = 0U;
 
         // Loop over pairs
         for (auto pair : m_pairs)
         {
-            int indFirstX = static_cast<int>(pair(0, 0) + key.pt.x);
-            int indFirstY = static_cast<int>(pair(0, 1) + key.pt.y);
-            int indSecX = static_cast<int>(pair(0, 2) + key.pt.x);
-            int indSecY = static_cast<int>(pair(0, 3) + key.pt.y);
+            int indFirstX = static_cast<int>(pair.x1 + feature.imageCoordX);
+            int indFirstY = static_cast<int>(pair.y1 + feature.imageCoordY);
+            int indSecX = static_cast<int>(pair.x2 + feature.imageCoordX);
+            int indSecY = static_cast<int>(pair.y2 + feature.imageCoordY);
            
             // Check whether all indices are within range
             const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < in_frame.GetImage().size[1]);
@@ -74,8 +64,8 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
             if (inRangeFirstX && inRangeFirstY && inRangeSecX && inRangeSecY)
             {
                 // Compare intensities and append bin to description
-                uint8_t bin = in_frame.GetImage()(indFirstY, indFirstX) > in_frame.GetImage()(indSecY, indSecX) ? 1U : 0U;
-                descriptions.at<uint8_t>(0, numSucessfulPairs) = bin;
+                bool bin = in_frame.GetImage()(indFirstY, indFirstX) > in_frame.GetImage()(indSecY, indSecX) ? true : false;
+                description.push_back(bin);
                 numSucessfulPairs++;
             }
             else
@@ -84,10 +74,9 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
             }
         }
 
-        if (numSucessfulPairs == m_numRandomPairs)
+        if (numSucessfulPairs == s_numRandomPairs)
         {
-            out_descriptions.push_back(descriptions);
-            out_validKeypoints.push_back(key);
+            out_descriptions.push_back(BinaryFeatureDescription(feature, description));
             ret = true;
         }
     }
@@ -99,7 +88,7 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
 void BriefDescriptor::DrawPairs()
 {
     
-    for (int i = 0U; i < m_numRandomPairs; i++)
+    for (int i = 0U; i < s_numRandomPairs; i++)
     {
         // Draw index in range [-radius, radius]
         float index1 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
@@ -107,14 +96,7 @@ void BriefDescriptor::DrawPairs()
         float index3 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
         float index4 = Utils::DrawFloatInRange(-static_cast<float>(m_randomPairDrawRadius), static_cast<float>(m_randomPairDrawRadius));
 
-        cv::Mat1f pairs = cv::Mat1f::zeros(1, 4);
-
-        pairs(0, 0) = index1;
-        pairs(0, 1) = index2;
-        pairs(0, 2) = index3;
-        pairs(0, 3) = index4;
-
-        m_pairs.push_back(pairs);
+        m_pairs.push_back(PointPair{ index1, index2, index3, index4});
     }
 }
 

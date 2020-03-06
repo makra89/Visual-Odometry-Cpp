@@ -2,19 +2,14 @@
 
 add_library(Vocpp_FeatureHandling STATIC
     #include
-    ./include/Vocpp_FeatureHandling/FeatureDetector.h
-    ./include/Vocpp_FeatureHandling/FeatureDescriptor.h
-    ./include/Vocpp_FeatureHandling/FeatureMatcher.h
-    #src
-    ./src/FeatureDetector.cpp
-    ./src/FeatureDescriptor.cpp
-    ./src/FeatureMatcher.cpp
-    ./src/HarrisEdgeDetector.h
+    ./include/Vocpp_FeatureHandling/Common.h
+    ./include/Vocpp_FeatureHandling/BriefDescriptor.h
+    ./include/Vocpp_FeatureHandling/HarrisEdgeDetector.h
+    ./include/Vocpp_FeatureHandling/BruteForceBinaryMatcher.h
+    #src   
     ./src/HarrisEdgeDetector.cpp
-    ./src/BriefDescriptor.h
     ./src/BriefDescriptor.cpp
-    ./src/BruteForceMatcher.h
-    ./src/BruteForceMatcher.cpp
+    ./src/BruteForceBinaryMatcher.cpp
 )
 
 

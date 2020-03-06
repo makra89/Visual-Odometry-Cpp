@@ -7,6 +7,7 @@
 
 #include <Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
+#include <Vocpp_Utils/ConversionUtils.h>
 #include <FullFundamentalMat8pt.h>
 #include <PureTranslationModel.h>
 #include <NoMotionModel.h>
@@ -26,20 +27,18 @@ namespace VOCPP
 namespace DeltaPoseReconstruction
 {
 
-DeltaPoseReconstructor::DeltaPoseReconstructor()
+DeltaPoseReconstructor::DeltaPoseReconstructor() :
+    m_detector(),
+    m_descriptor(),
+    m_matcher()
 {
-    // Instantiate all feature handling members
-    m_detector = FeatureHandling::InstantiateFeatureDetector("Harris");
-    m_descriptor = FeatureHandling::InstantiateFeatureDescriptor("Brief");
-    m_matcher = FeatureHandling::InstantiateFeatureMatcher("BruteForce");
-
     // Instantiate optimizer with an initial estimate of 30% outlier ratio
     m_optimizer = new RansacOptimizer(0.3F, 0.01F);
     // Instantiate local map
-    m_localMap = new LocalMap();
+    //m_localMap = new LocalMap();
 
     m_epiPolModels.clear();
-    m_epiPolModels.push_back(new PureTranslationModel());
+    //m_epiPolModels.push_back(new PureTranslationModel());
     m_epiPolModels.push_back(new FullFundamentalMat8pt());
     m_epiPolModels.push_back(new NoMotionModel());
 
@@ -61,22 +60,13 @@ DeltaPoseReconstructor::~DeltaPoseReconstructor()
 
     delete m_localMap;
     delete m_optimizer;
-
-    delete m_matcher;
-    delete m_descriptor;
-    delete m_detector;
 }
 
 bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat)
 {
     bool ret = true;
 
-    if (m_detector == NULL || m_descriptor == NULL || m_matcher == NULL)
-    {
-        std::cout << "[DeltaPoseReconstructor]: Feature handling members could not be instantiated" << std::endl;
-        ret = false;
-    }
-    else if (!in_frame.IsValid())
+    if (!in_frame.IsValid())
     {
         std::cout << "[DeltaPoseReconstructor]: Invalid frame provided" << std::endl;
         ret = false;
@@ -88,11 +78,10 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
         tick.start();
 
         // Get features and descriptions
-        std::vector<cv::KeyPoint> keypoints;
-        ret = m_detector->ExtractKeypoints(in_frame, keypoints);
-        std::vector<cv::KeyPoint> validKeypoints;
-        std::vector<cv::Mat> descriptions;
-        ret = ret && m_descriptor->ComputeDescriptions(in_frame, keypoints, descriptions, validKeypoints);
+        std::vector<FeatureHandling::Feature> features;
+        ret = m_detector.ExtractFeatures(in_frame, features);
+        std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
+        ret = ret && m_descriptor.ComputeDescriptions(in_frame, features, descriptions);
         
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose the the center of the world coordinate system
@@ -104,22 +93,22 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             m_lastDeltaPose = DeltaCameraPose();
             m_lastOrientationWcs = cv::Mat1f::eye(3, 3);
             m_lastPosWcs = cv::Mat1f::zeros(3, 1);
+            Utils::GetProjectionMatrix(m_lastOrientationWcs, m_lastPosWcs, m_lastProjectionMat);
         }
         else if (ret && IsValidFrameId(m_lastFrameId))
         {
             // Get matches and draw them
-            std::vector<cv::DMatch> matches;
-            ret = m_matcher->MatchDesriptions(descriptions, m_descriptionsLastFrame, m_lastFrameId, matches);
+            std::vector<FeatureHandling::BinaryDescriptionMatch> matches;
+            ret = m_matcher.MatchDesriptions(descriptions, m_descriptionsLastFrame, matches);
             std::vector<cv::Point2f> pLastFrame;
             std::vector<cv::Point2f> pCurrFrame;
-            Utils::ComputeMatchingPoints(validKeypoints, m_keypointsLastFrame, matches, m_lastFrameId, pCurrFrame, pLastFrame);
+            FeatureHandling::GetMatchingPoints(matches, pCurrFrame, pLastFrame);
 
             // Calculate rotation and translation from the matches of the two frames
-            std::vector<cv::Point2f> pLastFrameInliers;
-            std::vector<cv::Point2f> pCurrFrameInliers;
+            std::vector<int> inlierMatchIndices;
             cv::Mat1f rotation;
             cv::Mat1f translation;
-            m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, pCurrFrameInliers, pLastFrameInliers, translation, rotation);
+            m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation);
 
             // Up to now the rotation and translation are in the camera coordinate system
             // We want to transform it into the body system in which the x-Axis is aligned
@@ -144,20 +133,38 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             Translation currentPosWcs = { m_lastPosWcs(0,0), m_lastPosWcs(1,0) , m_lastPosWcs(2,0) };
             m_lastPose = CameraPose(currentPosWcs, currentOrientWcs);
 
+            // Now calculate the current projection marix to be able to triangulate all features
+            cv::Mat1f currentProjMat;
+            Utils::GetProjectionMatrix(m_lastOrientationWcs, -m_lastOrientationWcs * m_lastPosWcs, currentProjMat);
+            // Triangulate all inliers
+            for (auto matchIdx : inlierMatchIndices)
+            {
+                cv::Mat1f invCalibMat = in_calibMat.inv();
+                cv::Mat1f currFrameCamCoordMat = invCalibMat * Utils::Point2fToMatHomCoordinates(pCurrFrame[matchIdx]);
+                cv::Mat1f lastFrameCamCoordMat = invCalibMat * Utils::Point2fToMatHomCoordinates(pLastFrame[matchIdx]);
+                cv::Point2f currFrameCamCoord(currFrameCamCoordMat(0, 0) / currFrameCamCoordMat(2, 0), currFrameCamCoordMat(1, 0) / currFrameCamCoordMat(2, 0));
+                cv::Point2f lastFrameCamCoord(lastFrameCamCoordMat(0, 0) / lastFrameCamCoordMat(2, 0), lastFrameCamCoordMat(1, 0) / lastFrameCamCoordMat(2, 0));
+
+                //cv::Point3f triangulatedPoint;
+                //Utils::PointTriangulationLinear(m_lastProjectionMat, currentProjMat, currFrameCamCoord, lastFrameCamCoord, triangulatedPoint);
+
+                //LandmarkPosition pos = { triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z };
+                //m_localMap->InsertLandmark(pos, matches[matchIdx], in_frame.GetId());
+            }
+
             tick.stop();
-            //std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
+            std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
             cv::Mat matchImage = in_frame.GetImageCopy();
             cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
 
-            for (int it = 0; it < pLastFrameInliers.size(); it++)
+            for (auto matchIdx : inlierMatchIndices)
             {
-
                 // Draw keypoints from current frame
-                cv::circle(matchImage, pCurrFrameInliers[it], 5, cv::Scalar(0, 0.0, 255.0), 2);
+                cv::circle(matchImage, pCurrFrame[matchIdx], 5, cv::Scalar(0, 0.0, 255.0), 2);
                 // Draw keypoints from last frame
-                cv::circle(matchImage, pLastFrameInliers[it], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
+                cv::circle(matchImage, pLastFrame[matchIdx], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
                 // Draw connecting line
-                cv::line(matchImage, pCurrFrameInliers[it], pLastFrameInliers[it], cv::Scalar(0.0, 0.0, 255.0), 2);
+                cv::line(matchImage, pCurrFrame[matchIdx], pLastFrame[matchIdx], cv::Scalar(0.0, 0.0, 255.0), 2);
             }
 
          
@@ -168,7 +175,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
         // Save last frame, descriptions and keypoints
         m_lastFrameId = in_frame.GetId();
         m_descriptionsLastFrame = std::move(descriptions);
-        m_keypointsLastFrame = std::move(validKeypoints);
+        m_featuresLastFrame = std::move(features);
     }
 
     return ret;

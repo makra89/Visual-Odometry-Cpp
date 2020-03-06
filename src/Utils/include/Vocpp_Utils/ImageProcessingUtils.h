@@ -40,7 +40,8 @@ void Compute2DGradients(const cv::Mat1f& in_image, cv::Mat1f& out_gradX, cv::Mat
     * \param[out] out_localMaxima vector of extracted local maxima
     * \param[in] in_subPixelCalculationDistance distance used for calculation of subPixel position of local maxima
 */
-void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, const int in_subPixelCalculationDistance = 0U);
+void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, 
+    std::vector<float>& out_localMaximaValue, const int in_subPixelCalculationDistance = 0U);
 
 /**
 * /brief Extract patch of an image around a center position with a given distance
@@ -52,22 +53,6 @@ void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::v
 * \param[in] in_pixelPosY center location in Y
 */
 bool ExtractImagePatchAroundPixelPos(const cv::Mat1f& in_image, cv::Mat1f& out_patch, const int in_distanceAroundCenter, const int in_pixelPosX, const int in_pixelPosY);
-
-
-/**
-* /brief Get image coordinates of matching keypoints. Matching points have the same index in the output vector.
-* Since in_matchesLeftRight might contain more than only the matches of left to right frame, an index in_imgIdx
-* corresponding to cv::DMatch::imgIdx has to be provided.
-*
-* \param[in] in_left keypoints with indices corresponding to cv::DMatch::queryIdx of matching vector
-* \param[in] in_right keypoints with indices corresponding to cv::DMatch::trainIdx of matching vector (extracted from frame with ID in_imgIdx)
-* \param[in] in_matchesLeftRight vector of DMatches containing matching keypoints
-* \param[in] in_imgIdx index of frame for which the matches shall be extracted from in_matchesLeftRight.
-* \param[out] out_leftPoints image coordinates of left keypoint vector
-* \param[out] out_rightPoints image coordinates of left keypoint vector
-*/
-void ComputeMatchingPoints(const std::vector<cv::KeyPoint>& in_left, const std::vector<cv::KeyPoint>& in_right, const std::vector<cv::DMatch>& in_matchesLeftRight,
-    const int in_imgIdx, std::vector<cv::Point2f>& out_leftPoints, std::vector<cv::Point2f>& out_rightPoints);
 
 /**
 * /brief Normalize set out points with respect to their distance to the origin. Resulting point set will be centered at (0, 0)
