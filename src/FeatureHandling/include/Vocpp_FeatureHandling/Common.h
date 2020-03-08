@@ -31,6 +31,7 @@ struct Feature
     float imageCoordY; ///< image coordinates along image Y axis [pixel]
     float response; ///< "Goodness" of feature
     float angle; ///< orientation of feature [rad]
+    float size; ///< diameter of the feature, i.e. size of patch that was taken into account during detection, always odd [pixels]
 
     /**
       * /brief Compare two features according to their response

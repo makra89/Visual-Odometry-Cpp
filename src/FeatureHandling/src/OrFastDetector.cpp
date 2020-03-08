@@ -14,13 +14,14 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
+// The version of the FAST feature detector used here uses a ring of 16 pixels around the center pixel (radius = 3 --> diameter 7)
+const int OrientedFastDetector::s_featureSize = 7;
 
 OrientedFastDetector::OrientedFastDetector(const float& in_relTresh, const int& in_numPixelsAboveThresh,
-    const int& in_harrisBlockSize,  const int& in_distanceForAngleDet) :
+    const int& in_harrisBlockSize) :
     m_relTresh(in_relTresh),
     m_numPixelsAboveThresh(in_numPixelsAboveThresh),
     m_harrisBlockSize(in_harrisBlockSize),
-    m_distanceForAngleDet(in_distanceForAngleDet),
     m_harrisDetector()
 {
 }
@@ -53,7 +54,7 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
         // Thin out neighbouring features, we use the same radius as the one used for calculating the angle
         std::vector<cv::Point2f> localMax;
         std::vector<float> localMaxVal;
-        Utils::ExtractLocalMaxima(fastScore, m_distanceForAngleDet, localMax, localMaxVal, false);
+        Utils::ExtractLocalMaxima(fastScore, (s_featureSize - 1) / 2, localMax, localMaxVal, false);
         
         // Calculate Harris response for all surviving features
         int featureId = 0;
@@ -62,8 +63,8 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
             float response = m_harrisDetector.ComputeScore(in_frame.GetImage(), static_cast<int>(max.x)
                 , static_cast<int>(max.y), m_harrisBlockSize);
             
-            cv::Mat1f patch = cv::Mat1f::zeros(2 * m_distanceForAngleDet + 1, 2 * m_distanceForAngleDet + 1);
-            bool patchExtractSuccess = Utils::ExtractImagePatchAroundPixelPos(in_frame.GetImage(), patch, m_distanceForAngleDet,
+            cv::Mat1f patch = cv::Mat1f::zeros(s_featureSize, s_featureSize);
+            bool patchExtractSuccess = Utils::ExtractImagePatchAroundPixelPos(in_frame.GetImage(), patch, (s_featureSize - 1) / 2,
                 static_cast<int>(max.x), static_cast<int>(max.y));
 
             // Calculate angle if successful and create feature
@@ -72,7 +73,7 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
                 cv::Moments patchMoments = cv::moments(patch);
                 float angle = static_cast<float>(std::atan2(patchMoments.m01, patchMoments.m10));
 
-                out_features.push_back(Feature{ featureId, in_frame.GetId(), max.x, max.y, response, angle});
+                out_features.push_back(Feature{ featureId, in_frame.GetId(), max.x, max.y, response, angle, static_cast<float>(s_featureSize)});
                 featureId++;
             }
         }

@@ -52,7 +52,6 @@ namespace DeltaPoseReconstruction
         int N = CalculateNecessaryIterations(0.95F, m_outlierRatio, model->GetNumCorrespondences());
         for (int modelIt = 0; modelIt < N; modelIt++)
         {
-                        
             // Randomly draw a set of correspondences
             std::vector<cv::Point2f> corrFirstDrawn;
             std::vector<cv::Point2f> corrSecondDrawn;

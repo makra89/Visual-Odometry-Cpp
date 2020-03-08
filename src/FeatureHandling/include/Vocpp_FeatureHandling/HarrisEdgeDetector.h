@@ -39,6 +39,13 @@ public:
       */
     bool ExtractFeatures(const Frame& in_frame, std::vector<Feature>& out_features);
 
+    /**
+      * /brief Compute Harris score for a single pixel, the Harris response is averaged over a patch with size in_blockSize
+      *
+      * \return Harris score if successful, -1.0F if not (edge would have a score > 0)
+      */
+    float ComputeScore(const cv::Mat1f& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize);
+
 private:
     // It is not allowed to copy the detector directly
     HarrisEdgeDetector& operator=(const HarrisEdgeDetector&);

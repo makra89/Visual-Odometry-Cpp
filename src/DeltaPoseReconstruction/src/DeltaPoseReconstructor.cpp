@@ -79,7 +79,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
 
         // Get features and descriptions
         std::vector<FeatureHandling::Feature> features;
-        ret = m_detector.ExtractFeatures(in_frame, features);
+        // TODO remove number of features here
+        ret = m_detector.ExtractFeatures(in_frame, 200, features);
         std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
         ret = ret && m_descriptor.ComputeDescriptions(in_frame, features, descriptions);
         
@@ -151,12 +152,11 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 //LandmarkPosition pos = { triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z };
                 //m_localMap->InsertLandmark(pos, matches[matchIdx], in_frame.GetId());
             }
-
+            
             tick.stop();
             std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
             cv::Mat matchImage = in_frame.GetImageCopy();
             cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
-
             for (auto matchIdx : inlierMatchIndices)
             {
                 // Draw keypoints from current frame
@@ -167,7 +167,6 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 cv::line(matchImage, pCurrFrame[matchIdx], pLastFrame[matchIdx], cv::Scalar(0.0, 0.0, 255.0), 2);
             }
 
-         
             cv::imshow("Optical Flow", matchImage);
             cv::waitKey(1);
         }

@@ -29,7 +29,7 @@ public:
       * /brief Constructor
       */
     OrientedFastDetector(const float& in_relTresh=0.3, const int& in_numPixelsAboveThresh=12,
-        const int& in_harrisBlockSize=3, const int& in_distanceForAngleDet=3);
+        const int& in_harrisBlockSize=3);
 
     /**
       * /brief Extract features from a provided grayscale image frame.
@@ -62,8 +62,9 @@ private:
     float m_relTresh; ///< relative value for pixel intensity comparison
     int m_numPixelsAboveThresh; ///< necessary number of pixels above or below threshold for a detection
     int m_harrisBlockSize; ///< size of patch over which harris detector averages gradients (has to be odd number)
-    int m_distanceForAngleDet; ///< used for calculating the image patch out of which the feature angle will be calculated
     HarrisEdgeDetector m_harrisDetector; ///< Harris Edge detector, used to compute feature scores
+
+    static const int s_featureSize; ///< path size which is taken into account during feature detection and orientation determination
 };
 
 } //namespace FeatureHandling
