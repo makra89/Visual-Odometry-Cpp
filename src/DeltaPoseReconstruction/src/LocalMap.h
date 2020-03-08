@@ -29,7 +29,7 @@ struct LandmarkPosition
 };
 
 /**
-  * /brief Landmark represented by a 3D position, stores its occurence with respect to frame and keypoint IDs
+  * \brief Landmark represented by a 3D position, stores its occurence with respect to frame and keypoint IDs
   */
 class Landmark
 {
@@ -37,7 +37,7 @@ class Landmark
 public:
 
     /**
-      * /brief Constructor of a new landmark
+      * \brief Constructor of a new landmark
       */
     Landmark(int in_currentFrameId, int in_currentKeypointId, const cv::Mat1f& in_currentProjectionMat)// : 
         //m_lastSeenFrameId(in_currentFrameId),
@@ -49,7 +49,7 @@ public:
     }
 
     /**
-      * /brief Update the landmark with a new occurence in a frame
+      * \brief Update the landmark with a new occurence in a frame
       */
     void UpdateLandmark(const LandmarkPosition& in_position, int in_currentFrameId, int in_currentKeypointId)
     {
@@ -68,7 +68,7 @@ public:
     }
 
     /**
-      * /brief Queries whether a landmark is visible in a certain frame as a keypoint with a specific Id
+      * \brief Queries whether a landmark is visible in a certain frame as a keypoint with a specific Id
       */
     bool IsPresentInFrame(int in_frameId, int in_keypointId) const
     {
@@ -91,7 +91,7 @@ private:
 };
 
 /**
-  * /brief Collection of Landmarks
+  * \brief Collection of Landmarks
   */
 class LocalMap
 {
@@ -106,7 +106,7 @@ public:
     };
     
     /**
-      * /brief Constructor of an empty local map
+      * \brief Constructor of an empty local map
       */
     LocalMap(const int in_minNumberOfTrackedLandmarks) : 
         m_landmarks(), 
@@ -123,7 +123,7 @@ public:
     void Initialize(const std::vector<cv::KeyPoint>& in_keypoints, const cv::Mat& in_projectionMat, const int in_currentFrameId);
     
     /**
-      * /brief Insert landmark given a cv::DMatch and a frame Id. It will be checked whether this landmark has been seen before.
+      * \brief Insert landmark given a cv::DMatch and a frame Id. It will be checked whether this landmark has been seen before.
       * If it has been seen before, the existing landmark will be updated.
       */
     //void InsertSetOfMatches(const std::vector<cv::DMatch>& in_match, const int in_currentFrameId);
@@ -137,7 +137,7 @@ public:
     }
     
     /**
-      * /brief Get all stored landmarks
+      * \brief Get all stored landmarks
       */
     const std::vector<Landmark>& GetLandmarks() const
     {
