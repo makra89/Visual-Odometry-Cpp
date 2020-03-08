@@ -12,7 +12,7 @@
 #include <Vocpp_Interface/DeltaCameraPose.h>
 #include <Vocpp_Interface/CameraPose.h>
 
-#include<Vocpp_FeatureHandling/HarrisEdgeDetector.h>
+#include<Vocpp_FeatureHandling/OrFastDetector.h>
 #include<Vocpp_FeatureHandling/BriefDescriptor.h>
 #include<Vocpp_FeatureHandling/BruteForceBinaryMatcher.h>
 
@@ -71,7 +71,7 @@ public:
 
 private:
 
-    FeatureHandling::HarrisEdgeDetector m_detector; ///< feature detector
+    FeatureHandling::OrientedFastDetector m_detector; ///< feature detector
     FeatureHandling::BriefDescriptor m_descriptor; ///< feature descriptor
     FeatureHandling::BruteForceBinaryMatcher m_matcher; ///< feature matcher
 
