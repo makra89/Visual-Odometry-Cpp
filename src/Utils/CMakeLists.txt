@@ -6,11 +6,13 @@ add_library(Vocpp_Utils STATIC
     ./include/Vocpp_Utils/NumericalUtilities.h
     ./include/Vocpp_Utils/ConversionUtils.h
     ./include/Vocpp_Utils/FrameRotations.h
+    ./include/Vocpp_Utils/IntImage.h
     #src
     ./src/ImageProcessingUtils.cpp
     ./src/NumericalUtilities.cpp
     ./src/ConversionUtils.cpp
     ./src/FrameRotations.cpp
+    ./src/IntImage.cpp
 )
 
 

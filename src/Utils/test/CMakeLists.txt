@@ -4,6 +4,7 @@ add_executable(Vocpp_UtilsTest
     src/ImageProcessingUtilsTest.cpp
     src/NumericalUtilitiesTest.cpp
     src/FrameRotationsTest.cpp
+    src/IntImageTest.cpp
     src/main.cpp
 )
 

@@ -17,7 +17,7 @@ namespace FeatureHandling
 {
 
 /**
-  * /brief Feature detector class that uses the Harris Edge detection algorithm.
+  * \brief Feature detector class that uses the Harris Edge detection algorithm.
   * The detector will return the features sorted according to their response. 
   * A maximum number of returned features can be specified.
   */
@@ -25,13 +25,13 @@ class HarrisEdgeDetector
 {
 public:
     /**
-      * /brief Constructor
+      * \brief Constructor
       */
     HarrisEdgeDetector(const int in_maxNumFeatures = 150, const float in_k = 0.06, const std::string& in_kernelName = "window",
         const int in_localMaxDistance = 10U, const int in_subPixelCalculationDistance = 5U);
 
     /**
-      * /brief Extract features from a provided grayscale image frame.
+      * \brief Extract features from a provided grayscale image frame.
       *
       * \param[in] in_frame image frame from which features shall be extracted
       * \param[out] out_features features extracted from the frame
@@ -40,7 +40,7 @@ public:
     bool ExtractFeatures(const Frame& in_frame, std::vector<Feature>& out_features);
 
     /**
-      * /brief Compute Harris score for a single pixel, the Harris response is averaged over a patch with size in_blockSize
+      * \brief Compute Harris score for a single pixel, the Harris response is averaged over a patch with size in_blockSize
       *
       * \return Harris score if successful, -1.0F if not (edge would have a score > 0)
       */

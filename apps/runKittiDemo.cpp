@@ -57,7 +57,6 @@ int main(int argc, char** argv)
         grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
         
         // Feed frame to Master
-        const float* buffer = grayScaleImg.ptr<float>(0);
         Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, frameId);
         voMaster.FeedNextFrame(frame);
         
