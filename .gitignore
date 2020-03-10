@@ -31,3 +31,6 @@
 *.out
 *.app
 /3rdParty/OpenCV-Download/CMakeLists.txt
+
+# CMAKE generated headers for test input
+/src/FeatureHandling/test/src/input.h

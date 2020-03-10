@@ -27,7 +27,7 @@ public:
     /**
       * \brief Constructor
       */
-    HarrisEdgeDetector(const int in_maxNumFeatures = 150, const float in_k = 0.06, const std::string& in_kernelName = "window",
+    HarrisEdgeDetector(const int in_maxNumFeatures = 150, const float in_k = 0.04, const std::string& in_kernelName = "window",
         const int in_localMaxDistance = 10U, const int in_subPixelCalculationDistance = 5U);
 
     /**

@@ -30,3 +30,7 @@ target_link_libraries(Vocpp_FeatureHandling
         Vocpp_Utils
         ${OpenCV_LIBS} 
 )
+
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()

@@ -28,7 +28,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrientedFastDetector(const float& in_relTresh=0.3, const int& in_numPixelsAboveThresh=12,
+    OrientedFastDetector(const float& in_relTresh=0.2, const int& in_numPixelsAboveThresh=12,
         const int& in_harrisBlockSize=3);
 
     /**
