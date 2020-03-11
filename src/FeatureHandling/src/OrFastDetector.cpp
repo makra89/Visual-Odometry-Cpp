@@ -69,8 +69,8 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
             if (patchExtractSuccess)
             {
                 cv::Moments patchMoments = cv::moments(patch);
-                const float centroidX = patchMoments.m10 / patchMoments.m00;
-                const float centroidY = patchMoments.m01 / patchMoments.m00;
+                const float centroidX = static_cast<float>(patchMoments.m10 / patchMoments.m00);
+                const float centroidY = static_cast<float>(patchMoments.m01 / patchMoments.m00);
                 const float vecX = centroidX - (s_featureSize - 1) / 2;
                 const float vecY = centroidY - (s_featureSize - 1) / 2;
                 float angle = static_cast<float>(std::atan2(vecY, vecX));
@@ -136,7 +136,6 @@ int OrientedFastDetector::CheckIntensities(const cv::Mat1f& in_image, const int&
 
 int OrientedFastDetector::CheckAll(const cv::Mat1f& in_image, const int& in_coordX, const int& in_coordY)
 {
-    int ret = 0;
     const float nucleusInt = in_image(in_coordY, in_coordX);
     
     // Pixel 1

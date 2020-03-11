@@ -44,8 +44,6 @@ bool IntImage::GetAreaAroundPixel(const int& in_centRow, const int& in_centCol, 
 
 void IntImage::FillIntImage(const cv::Mat1f& in_image)
 {
-    float runningArea = 0.0;
-
     for (int i = 0; i < in_image.cols; i++)
     {
         for (int j = 0; j < in_image.rows; j++)
