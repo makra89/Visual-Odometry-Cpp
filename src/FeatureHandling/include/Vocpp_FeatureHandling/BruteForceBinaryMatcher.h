@@ -28,7 +28,7 @@ public:
     /**
       * /brief Constructor
       */
-    BruteForceBinaryMatcher(const int in_maxDistance=50U);
+    BruteForceBinaryMatcher(const int in_maxDistance=40U);
 
     /**
       * /brief Compares binary feature descriptions and return matches.
