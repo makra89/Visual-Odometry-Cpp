@@ -80,10 +80,10 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
         // Get features and descriptions
         std::vector<FeatureHandling::Feature> features;
         // TODO remove number of features here
-        ret = m_detector.ExtractFeatures(in_frame, 200, features);
+        ret = m_detector.ExtractFeatures(in_frame, 300, features);
         std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
         ret = ret && m_descriptor.ComputeDescriptions(in_frame, features, descriptions);
-        
+
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose the the center of the world coordinate system
         // TODO: Set it to the last valid pose
@@ -104,7 +104,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             std::vector<cv::Point2f> pLastFrame;
             std::vector<cv::Point2f> pCurrFrame;
             FeatureHandling::GetMatchingPoints(matches, pCurrFrame, pLastFrame);
-
+           
             // Calculate rotation and translation from the matches of the two frames
             std::vector<int> inlierMatchIndices;
             cv::Mat1f rotation;
@@ -170,7 +170,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             cv::imshow("Optical Flow", matchImage);
             cv::waitKey(1);
         }
-
+        
         // Save last frame, descriptions and keypoints
         m_lastFrameId = in_frame.GetId();
         m_descriptionsLastFrame = std::move(descriptions);
