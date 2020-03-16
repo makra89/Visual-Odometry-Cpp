@@ -44,7 +44,7 @@ public:
       * \param[in] in_trainingMode specifies whether training mode shall be activated (see class description for explanation)
       */
     BriefDescriptor(const int& in_randomPairDrawRadius = 15, const int& in_areaDetRadius = 2, 
-        const bool& in_trainingMode = true, std::string in_filePath = "Brief_TrainedPattern.txt", const int& in_numFramesForTraining = 2);
+        const bool& in_trainingMode = false, std::string in_filePath = "Brief_TrainedPattern.txt", const int& in_numFramesForTraining = 1000);
 
     /**
       * /brief Compute binary feature descriptions for provided frame. The returned description IDs will
