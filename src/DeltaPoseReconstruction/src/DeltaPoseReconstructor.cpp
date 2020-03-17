@@ -80,7 +80,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
         // Get features and descriptions
         std::vector<FeatureHandling::Feature> features;
         // TODO remove number of features here
-        ret = m_detector.ExtractFeatures(in_frame, 300, features);
+        ret = m_detector.ExtractFeatures(in_frame, 500, features);
         std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
         ret = ret && m_descriptor.ComputeDescriptions(in_frame, features, descriptions);
 

@@ -14,7 +14,7 @@
 
 #include<Vocpp_FeatureHandling/OrFastDetector.h>
 #include<Vocpp_FeatureHandling/BriefDescriptor.h>
-#include<Vocpp_FeatureHandling/BruteForceBinaryMatcher.h>
+#include<Vocpp_FeatureHandling/LshMatcher.h>
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
@@ -73,7 +73,7 @@ private:
 
     FeatureHandling::OrientedFastDetector m_detector; ///< feature detector
     FeatureHandling::BriefDescriptor m_descriptor; ///< feature descriptor
-    FeatureHandling::BruteForceBinaryMatcher m_matcher; ///< feature matcher
+    FeatureHandling::LshMatcher m_matcher; ///< feature matcher
 
     RansacOptimizer* m_optimizer;
     std::vector<EpipolarModel*> m_epiPolModels;
