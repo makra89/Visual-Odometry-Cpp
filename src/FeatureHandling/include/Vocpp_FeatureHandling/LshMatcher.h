@@ -28,7 +28,7 @@ public:
     /**
       * \brief Constructor
       */
-    LshMatcher(const int& in_maxDistance = 40, const int& in_numHashFuncs = 30, const int& in_lengthHashFunc = 10,
+    LshMatcher(const int& in_maxDistance = 50, const int& in_numHashFuncs = 30, const int& in_lengthHashFunc = 15,
         const int& in_lengthDescription = 256);
 
     /**
