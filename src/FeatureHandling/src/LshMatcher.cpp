@@ -48,7 +48,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
             int bucketId = 0;
             for (int k = 0; k < m_lengthHashFunc; k++)
             {
-                bucketId += descFirst.GetDescription()[hashFunc[k]] * std::pow(2, k);
+                bucketId += descFirst.GetDescription()[hashFunc[k]] * std::pow(2U, k);
             }
 
             if (bucketTable.count(bucketId) > 0)
@@ -127,7 +127,7 @@ void LshMatcher::GenerateHashFuncs()
     }
 }
 
-bool LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::map<int, std::vector<BinaryFeatureDescription>>& out_bucketTable)
+void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::map<int, std::vector<BinaryFeatureDescription>>& out_bucketTable)
 {
     for (auto description : in_desc)
     {
@@ -136,7 +136,7 @@ bool LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& 
             int bucketId = 0;
             for (int k = 0; k < m_lengthHashFunc; k++)
             {
-                bucketId += description.GetDescription()[hashFunc[k]] * std::pow(2, k);
+                bucketId += description.GetDescription()[hashFunc[k]] * std::pow(2U, k);
             }
             
             if (out_bucketTable.count(bucketId) > 0)

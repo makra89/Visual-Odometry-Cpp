@@ -42,47 +42,27 @@ void Compute2DGradients(const cv::Mat1f& in_image, cv::Mat1f& out_gradX, cv::Mat
     cv::sepFilter2D(in_image, out_gradY, CV_32F, sobelRowY, sobelColY);
 }
 
-void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, 
-    std::vector<float>& out_localMaximaValue, const int in_subPixelCalculationDistance)
+void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<LocalMaximum>& out_localMaxima)
 {
     cv::Mat1f dilatedImage;
     cv::Mat1f kernel = GetWindowKernel(2 * in_distance + 1);
     cv::dilate(in_image, dilatedImage, kernel);
-
-    for (int i = 0; i < in_image.size[1]; i++)
+    
+    for (int i = 0; i < in_image.size[0]; i++)
     {
-        for (int j = 0; j < in_image.size[0]; j++)
+        const float* rowImage = in_image.ptr<float>(i);
+        const float* rowDilImage = dilatedImage.ptr<float>(i);
+        for (int j = 0; j < in_image.size[1]; j++)
         {
-            bool greaterZero = in_image(j, i) > 0.0;
+            bool greaterZero = rowImage[j] > 0.0;
             // If image value is equal to the dilated value (maximum value of surrounding pixels)
             // this pixel has the maximum value
-            if (greaterZero && in_image(j, i) == dilatedImage(j, i))
+            if (greaterZero && rowImage[j] == rowDilImage[j])
             {
-                out_localMaxima.push_back(cv::Point2f(static_cast<float>(i), static_cast<float>(j)));
-                out_localMaximaValue.push_back(in_image(j, i));
+                out_localMaxima.push_back(LocalMaximum{ static_cast<float>(j), static_cast<float>(i),rowImage[j]});
             }
         }
     }
-
-    // If specified, try to calculate sub-pixel position by looking at centroids
-    if (in_subPixelCalculationDistance > 0U)
-    {
-        for (auto pos = out_localMaxima.begin(); pos != out_localMaxima.end(); pos++)
-        {
-            const int patchDim = 2 * in_subPixelCalculationDistance + 1U;
-            cv::Mat1f patch = cv::Mat1f::zeros(patchDim, patchDim);
-            bool subPixSuccess = ExtractImagePatchAroundPixelPos(in_image, patch, in_subPixelCalculationDistance, static_cast<int>(pos->x), static_cast<int>(pos->y));
-
-            if (subPixSuccess)
-            {
-                cv::Moments patchMoments = cv::moments(patch);
-
-                pos->x = pos->x - in_subPixelCalculationDistance + static_cast<float>(patchMoments.m10 / patchMoments.m00);
-                pos->y = pos->y - in_subPixelCalculationDistance + static_cast<float>(patchMoments.m01 / patchMoments.m00);
-            }
-        }
-    }
-
 }
 
 bool ExtractImagePatchAroundPixelPos(const cv::Mat1f& in_image, cv::Mat1f& out_patch, const int in_distanceAroundCenter, const int in_pixelPosX, const int in_pixelPosY)

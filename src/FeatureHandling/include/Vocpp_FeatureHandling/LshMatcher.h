@@ -13,6 +13,7 @@
 #include <Vocpp_FeatureHandling/Common.h>
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
 #include <map>
+
 namespace VOCPP
 {
 namespace FeatureHandling
@@ -49,7 +50,7 @@ private:
 
     void GenerateHashFuncs();
 
-    bool IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::map<int, std::vector<BinaryFeatureDescription>>& out_bucketTable);
+    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::map<int, std::vector<BinaryFeatureDescription>>& out_bucketTable);
     /**
       * \brief Compute Hamming Distance for two BRIEF descriptions
       *

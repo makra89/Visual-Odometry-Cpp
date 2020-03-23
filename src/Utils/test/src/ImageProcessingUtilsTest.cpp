@@ -19,17 +19,16 @@ TEST(ExtractLocalMaximaTest, BlockMatrix)
     // Construct frame filled with ones
     cv::Mat1f ones = GetWindowKernel(5);
 
-    std::vector<cv::Point2f> max;
-    std::vector<float> maxVal;
-    ExtractLocalMaxima(ones, 2U, max, maxVal, 0U);
+    std::vector<LocalMaximum> max;
+    ExtractLocalMaxima(ones, 2U, max);
     
     // We expect 5 * 5 maxima since all values are equal
     EXPECT_EQ(max.size(), 25);
 
     // All values should be equal to 1.0
-    for (auto val : maxVal)
+    for (auto val : max)
     {
-        EXPECT_FLOAT_EQ(val, 1.0);
+        EXPECT_FLOAT_EQ(val.value, 1.0);
     }
 }
 
@@ -39,15 +38,14 @@ TEST(ExtractLocalMaximaTest, OneMax)
     cv::Mat1f ones = cv::Mat1f::zeros(5, 5);
     ones(2, 2) = 1.0;
 
-    std::vector<cv::Point2f> max;
-    std::vector<float> maxVal;
-    ExtractLocalMaxima(ones, 2U, max, maxVal, 0U);
+    std::vector<LocalMaximum> max;
+    ExtractLocalMaxima(ones, 2U, max);
 
     // We expect one single maximum
     EXPECT_EQ(max.size(), 1);
-    EXPECT_FLOAT_EQ(max[0].x, 2.0);
-    EXPECT_FLOAT_EQ(max[0].y, 2.0);
-    EXPECT_FLOAT_EQ(maxVal[0], 1.0);
+    EXPECT_FLOAT_EQ(max[0].posX, 2.0);
+    EXPECT_FLOAT_EQ(max[0].posY, 2.0);
+    EXPECT_FLOAT_EQ(max[0].value, 1.0);
 }
 
 TEST(ExtractLocalMaximaTest, TestDistanceCheck)
@@ -58,58 +56,30 @@ TEST(ExtractLocalMaximaTest, TestDistanceCheck)
     ones(2, 3) = 3.0;
     ones(3, 2) = 4.0;
 
-    std::vector<cv::Point2f> max;
-    std::vector<float> maxVal;
-    ExtractLocalMaxima(ones, 0U, max, maxVal, 0U);
+    std::vector<LocalMaximum> max;
+    ExtractLocalMaxima(ones, 0U, max);
 
     // Without any distance check we expect three maxima
     EXPECT_EQ(max.size(), 3);
-    EXPECT_FLOAT_EQ(max[0].x, 2.0);
-    EXPECT_FLOAT_EQ(max[0].y, 2.0);
-    EXPECT_FLOAT_EQ(maxVal[0], 1.0);
-    EXPECT_FLOAT_EQ(max[1].x, 2.0);
-    EXPECT_FLOAT_EQ(max[1].y, 3.0);
-    EXPECT_FLOAT_EQ(maxVal[1], 4.0);
-    EXPECT_FLOAT_EQ(max[2].x, 3.0);
-    EXPECT_FLOAT_EQ(max[2].y, 2.0);
-    EXPECT_FLOAT_EQ(maxVal[2], 3.0);
+    EXPECT_FLOAT_EQ(max[0].posX, 2.0);
+    EXPECT_FLOAT_EQ(max[0].posY, 2.0);
+    EXPECT_FLOAT_EQ(max[0].value, 1.0);
+    EXPECT_FLOAT_EQ(max[1].posX, 2.0);
+    EXPECT_FLOAT_EQ(max[1].posY, 3.0);
+    EXPECT_FLOAT_EQ(max[1].value, 4.0);
+    EXPECT_FLOAT_EQ(max[2].posX, 3.0);
+    EXPECT_FLOAT_EQ(max[2].posY, 2.0);
+    EXPECT_FLOAT_EQ(max[2].value, 3.0);
 
     max.clear();
-    maxVal.clear();
     // Do it again, this time with a minimum distance
-    ExtractLocalMaxima(ones, 1U, max, maxVal, 0U);
+    ExtractLocalMaxima(ones, 1U, max);
 
     // Only one maximum survives
     EXPECT_EQ(max.size(), 1);
-    EXPECT_FLOAT_EQ(max[0].x, 2.0);
-    EXPECT_FLOAT_EQ(max[0].y, 3.0);
-    EXPECT_FLOAT_EQ(maxVal[0], 4.0);
-}
-
-TEST(ExtractLocalMaximaTest, SubPixPrecisionTest)
-{
-    // Construct image with two maxima
-    cv::Mat1f ones = cv::Mat1f::zeros(5, 5);
-    ones(2, 2) = 2.0;
-    ones(2, 3) = 1.0;
-
-    std::vector<cv::Point2f> max;
-    std::vector<float> maxVal;
-    //Average of a pixel distance of 1
-    ExtractLocalMaxima(ones, 1U, max, maxVal, 1U);
-
-    // Test averaged pixel position
-    EXPECT_EQ(max.size(), 1);
-    EXPECT_NEAR(max[0].x, 2.33, 1e-2);
-    EXPECT_FLOAT_EQ(max[0].y, 2.0);
-
-    max.clear();
-    // Now test what happens when the averaging distance
-    // exceeds the image range, we expect to have one maximum
-    ExtractLocalMaxima(ones, 1U, max, maxVal, 3U);
-    EXPECT_EQ(max.size(), 1);
-    EXPECT_FLOAT_EQ(max[0].y, 2.0);
-    EXPECT_FLOAT_EQ(max[0].y, 2.0);
+    EXPECT_FLOAT_EQ(max[0].posX, 2.0);
+    EXPECT_FLOAT_EQ(max[0].posY, 3.0);
+    EXPECT_FLOAT_EQ(max[0].value, 4.0);
 }
 
 // Test essential matrix decomposition with translation only
