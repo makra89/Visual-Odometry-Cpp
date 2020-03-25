@@ -12,7 +12,7 @@
 #include <opencv2/core/core.hpp>
 #include <Vocpp_FeatureHandling/Common.h>
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
-#include <map>
+#include <unordered_map>
 
 namespace VOCPP
 {
@@ -50,7 +50,7 @@ private:
 
     void GenerateHashFuncs();
 
-    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::map<int, std::vector<BinaryFeatureDescription>>& out_bucketTable);
+    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<int, std::vector<int>>& out_bucketTable);
     /**
       * \brief Compute Hamming Distance for two BRIEF descriptions
       *

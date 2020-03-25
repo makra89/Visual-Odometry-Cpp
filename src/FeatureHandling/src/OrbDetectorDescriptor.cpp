@@ -67,7 +67,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
             std::vector<Feature> octaveFeatures;
             //cv::TickMeter tick;
            // tick.start();
-            m_fastDetector.ExtractFeatures(octaveFrame, in_maxNumFeatures * octave.featureRatio, octaveFeatures);
+            m_fastDetector.ExtractFeatures(octaveFrame, static_cast<int>(in_maxNumFeatures * octave.featureRatio), octaveFeatures);
             //tick.stop();
             //std::cout << "[ORB] OFast " << tick.getTimeMilli() << std::endl;
             //cv::TickMeter tick2;
@@ -79,7 +79,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
             for (auto desc : octaveDescriptions)
             {
                 Feature outFeature{ featureId, desc.GetFeature().frameId,
-                    1. / octave.scale * desc.GetFeature().imageCoordX, 1. / octave.scale * desc.GetFeature().imageCoordY,
+                    1.F / octave.scale * desc.GetFeature().imageCoordX, 1.F / octave.scale * desc.GetFeature().imageCoordY,
                     desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / octave.scale, octave.scale };
 
                 out_descriptions.push_back(BinaryFeatureDescription(outFeature, desc.GetDescription()));

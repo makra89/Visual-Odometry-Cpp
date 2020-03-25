@@ -64,12 +64,12 @@ TEST(ExtractLocalMaximaTest, TestDistanceCheck)
     EXPECT_FLOAT_EQ(max[0].posX, 2.0);
     EXPECT_FLOAT_EQ(max[0].posY, 2.0);
     EXPECT_FLOAT_EQ(max[0].value, 1.0);
-    EXPECT_FLOAT_EQ(max[1].posX, 2.0);
-    EXPECT_FLOAT_EQ(max[1].posY, 3.0);
-    EXPECT_FLOAT_EQ(max[1].value, 4.0);
-    EXPECT_FLOAT_EQ(max[2].posX, 3.0);
-    EXPECT_FLOAT_EQ(max[2].posY, 2.0);
-    EXPECT_FLOAT_EQ(max[2].value, 3.0);
+    EXPECT_FLOAT_EQ(max[2].posX, 2.0);
+    EXPECT_FLOAT_EQ(max[2].posY, 3.0);
+    EXPECT_FLOAT_EQ(max[2].value, 4.0);
+    EXPECT_FLOAT_EQ(max[1].posX, 3.0);
+    EXPECT_FLOAT_EQ(max[1].posY, 2.0);
+    EXPECT_FLOAT_EQ(max[1].value, 3.0);
 
     max.clear();
     // Do it again, this time with a minimum distance

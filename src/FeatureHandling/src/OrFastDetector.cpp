@@ -17,11 +17,12 @@ namespace FeatureHandling
 // The version of the FAST feature detector used here uses a ring of 16 pixels around the center pixel (radius = 3 --> diameter 7)
 const int OrientedFastDetector::s_featureSize = 7;
 
-OrientedFastDetector::OrientedFastDetector(const float& in_relTresh, const int& in_numPixelsAboveThresh,
-    const int& in_harrisBlockSize) :
-    m_relTresh(in_relTresh),
+OrientedFastDetector::OrientedFastDetector(const float& in_intDiffTresh, const int& in_numPixelsAboveThresh,
+    const int& in_harrisBlockSize, const int& in_distToEdges) :
+    m_intDiffTresh(in_intDiffTresh),
     m_numPixelsAboveThresh(in_numPixelsAboveThresh),
     m_harrisBlockSize(in_harrisBlockSize),
+    m_distToEdges(in_distToEdges),
     m_harrisDetector()
 {
 }
@@ -39,22 +40,29 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
     else
     {
         cv::Mat1f harrisScore = cv::Mat1f::zeros(in_frame.GetImage().rows, in_frame.GetImage().cols);
-        for (int i = 0; i < in_frame.GetImage().rows; i++)
+        for (int i = m_distToEdges; i < in_frame.GetImage().rows - m_distToEdges; i++)
         {
-            for (int j = 0; j < in_frame.GetImage().cols; j++)
+            float* rowPtr = harrisScore.ptr<float>(i);
+            for (int j = m_distToEdges; j < in_frame.GetImage().cols - m_distToEdges; j++)
             {
-                int score = CheckIntensities(in_frame.GetImage(), j, i, in_frame.GetImage().cols, in_frame.GetImage().rows);
+                const int score = CheckIntensities(in_frame.GetImage(), j, i, in_frame.GetImage().cols, in_frame.GetImage().rows);
                 if (score >= m_numPixelsAboveThresh)
                 {
-                    harrisScore(i, j) = m_harrisDetector.ComputeScore(in_frame.GetImage(), j, i, m_harrisBlockSize);
+                    rowPtr[j] = m_harrisDetector.ComputeScore(in_frame.GetImage(), j, i, m_harrisBlockSize);
                 }
             }
         }
 
         // Thin out neighbouring features, we use the same radius as the one used for calculating the angle
-        std::vector<cv::Point2f> localMax;
-        std::vector<float> localMaxVal;
-        Utils::ExtractLocalMaxima(harrisScore, (s_featureSize - 1) / 2, localMax, localMaxVal, false);
+        std::vector<Utils::LocalMaximum> localMax;
+        Utils::ExtractLocalMaxima(harrisScore, (s_featureSize - 1) / 2, localMax);
+
+        // Sort according to feature response and throw away weakest features if we have more than we need
+        std::sort(localMax.begin(), localMax.end(), std::greater<Utils::LocalMaximum>());
+        if (localMax.size() > in_maxNumFeatures)
+        {
+            localMax.resize(in_maxNumFeatures);
+        }
         
         // Calculate Harris response for all surviving features
         int featureId = 0;
@@ -63,7 +71,7 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
         {
             cv::Mat1f patch = cv::Mat1f::zeros(s_featureSize, s_featureSize);
             bool patchExtractSuccess = Utils::ExtractImagePatchAroundPixelPos(in_frame.GetImage(), patch,  (s_featureSize - 1) / 2,
-                static_cast<int>(max.x), static_cast<int>(max.y));
+                static_cast<int>(max.posX), static_cast<int>(max.posY));
             
             // Calculate angle if successful and create feature
             if (patchExtractSuccess)
@@ -74,20 +82,13 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
                 const float vecX = centroidX - (s_featureSize - 1) / 2;
                 const float vecY = centroidY - (s_featureSize - 1) / 2;
                 float angle = static_cast<float>(std::atan2(vecY, vecX));
-                out_features.push_back(Feature{ featureId, in_frame.GetId(), max.x, max.y, localMaxVal[maxId], angle, static_cast<float>(s_featureSize)});
+                out_features.push_back(Feature{ featureId, in_frame.GetId(), max.posX, max.posY, max.value, angle, static_cast<float>(s_featureSize)});
                 featureId++;
             }
             maxId++;
         }
-
-        // Sort according to feature response and throw away weakest features if we have more than we need
-        std::sort(out_features.begin(), out_features.end(), std::greater<Feature>());
-        if (out_features.size() > in_maxNumFeatures)
-        {
-            out_features.resize(in_maxNumFeatures);
-        }
     }
-
+    
     return ret;
 }
 
@@ -96,115 +97,103 @@ int OrientedFastDetector::CheckIntensities(const cv::Mat1f& in_image, const int&
 {
     int ret = 0;
     
-    bool inRangeX = (in_coordX - 3) > 0 && (in_coordX + 3 < in_imgWidth);
-    bool inRangeY = (in_coordY - 3) > 0 && (in_coordY + 3 < in_imgHeight);
-
-    if (inRangeX && inRangeY)
+    const float nucleusInt = in_image(in_coordY, in_coordX);
+    // Pixel 1
+    int passLower = (in_image(in_coordY - 3, in_coordX) + m_intDiffTresh) < nucleusInt ? 1 : 0;
+    // Pixel 5
+    if ((in_image(in_coordY, in_coordX + 3) + m_intDiffTresh) < nucleusInt) passLower++;
+    // Pixel 9
+    if ((in_image(in_coordY + 3, in_coordX) + m_intDiffTresh) < nucleusInt) passLower++;
+    // Pixel 13
+    if ((in_image(in_coordY, in_coordX - 3) + m_intDiffTresh) < nucleusInt) passLower++;
+    
+    if (passLower < 3)
     {
-        const float nucleusInt = in_image(in_coordY, in_coordX);
-        // Pixel 1
-        int passLower = (in_image(in_coordY - 3, in_coordX) + m_relTresh * nucleusInt) < nucleusInt ? 1 : 0;
+        int passHigher = (in_image(in_coordY - 3, in_coordX) - m_intDiffTresh) > nucleusInt ? 1 : 0;
         // Pixel 5
-        if ((in_image(in_coordY, in_coordX + 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
+        if ((in_image(in_coordY, in_coordX + 3) - m_intDiffTresh) > nucleusInt) passHigher++;
         // Pixel 9
-        if ((in_image(in_coordY + 3, in_coordX) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
+        if ((in_image(in_coordY + 3, in_coordX) - m_intDiffTresh) > nucleusInt) passHigher++;
         // Pixel 13
-        if((in_image(in_coordY, in_coordX - 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-        if (passLower < 3)
+        if ((in_image(in_coordY, in_coordX - 3) - m_intDiffTresh) > nucleusInt) passHigher++;
+
+        if (passHigher >= 3)
         {
-            int passHigher = (in_image(in_coordY - 3, in_coordX) - m_relTresh * nucleusInt) > nucleusInt ? 1 : 0;
-            // Pixel 5
-            if ((in_image(in_coordY, in_coordX + 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-            // Pixel 9
-            if ((in_image(in_coordY + 3, in_coordX) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-            // Pixel 13
-            if ((in_image(in_coordY, in_coordX - 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-            
-            if (passHigher >= 3)
-            {
-                ret = CheckAll(in_image, in_coordX, in_coordY);
-            }
+            ret = CheckAll(in_image, in_coordX, in_coordY, 0, passHigher);
         }
-        else
-        {
-            ret = CheckAll(in_image, in_coordX, in_coordY);
-        }
+    }
+    else
+    {
+        ret = CheckAll(in_image, in_coordX, in_coordY, passLower, 0);
     }
 
     return ret;
 }
 
-int OrientedFastDetector::CheckAll(const cv::Mat1f& in_image, const int& in_coordX, const int& in_coordY)
+int OrientedFastDetector::CheckAll(const cv::Mat1f& in_image, const int& in_coordX, const int& in_coordY, const int& in_passLower, const int& in_passHigher)
 {
     const float nucleusInt = in_image(in_coordY, in_coordX);
     
-    // Pixel 1
-    int passLower = (in_image(in_coordY - 3, in_coordX) + m_relTresh * nucleusInt) < nucleusInt ? 1 : 0;
-    // Pixel 2
-    if ((in_image(in_coordY - 3, in_coordX + 1) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 3
-    if ((in_image(in_coordY - 2, in_coordX + 2) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 4
-    if ((in_image(in_coordY - 1, in_coordX + 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 5
-    if ((in_image(in_coordY, in_coordX + 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 6
-    if ((in_image(in_coordY + 1, in_coordX + 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 7
-    if ((in_image(in_coordY + 2, in_coordX + 2) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 8
-    if ((in_image(in_coordY + 3, in_coordX + 1) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 9
-    if ((in_image(in_coordY + 3, in_coordX) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 10
-    if ((in_image(in_coordY + 3, in_coordX - 1) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 11
-    if ((in_image(in_coordY + 2, in_coordX - 2) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 12
-    if ((in_image(in_coordY + 1, in_coordX - 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 13
-    if ((in_image(in_coordY, in_coordX - 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 14
-    if ((in_image(in_coordY - 1, in_coordX - 3) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 15
-    if ((in_image(in_coordY - 2, in_coordX - 2) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
-    // Pixel 16
-    if ((in_image(in_coordY -3, in_coordX - 1) + m_relTresh * nucleusInt) < nucleusInt) passLower++;
+    int score = 0;
     
-    int passHigher = (in_image(in_coordY - 3, in_coordX) - m_relTresh * nucleusInt) > nucleusInt ? 1 : 0;
-    // Pixel 2
-    if ((in_image(in_coordY - 3, in_coordX + 1) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 3
-    if ((in_image(in_coordY - 2, in_coordX + 2) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 4
-    if ((in_image(in_coordY - 1, in_coordX + 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 5
-    if ((in_image(in_coordY, in_coordX + 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 6
-    if ((in_image(in_coordY + 1, in_coordX + 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 7
-    if ((in_image(in_coordY + 2, in_coordX + 2) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 8
-    if ((in_image(in_coordY + 3, in_coordX + 1) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 9
-    if ((in_image(in_coordY + 3, in_coordX) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 10
-    if ((in_image(in_coordY + 3, in_coordX - 1) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 11
-    if ((in_image(in_coordY + 2, in_coordX - 2) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 12
-    if ((in_image(in_coordY + 1, in_coordX - 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 13
-    if ((in_image(in_coordY, in_coordX - 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 14
-    if ((in_image(in_coordY - 1, in_coordX - 3) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 15
-    if ((in_image(in_coordY - 2, in_coordX - 2) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-    // Pixel 16
-    if ((in_image(in_coordY - 3, in_coordX - 1) - m_relTresh * nucleusInt) > nucleusInt) passHigher++;
-            
-    const int highestScore = std::max(passHigher, passLower);
-    return highestScore;
+    if (in_passLower > 0)
+    {
+        score = in_passLower;
+        // Pixel 2
+        if ((in_image(in_coordY - 3, in_coordX + 1) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 3
+        if ((in_image(in_coordY - 2, in_coordX + 2) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 4
+        if ((in_image(in_coordY - 1, in_coordX + 3) + m_intDiffTresh) < nucleusInt)score++;
+        // Pixel 6
+        if ((in_image(in_coordY + 1, in_coordX + 3) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 7
+        if ((in_image(in_coordY + 2, in_coordX + 2) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 8
+        if ((in_image(in_coordY + 3, in_coordX + 1) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 10
+        if ((in_image(in_coordY + 3, in_coordX - 1) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 11
+        if ((in_image(in_coordY + 2, in_coordX - 2) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 12
+        if ((in_image(in_coordY + 1, in_coordX - 3) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 14
+        if ((in_image(in_coordY - 1, in_coordX - 3) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 15
+        if ((in_image(in_coordY - 2, in_coordX - 2) + m_intDiffTresh) < nucleusInt) score++;
+        // Pixel 16
+        if ((in_image(in_coordY - 3, in_coordX - 1) + m_intDiffTresh) < nucleusInt) score++;
+    }
+    else if(in_passHigher > 0)
+    {
+        score = in_passHigher;
+        // Pixel 2
+        if ((in_image(in_coordY - 3, in_coordX + 1) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 3
+        if ((in_image(in_coordY - 2, in_coordX + 2) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 4
+        if ((in_image(in_coordY - 1, in_coordX + 3) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 6
+        if ((in_image(in_coordY + 1, in_coordX + 3) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 7
+        if ((in_image(in_coordY + 2, in_coordX + 2) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 8
+        if ((in_image(in_coordY + 3, in_coordX + 1) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 10
+        if ((in_image(in_coordY + 3, in_coordX - 1) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 11
+        if ((in_image(in_coordY + 2, in_coordX - 2) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 12
+        if ((in_image(in_coordY + 1, in_coordX - 3) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 14
+        if ((in_image(in_coordY - 1, in_coordX - 3) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 15
+        if ((in_image(in_coordY - 2, in_coordX - 2) - m_intDiffTresh) > nucleusInt) score++;
+        // Pixel 16
+        if ((in_image(in_coordY - 3, in_coordX - 1) - m_intDiffTresh) > nucleusInt) score++;
+    }
+    
+    return score;
 }
 
 } //namespace FeatureHandling

@@ -28,7 +28,7 @@ public:
       * \brief Constructor
       */
     HarrisEdgeDetector(const int in_maxNumFeatures = 150, const float in_k = 0.04, const std::string& in_kernelName = "window",
-        const int in_localMaxDistance = 10U, const int in_subPixelCalculationDistance = 5U);
+        const int in_localMaxDistance = 10U);
 
     /**
       * \brief Extract features from a provided grayscale image frame.
@@ -54,7 +54,6 @@ private:
     int m_maxNumFeatures; ///< maximum number of returned features
     float m_k; ///< k factor used for Harris response calculation, see literature
     int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
-    int m_subPixelCalculationDistance; ///< radius that is taken into account for subPixel feature position calculation [pixels]
     
     cv::Mat1f m_smoothingKernel; ///< kernel used for smoothing the gradients
 

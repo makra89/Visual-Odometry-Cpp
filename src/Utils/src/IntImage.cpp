@@ -18,7 +18,7 @@ IntImage::IntImage(const cv::Mat1f& in_image) : m_intImage(cv::Mat1f::zeros(in_i
 
 float IntImage::GetIntensity(const int& in_imgRow, const int& in_imgCol)
 {
-    return m_intImage(in_imgRow, in_imgCol);
+    return m_intImage.ptr<float>(in_imgRow)[in_imgCol];
 }
 
 bool IntImage::GetAreaAroundPixel(const int& in_centRow, const int& in_centCol, const int& in_distance, float& out_area)
@@ -44,31 +44,34 @@ bool IntImage::GetAreaAroundPixel(const int& in_centRow, const int& in_centCol, 
 
 void IntImage::FillIntImage(const cv::Mat1f& in_image)
 {
-    for (int i = 0; i < in_image.cols; i++)
+    for (int j = 0; j < in_image.rows; j++)
     {
-        for (int j = 0; j < in_image.rows; j++)
+        float* currRowPtrIntImage = m_intImage.ptr<float>(j);
+        const float* currRowPtrImage = in_image.ptr<float>(j);
+        const float* upRowPtrIntImage = m_intImage.ptr<float>(j-1);
+        for (int i = 0; i < in_image.cols; i++)
         {
             float area = 0;
 
             // Pixel left
             if (i - 1 >= 0)
             {
-                area += GetIntensity(j, i - 1);
+                area += currRowPtrIntImage[i - 1];
             }
             // Pixel above
             if (j - 1 >= 0)
             {
-                area += GetIntensity(j - 1, i);
+                area += upRowPtrIntImage[i];
             }
             // Substract pixel that is counted twice
             if (i - 1 >= 0 && j - 1 >= 0)
             {
-                area -= GetIntensity(j - 1, i - 1);
+                area -= upRowPtrIntImage[i - 1];
             }
             // Add value of current pixel
-            area += in_image(j, i);
+            area += currRowPtrImage[i];
             // Fill value
-            m_intImage(j, i) = area;
+            currRowPtrIntImage[i] = area;
         }
     }
 }

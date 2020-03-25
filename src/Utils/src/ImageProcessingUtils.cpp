@@ -78,13 +78,15 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat1f& in_image, cv::Mat1f& out_p
 
     if (inRangeX && inRangeY && correctPatchDimX && correctPatchDimY)
     {
-        for (int i = 0; i < out_patch.size[1]; i++)
+        for (int j = 0; j < out_patch.size[0]; j++)
         {
-            for (int j = 0; j < out_patch.size[0]; j++)
+            int imagePosY = in_pixelPosY - in_distanceAroundCenter + j;
+            const float* rowPtr = in_image.ptr<float>(imagePosY);
+            float* rowPtrPatch = out_patch.ptr<float>(j);
+            for (int i = 0; i < out_patch.size[1]; i++)
             {
                 int imagePosX = in_pixelPosX - in_distanceAroundCenter + i;
-                int imagePosY = in_pixelPosY - in_distanceAroundCenter + j;
-                out_patch(j, i) = in_image(imagePosY, imagePosX);
+                rowPtrPatch[i] = rowPtr[imagePosX];
             }
         }
     }
