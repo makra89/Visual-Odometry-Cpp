@@ -23,19 +23,17 @@ The goal is not to create yet another visual odometry pipeline that can easily b
 
 # Current functionality
 
-So far the goal is to get the whole pipeline running, so no focus on quality at all! 
-The most basic kind of algorithms are in use at the moment.
-With respect to feature detection, description and matching the following functionality is provided:
-- Harris edge detector
-- BRIEF descriptor
-- Brute force matcher
+All individual parts of an ORB detector-descriptor-matcher chain are implemented:
+- Oriented FAST detector
+- Rotated BRIEF descriptor
+- LSH matcher
 
-Additionally, fundamental matrix estimation and essential matrix decomposition is implemented. 
+Additionally, fundamental matrix estimation and essential matrix decomposition, including RANSAC, is implemented. 
 Having this functionality at least some (low quality) delta poses can be computed. 
 
 A python package can be built optionally that exposes the Master interface.
 
-Finally there is some output, looks horrible, but at least its some kind of result =)
+Finally there is some output :) 
 
 ![Feature Detection](doc/results/FeatureDetection.gif)
 
@@ -54,13 +52,12 @@ Additionally there is a python script for running the KITTI sequence + comparing
 
 # Dependencies
 
-The following dependencies are placed in the folder 3rdparty and included as source:
+The following dependencies are placed in the folder 3rdparty:
 
 - [gtest](https://github.com/google/googletest/blob/master/googletest/LICENSE)
-
+- [opencv](https://opencv.org/license/) 
 
 The following dependencies are required as CMake package:
 
-- [opencv](https://opencv.org/license/)
 - swig (optionally for python package)
 - python (optionally for python package)
