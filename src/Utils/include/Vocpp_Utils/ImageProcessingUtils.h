@@ -32,6 +32,18 @@ void ApplyKernelToImage(const cv::Mat1f& in_image, const cv::Mat1f& in_kernel, c
 */
 void Compute2DGradients(const cv::Mat1f& in_image, cv::Mat1f& out_gradX, cv::Mat1f& out_gradY);
 
+
+struct LocalMaximum
+{
+    float posX;
+    float posY;
+    float value;
+
+    bool operator > (const LocalMaximum& right) const
+    {
+        return value > right.value;
+    }
+};
 /**
     * /brief Extract local maxima (with respect to intensity) of an image
     *
@@ -40,8 +52,7 @@ void Compute2DGradients(const cv::Mat1f& in_image, cv::Mat1f& out_gradX, cv::Mat
     * \param[out] out_localMaxima vector of extracted local maxima
     * \param[in] in_subPixelCalculationDistance distance used for calculation of subPixel position of local maxima
 */
-void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<cv::Point2f>& out_localMaxima, 
-    std::vector<float>& out_localMaximaValue, const int in_subPixelCalculationDistance = 0U);
+void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<LocalMaximum>& out_localMaxima);
 
 /**
 * /brief Extract patch of an image around a center position with a given distance

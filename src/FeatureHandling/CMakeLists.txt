@@ -13,6 +13,7 @@ add_library(Vocpp_FeatureHandling STATIC
     ./src/BriefDescriptor.cpp
     ./src/LshMatcher.cpp
     ./src/OrFastDetector.cpp
+    ./src/OrbDetectorDescriptor.cpp
 )
 
 

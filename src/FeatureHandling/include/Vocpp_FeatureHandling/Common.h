@@ -32,7 +32,7 @@ struct Feature
     float response; ///< "Goodness" of feature
     float angle; ///< orientation of feature [rad]
     float size; ///< diameter of the feature, i.e. size of patch that was taken into account during detection, always odd [pixels]
-
+    float scale; ///< scale of the image, the feature has been extracted from. 1.0 means original image
     /**
       * /brief Compare two features according to their response
       */

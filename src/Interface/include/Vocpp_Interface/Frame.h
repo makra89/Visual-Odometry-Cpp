@@ -67,6 +67,23 @@ public:
         }
     }
 
+    /**
+      * /brief Frame constructor using a Mat1f
+      */
+    Frame(const cv::Mat1f& in_image , int in_frameId) : m_Id(s_invalidFrameId)
+    {
+        if (in_image.dims != 2)
+        {
+            std::cout << "[Frame]: Non-grayscale image has been provided" << std::endl;
+        }
+        // Valid image data
+        else
+        {
+            m_grayImage = in_image;
+            m_Id = in_frameId;
+            m_validFrame = true;
+        }
+    }
 
     /**
       * /brief Get image data (const reference), either raw or grayscale

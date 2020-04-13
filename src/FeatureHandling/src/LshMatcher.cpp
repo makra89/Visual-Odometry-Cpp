@@ -36,30 +36,29 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         return false;
     }
     std::vector<BinaryDescriptionMatch> testMatches;
-    std::map<int, std::vector<BinaryFeatureDescription>> bucketTable;
+    std::unordered_map<int, std::vector<int>> bucketTable;
     IndexDescriptions(in_descSecond, bucketTable);
     
     for (auto descFirst : in_descFirst)
     {
         // Search for match candidates
-        std::vector<BinaryFeatureDescription> candidates;
+        std::vector<int> candidateIds;
         for (auto hashFunc : m_hashFuncs)
         {
             int bucketId = 0;
             for (int k = 0; k < m_lengthHashFunc; k++)
             {
-                bucketId += descFirst.GetDescription()[hashFunc[k]] * std::pow(2, k);
+                bucketId += descFirst.GetDescription()[hashFunc[k]] * std::pow(2U, k);
             }
-
             if (bucketTable.count(bucketId) > 0)
             {
                 for (auto candidate : bucketTable[bucketId])
                 {
-                    candidates.push_back(candidate);
+                    candidateIds.push_back(candidate);
                 }
             }
 
-            if (candidates.size() >= m_numHashFuncs)
+            if (candidateIds.size() >= m_numHashFuncs)
             {
                 break;
             }
@@ -67,9 +66,9 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
 
         int smallestDist = INT_MAX;
         int smallestIdx2 = 0;
-        for (int index2 = 0; index2 < candidates.size(); index2++)
+        for (int index2 = 0; index2 < candidateIds.size(); index2++)
         {
-            int distance = ComputeHammingDistance(descFirst, candidates[index2]);
+            int distance = ComputeHammingDistance(descFirst, in_descSecond[candidateIds[index2]]);
             
             if (distance < smallestDist)
             {
@@ -81,7 +80,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         // Check if distance is smaller than threshold
         if (smallestDist <= m_maxDistance)
         {
-            out_matches.push_back(BinaryDescriptionMatch{ descFirst, candidates[smallestIdx2] , static_cast<float>(smallestDist) });
+            out_matches.push_back(BinaryDescriptionMatch{ descFirst,in_descSecond[candidateIds[smallestIdx2]] , static_cast<float>(smallestDist) });
         }
     }
 
@@ -127,8 +126,9 @@ void LshMatcher::GenerateHashFuncs()
     }
 }
 
-bool LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::map<int, std::vector<BinaryFeatureDescription>>& out_bucketTable)
+void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<int, std::vector<int>>& out_bucketTable)
 {
+    int descId = 0;
     for (auto description : in_desc)
     {
         for (auto hashFunc : m_hashFuncs)
@@ -136,21 +136,21 @@ bool LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& 
             int bucketId = 0;
             for (int k = 0; k < m_lengthHashFunc; k++)
             {
-                bucketId += description.GetDescription()[hashFunc[k]] * std::pow(2, k);
+                bucketId += description.GetDescription()[hashFunc[k]] * std::pow(2U, k);
             }
-            
             if (out_bucketTable.count(bucketId) > 0)
             {
-                out_bucketTable[bucketId].push_back(description);
+                out_bucketTable[bucketId].push_back(descId);
             }
             else
             {
-                std::vector<BinaryFeatureDescription> table;
-                table.push_back(description);
+                std::vector<int> table;
+                table.push_back(descId);
                 out_bucketTable[bucketId] = table;
             }
             
         }
+        descId++;
     }
 }
 
