@@ -22,13 +22,15 @@ static float PI = 3.141592653589793238463F;
 
 /**
 * /brief Draw a random int in the range [in_lowerEdge, in_upperEdge]
+* if in_fixedSeed is false, the random number generator will be initialized with a random seed
 */
-int DrawIntInRange(const int in_lowerEdge, const int in_upperEdge);
+int DrawIntInRange(const int in_lowerEdge, const int in_upperEdge, const bool in_fixedSeed = true);
 
 /**
 * /brief Draw a random float in the range [in_lowerEdge, in_upperEdge]
+* if in_fixedSeed is false, the random number generator will be initialized with a random seed
 */
-float DrawFloatInRange(const float in_lowerEdge, const float in_upperEdge);
+float DrawFloatInRange(const float in_lowerEdge, const float in_upperEdge, const bool in_fixedSeed = true);
 
 
 } //namespace Utils
