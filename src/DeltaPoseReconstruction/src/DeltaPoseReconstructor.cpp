@@ -104,7 +104,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             std::vector<cv::Point2f> pLastFrame;
             std::vector<cv::Point2f> pCurrFrame;
             FeatureHandling::GetMatchingPoints(matches, pCurrFrame, pLastFrame);
-           
+
             // Calculate rotation and translation from the matches of the two frames
             std::vector<unsigned int> inlierMatchIndices;
             cv::Mat1f rotation;
