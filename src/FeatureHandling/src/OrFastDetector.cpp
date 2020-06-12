@@ -28,7 +28,7 @@ OrientedFastDetector::OrientedFastDetector(const float& in_intDiffTresh, const i
 }
 
 
-bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_maxNumFeatures, std::vector<Feature>& out_features)
+bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned int& in_maxNumFeatures, std::vector<Feature>& out_features)
 {
     bool ret = true;
 
@@ -65,8 +65,8 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const int& in_
         }
         
         // Calculate Harris response for all surviving features
-        int featureId = 0;
-        int maxId = 0;
+        unsigned int featureId = 0U;
+        unsigned int maxId = 0U;
         for (auto max : localMax)
         {
             cv::Mat1f patch = cv::Mat1f::zeros(s_featureSize, s_featureSize);

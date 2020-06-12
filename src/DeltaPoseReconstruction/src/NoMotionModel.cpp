@@ -16,9 +16,9 @@ namespace DeltaPoseReconstruction
 {
 
 void NoMotionModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-    const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
+    const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<unsigned int>& out_inliers)
 {
-    for (int i = 0; i < in_pointCorrLeft.size(); i++)
+    for (unsigned int i = 0U; i < in_pointCorrLeft.size(); i++)
     {
         // Compute error as squared distance of left and right pixels
         const float error = std::pow(in_pointCorrLeft[i].x - in_pointCorrRight[i].x, 2) + std::pow(in_pointCorrLeft[i].y - in_pointCorrRight[i].y, 2);

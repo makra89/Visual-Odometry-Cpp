@@ -19,12 +19,12 @@ namespace VOCPP
 /**
   * /brief Invalid frame Id marker
   */
-static int s_invalidFrameId = INT_MIN;
+static unsigned int s_invalidFrameId = UINT_MAX;
 
 /**
   * /brief Checks whether a frame has a valid Id
   */
-static bool IsValidFrameId(const int in_frameId)
+static bool IsValidFrameId(const unsigned int in_frameId)
 {
     return in_frameId > s_invalidFrameId ? true : false;
 }
@@ -50,7 +50,7 @@ public:
       * no memory is allocated. The frame is just a view on the data. The pointer has to be valid
       * for the whole lifetime of the frame object.
       */
-    Frame(float* const in_grayImgData, int in_width, int in_height, int in_frameId) : m_Id(s_invalidFrameId)
+    Frame(float* const in_grayImgData, unsigned int in_width, unsigned int in_height, unsigned int in_frameId) : m_Id(s_invalidFrameId)
     {
         // No image data
         if (in_grayImgData == NULL)
@@ -70,7 +70,7 @@ public:
     /**
       * /brief Frame constructor using a Mat1f
       */
-    Frame(const cv::Mat1f& in_image , int in_frameId) : m_Id(s_invalidFrameId)
+    Frame(const cv::Mat1f& in_image , unsigned int in_frameId) : m_Id(s_invalidFrameId)
     {
         if (in_image.dims != 2)
         {
@@ -104,7 +104,7 @@ public:
     /**
       * /brief Returns frame ID
       */
-    const int GetId() const
+    const unsigned int GetId() const
     {
         return m_Id;
     }
@@ -121,7 +121,7 @@ private:
 
     cv::Mat1f m_grayImage; ///< grayscale image data
 
-    int m_Id; ///< Id of the frame, must be a unique one!
+    unsigned int m_Id; ///< Id of the frame, must be a unique one!
     bool m_validFrame; ///< indicated whether this frame is a valid one
 
 };

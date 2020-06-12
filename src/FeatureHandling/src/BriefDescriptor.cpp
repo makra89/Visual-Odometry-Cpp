@@ -21,7 +21,7 @@ namespace FeatureHandling
 
 
 BriefDescriptor::BriefDescriptor(const int& in_randomPairDrawRadius, const int& in_areaDetRadius,
-    const bool& in_trainingMode, std::string in_filePath, const int& in_numFramesForTraining) :
+    const bool& in_trainingMode, std::string in_filePath, const unsigned int& in_numFramesForTraining) :
     m_randomPairDrawRadius(in_randomPairDrawRadius),
     m_areaDetRadius(in_areaDetRadius),
     m_pairs(),
@@ -86,8 +86,8 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
 
 
         // Loop over pairs
-        int pairId = 0;
-        int numSucessfulPairs = 0U;
+        unsigned int pairId = 0U;
+        unsigned int numSucessfulPairs = 0U;
         for (auto pair : m_pairs)
         {
             PointPair rotPair = RotatePair(feature.angle, pair);
@@ -188,9 +188,9 @@ void BriefDescriptor::DrawTrainPairs()
     }
 
     // And build all possible combinations (without replacement)
-    for (int i = 0; i < possiblePoint.size(); i++)
+    for (unsigned int i = 0U; i < possiblePoint.size(); i++)
     {
-        for (int j = i + 1; j < possiblePoint.size(); j++)
+        for (unsigned int j = i + 1; j < possiblePoint.size(); j++)
         {
             // Only choose test locations without overlap
             if (std::abs(possiblePoint[i].x - possiblePoint[j].x) <= (2 * m_areaDetRadius)
@@ -231,7 +231,7 @@ float BriefDescriptor::CalculatePearsonCorr(const TrainPosition& in_first, const
         float denomSec = 0.0;
         float firstMean = in_first.GetMean();
         float secMean = in_second.GetMean();
-        for (int i = 0; i < in_first.m_testResults->size(); i++)
+        for (unsigned int i = 0; i < in_first.m_testResults->size(); i++)
         {
             nom += (((*in_first.m_testResults)[i] - firstMean) * ((*in_second.m_testResults)[i] - secMean));
             denomFirst += std::pow((*in_first.m_testResults)[i] - firstMean, 2);

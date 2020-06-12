@@ -14,8 +14,8 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
-LshMatcher::LshMatcher(const int& in_maxDistance, const int& in_numHashFuncs, 
-    const int& in_lengthHashFunc, const int& in_lengthDescription) :
+LshMatcher::LshMatcher(const unsigned int& in_maxDistance, const unsigned int& in_numHashFuncs,
+    const unsigned int& in_lengthHashFunc, const unsigned int& in_lengthDescription) :
     m_maxDistance(in_maxDistance),
     m_numHashFuncs(in_numHashFuncs),
     m_lengthHashFunc(in_lengthHashFunc),
@@ -36,7 +36,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         return false;
     }
     std::vector<BinaryDescriptionMatch> testMatches;
-    std::unordered_map<int, std::vector<int>> bucketTable;
+    std::unordered_map<unsigned int, std::vector<unsigned int>> bucketTable;
     IndexDescriptions(in_descSecond, bucketTable);
     
     for (auto descFirst : in_descFirst)
@@ -45,10 +45,10 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         std::vector<int> candidateIds;
         for (auto hashFunc : m_hashFuncs)
         {
-            int bucketId = 0;
-            for (int k = 0; k < m_lengthHashFunc; k++)
+            unsigned int bucketId = 0U;
+            for (unsigned int k = 0U; k < m_lengthHashFunc; k++)
             {
-                bucketId += descFirst.GetDescription()[hashFunc[k]] * std::pow(2U, k);
+                bucketId += descFirst.GetDescription()[hashFunc[k]] * static_cast<unsigned int>(std::pow(2U, k));
             }
             if (bucketTable.count(bucketId) > 0)
             {
@@ -64,11 +64,11 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
             }
         }
 
-        int smallestDist = INT_MAX;
-        int smallestIdx2 = 0;
-        for (int index2 = 0; index2 < candidateIds.size(); index2++)
+        unsigned int smallestDist = UINT_MAX;
+        unsigned int smallestIdx2 = 0U;
+        for (unsigned int index2 = 0U; index2 < candidateIds.size(); index2++)
         {
-            int distance = ComputeHammingDistance(descFirst, in_descSecond[candidateIds[index2]]);
+            unsigned int distance = ComputeHammingDistance(descFirst, in_descSecond[candidateIds[index2]]);
             
             if (distance < smallestDist)
             {
@@ -113,30 +113,30 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
 
 void LshMatcher::GenerateHashFuncs()
 {
-    for (int l = 0; l < m_numHashFuncs; l++)
+    for (unsigned int l = 0U; l < m_numHashFuncs; l++)
     {
-        std::vector<int> hashFunc;
+        std::vector<unsigned int> hashFunc;
         hashFunc.reserve(m_lengthHashFunc);
-        for (int k = 0; k < m_lengthHashFunc; k++)
+        for (unsigned int k = 0U; k < m_lengthHashFunc; k++)
         {
-            hashFunc.push_back(Utils::DrawIntInRange(0, m_lengthDescription));
+            hashFunc.push_back(static_cast<unsigned int>(Utils::DrawIntInRange(0, m_lengthDescription)));
         }
 
         m_hashFuncs.push_back(hashFunc);
     }
 }
 
-void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<int, std::vector<int>>& out_bucketTable)
+void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<unsigned int, std::vector<unsigned int>>& out_bucketTable)
 {
-    int descId = 0;
+    unsigned int descId = 0U;
     for (auto description : in_desc)
     {
         for (auto hashFunc : m_hashFuncs)
         {
-            int bucketId = 0;
-            for (int k = 0; k < m_lengthHashFunc; k++)
+            unsigned int bucketId = 0U;
+            for (unsigned int k = 0U; k < m_lengthHashFunc; k++)
             {
-                bucketId += description.GetDescription()[hashFunc[k]] * std::pow(2U, k);
+                bucketId += description.GetDescription()[hashFunc[k]] * static_cast<unsigned int>(std::pow(2U, k));
             }
             if (out_bucketTable.count(bucketId) > 0)
             {
@@ -144,7 +144,7 @@ void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& 
             }
             else
             {
-                std::vector<int> table;
+                std::vector<unsigned int> table;
                 table.push_back(descId);
                 out_bucketTable[bucketId] = table;
             }
@@ -154,11 +154,11 @@ void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& 
     }
 }
 
-int LshMatcher::ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const
+unsigned int LshMatcher::ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const
 {
-    int distance = 0U;
+    unsigned int distance = 0U;
     
-    for (int i = 0; i < in_first.GetDescription().size(); i++)
+    for (unsigned int i = 0U; i < in_first.GetDescription().size(); i++)
     {
         if (in_first.GetDescription()[i] != in_second.GetDescription()[i])
         {

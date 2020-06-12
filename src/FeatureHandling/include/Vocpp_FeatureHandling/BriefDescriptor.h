@@ -44,7 +44,7 @@ public:
       * \param[in] in_trainingMode specifies whether training mode shall be activated (see class description for explanation)
       */
     BriefDescriptor(const int& in_randomPairDrawRadius = 15, const int& in_areaDetRadius = 2, 
-        const bool& in_trainingMode = false, std::string in_filePath = "Brief_TrainedPattern.txt", const int& in_numFramesForTraining = 1000);
+        const bool& in_trainingMode = false, std::string in_filePath = "Brief_TrainedPattern.txt", const unsigned int& in_numFramesForTraining = 1000U);
 
     /**
       * /brief Compute binary feature descriptions for provided frame. The returned description IDs will
@@ -95,7 +95,7 @@ private:
     /// ============================================================================
     bool m_trainingMode; ///< specifies whether training is switched on or off
     std::ofstream m_patternOutFile; ///< file the trained pattern is written to
-    int m_numFramesForTraining; ///< number of processed frames after which the best pattern will be written
+    unsigned int m_numFramesForTraining; ///< number of processed frames after which the best pattern will be written
 
      /**
       * /brief training position class, each position specify a possible test pattern
@@ -106,7 +106,7 @@ private:
         /**
           * /brief Constructor
           */
-        TrainPosition(const int& in_Id, const BriefDescriptor::PointPair& in_pair) :
+        TrainPosition(const unsigned int& in_Id, const BriefDescriptor::PointPair& in_pair) :
             m_Id(in_Id),
             m_testResults(new std::vector<bool>()),
             m_pair(in_pair)
@@ -165,7 +165,7 @@ private:
             return *this;
         }
 
-        int m_Id; ///< Id of TrainPosition
+        unsigned int m_Id; ///< Id of TrainPosition
         std::shared_ptr<std::vector<bool>> m_testResults; ///< vector of boolean test results (result of intensity comparison)
         BriefDescriptor::PointPair m_pair; ///< Test pattern used
     };

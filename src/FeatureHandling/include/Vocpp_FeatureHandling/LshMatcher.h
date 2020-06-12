@@ -29,8 +29,8 @@ public:
     /**
       * \brief Constructor
       */
-    LshMatcher(const int& in_maxDistance = 50, const int& in_numHashFuncs = 30, const int& in_lengthHashFunc = 15,
-        const int& in_lengthDescription = 256);
+    LshMatcher(const unsigned int& in_maxDistance = 50U, const unsigned int& in_numHashFuncs = 30U, const unsigned int& in_lengthHashFunc = 15U,
+        const unsigned int& in_lengthDescription = 256U);
 
     /**
       * \brief Compares binary feature descriptions and return matches.
@@ -50,7 +50,7 @@ private:
 
     void GenerateHashFuncs();
 
-    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<int, std::vector<int>>& out_bucketTable);
+    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<unsigned int, std::vector<unsigned int>>& out_bucketTable);
     /**
       * \brief Compute Hamming Distance for two BRIEF descriptions
       *
@@ -58,13 +58,13 @@ private:
       * \param[ín] in_second second (binary) description
       * \return True distance of descriptions
       */
-    int ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const;
+    unsigned int ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const;
 
-    int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
-    int m_numHashFuncs;
-    int m_lengthHashFunc;
-    int m_lengthDescription;
-    std::vector<std::vector<int>> m_hashFuncs;
+    unsigned int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
+    unsigned int m_numHashFuncs;
+    unsigned int m_lengthHashFunc;
+    unsigned int m_lengthDescription;
+    std::vector<std::vector<unsigned int>> m_hashFuncs;
 };
 
 } //namespace FeatureHandling

@@ -12,6 +12,7 @@
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
 #include<iostream>
+
 namespace VOCPP
 {
 namespace FeatureHandling
@@ -25,8 +26,8 @@ namespace FeatureHandling
   */
 struct Feature
 {
-    int id; ///< ID should assigned by the feature detector
-    int frameId; ///< ID of frame this feature has been detected in
+    unsigned int id; ///< ID should assigned by the feature detector
+    unsigned int frameId; ///< ID of frame this feature has been detected in
     float imageCoordX; ///< image coordinates along image X axis [pixel]
     float imageCoordY; ///< image coordinates along image Y axis [pixel]
     float response; ///< "Goodness" of feature

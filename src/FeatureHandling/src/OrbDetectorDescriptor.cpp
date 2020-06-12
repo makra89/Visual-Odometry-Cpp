@@ -49,7 +49,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
     }
     else
     {
-        int featureId = 0;
+        unsigned int featureId = 0;
         for (auto octave : m_octaves)
         {
             cv::Mat1f octaveImage;

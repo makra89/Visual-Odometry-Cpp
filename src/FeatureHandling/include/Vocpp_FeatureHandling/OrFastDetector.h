@@ -39,7 +39,7 @@ public:
       * \param[out] out_features features extracted from the frame
       * \return True if at least one feature has been detected, false otherwise
       */
-    bool ExtractFeatures(const Frame& in_frame, const int& in_maxNumFeatures, std::vector<Feature>& out_features);
+    bool ExtractFeatures(const Frame& in_frame, const unsigned int& in_maxNumFeatures, std::vector<Feature>& out_features);
 
 private:
     // It is not allowed to copy the detector directly

@@ -16,11 +16,11 @@ namespace DeltaPoseReconstruction
 {
 
     int RansacOptimizer::Run(const std::vector<EpipolarModel*>& in_testedModels, const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat1f& in_calibMat, std::vector<int>& out_inlierMatchIndices, cv::Mat1f &out_translation, cv::Mat1f& out_rotation)
+        const cv::Mat1f& in_calibMat, std::vector<unsigned int>& out_inlierMatchIndices, cv::Mat1f &out_translation, cv::Mat1f& out_rotation)
 {
     // Save best model according to Plunder Score
     int bestModelId = -1;
-    std::vector<int> inliers;
+    std::vector<unsigned int> inliers;
 
     // Set from outside, or set here hardcoded?
     // This is the gaussian noise in the distance to the epipolar line
@@ -35,7 +35,7 @@ namespace DeltaPoseReconstruction
         // The "no motion" model needs a special treatment
         if (model->GetModelType() == EpipolarModel::Types::NoMotionModel)
         {
-            std::vector<int> indicesInliers;
+            std::vector<unsigned int> indicesInliers;
             cv::Mat1f dummySolution = cv::Mat1f::zeros(3, 3);
             model->Test(in_correspondFirst, in_correspondSecond, dummySolution, assumedDistanceError, indicesInliers);
             int plunderScore = model->ComputePlunderScore(static_cast<int>(indicesInliers.size()), static_cast<int>(in_correspondFirst.size() - indicesInliers.size()));
@@ -72,7 +72,7 @@ namespace DeltaPoseReconstruction
             // Test with full set for all solutions and get Inlier
             for (auto solution : solutions)
             {
-                std::vector<int> indicesInliers;
+                std::vector<unsigned int> indicesInliers;
                 model->Test(in_correspondFirst, in_correspondSecond, solution, assumedDistanceError, indicesInliers);
                 int plunderScore = model->ComputePlunderScore(static_cast<int>(indicesInliers.size()), static_cast<int>(in_correspondFirst.size() - indicesInliers.size()));
                 if (plunderScore < bestPlunderScore)

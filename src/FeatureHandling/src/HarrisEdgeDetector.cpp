@@ -15,7 +15,7 @@ namespace FeatureHandling
 {
 
 
-HarrisEdgeDetector::HarrisEdgeDetector(const int in_maxNumFeatures, const float in_k, const std::string& in_kernelName,
+HarrisEdgeDetector::HarrisEdgeDetector(const unsigned int in_maxNumFeatures, const float in_k, const std::string& in_kernelName,
     const int in_localMaxDistance)
 {
     m_maxNumFeatures = in_maxNumFeatures;
@@ -51,7 +51,7 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
     std::vector<Utils::LocalMaximum> localMax;
     Utils::ExtractLocalMaxima(response, m_localMaxDistance, localMax);
 
-    int featureId = 0;
+    unsigned int featureId = 0U;
     for (auto max : localMax)
     {
         out_features.push_back(Feature{ featureId, in_frame.GetId(), max.posX, max.posY, max.value});

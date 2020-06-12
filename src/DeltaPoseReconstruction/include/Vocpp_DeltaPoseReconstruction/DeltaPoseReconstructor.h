@@ -81,7 +81,7 @@ private:
 
     std::vector<FeatureHandling::BinaryFeatureDescription> m_descriptionsLastFrame;  ///< descriptions computed for last frame
     std::vector<FeatureHandling::Feature> m_featuresLastFrame;  ///< features detected in last frame
-    int m_lastFrameId;
+    unsigned int m_lastFrameId;
 
     DeltaCameraPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
     CameraPose m_lastPose; ///< Current Pose in world coordinate system calculated for last frame

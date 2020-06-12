@@ -21,7 +21,7 @@ TEST(OrFastDetectorTest, DetectTriangleEdges)
     cv::cvtColor(cv::imread(testDirectory + "FastDetectorTest.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
     grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
 
-    VOCPP::FeatureHandling::OrientedFastDetector detector(0.2, 12, 3, 5);
+    VOCPP::FeatureHandling::OrientedFastDetector detector(0.2F, 12, 3, 5);
 
     VOCPP::Frame frameFirst(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
     std::vector<VOCPP::FeatureHandling::Feature> features;

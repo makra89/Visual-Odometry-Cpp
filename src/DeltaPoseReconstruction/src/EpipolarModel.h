@@ -70,7 +70,7 @@ public:
       * F and H are fundamental matrices and homographies, respectively.
       */
     virtual void Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-        const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<int>& out_inliers) = 0;
+        const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<unsigned int>& out_inliers) = 0;
 
     /**
       * /brief Decompose a model solution into a translation and a rotation matrix

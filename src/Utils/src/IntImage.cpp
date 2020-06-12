@@ -6,6 +6,7 @@
 */
 
 #include <Vocpp_Utils/IntImage.h>
+#include<iostream>
 namespace VOCPP
 {
 namespace Utils
@@ -48,7 +49,6 @@ void IntImage::FillIntImage(const cv::Mat1f& in_image)
     {
         float* currRowPtrIntImage = m_intImage.ptr<float>(j);
         const float* currRowPtrImage = in_image.ptr<float>(j);
-        const float* upRowPtrIntImage = m_intImage.ptr<float>(j-1);
         for (int i = 0; i < in_image.cols; i++)
         {
             float area = 0;
@@ -60,12 +60,14 @@ void IntImage::FillIntImage(const cv::Mat1f& in_image)
             }
             // Pixel above
             if (j - 1 >= 0)
-            {
+            {   
+                const float* upRowPtrIntImage = m_intImage.ptr<float>(j - 1);
                 area += upRowPtrIntImage[i];
             }
             // Substract pixel that is counted twice
             if (i - 1 >= 0 && j - 1 >= 0)
             {
+                const float* upRowPtrIntImage = m_intImage.ptr<float>(j - 1);
                 area -= upRowPtrIntImage[i - 1];
             }
             // Add value of current pixel

@@ -106,7 +106,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             FeatureHandling::GetMatchingPoints(matches, pCurrFrame, pLastFrame);
            
             // Calculate rotation and translation from the matches of the two frames
-            std::vector<int> inlierMatchIndices;
+            std::vector<unsigned int> inlierMatchIndices;
             cv::Mat1f rotation;
             cv::Mat1f translation;
             m_optimizer->Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation);

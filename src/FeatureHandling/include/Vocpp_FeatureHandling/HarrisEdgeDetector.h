@@ -27,7 +27,7 @@ public:
     /**
       * \brief Constructor
       */
-    HarrisEdgeDetector(const int in_maxNumFeatures = 150, const float in_k = 0.04, const std::string& in_kernelName = "window",
+    HarrisEdgeDetector(const unsigned int in_maxNumFeatures = 150U, const float in_k = 0.04, const std::string& in_kernelName = "window",
         const int in_localMaxDistance = 10U);
 
     /**
@@ -51,7 +51,7 @@ private:
     HarrisEdgeDetector& operator=(const HarrisEdgeDetector&);
     HarrisEdgeDetector(const HarrisEdgeDetector&);
 
-    int m_maxNumFeatures; ///< maximum number of returned features
+    unsigned int m_maxNumFeatures; ///< maximum number of returned features
     float m_k; ///< k factor used for Harris response calculation, see literature
     int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
     

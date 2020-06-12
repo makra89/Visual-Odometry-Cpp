@@ -91,10 +91,10 @@ bool PureTranslationModel::Compute(const std::vector<cv::Point2f>& in_pointCorrL
 }
 
 void PureTranslationModel::Test(const std::vector<cv::Point2f>& in_pointCorrLeft, const std::vector<cv::Point2f>& in_pointCorrRight,
-    const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<int>& out_inliers)
+    const cv::Mat1f& in_solution, const float in_errorTresh, std::vector<unsigned int>& out_inliers)
 {
 
-    for (int i = 0; i < in_pointCorrLeft.size(); i++)
+    for (unsigned int i = 0U; i < in_pointCorrLeft.size(); i++)
     {
         // We are using the symmetric epipolar distance here (SED)
         // See https://www.robots.ox.ac.uk/~vgg/publications/1998/Torr98c/torr98c.pdf
