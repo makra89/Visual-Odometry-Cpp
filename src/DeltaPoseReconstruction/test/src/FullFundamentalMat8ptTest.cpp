@@ -91,11 +91,11 @@ TEST(FullFundamentalMat8pt, RotationAndTranslation)
     // And check
     EXPECT_NEAR(solutionVec[0](0, 0), trueFundMat(0, 0), 1e-7);
     EXPECT_NEAR(solutionVec[0](0, 1), trueFundMat(0, 1), 1e-7);
-    EXPECT_NEAR(solutionVec[0](0, 2), trueFundMat(0, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0](0, 2), trueFundMat(0, 2), 5e-6);
     EXPECT_NEAR(solutionVec[0](1, 0), trueFundMat(1, 0), 1e-7);
     EXPECT_NEAR(solutionVec[0](1, 1), trueFundMat(1, 1), 1e-7);
-    EXPECT_NEAR(solutionVec[0](1, 2), trueFundMat(1, 2), 5e-5);
-    EXPECT_NEAR(solutionVec[0](2, 0), trueFundMat(2, 0), 5e-5);
-    EXPECT_NEAR(solutionVec[0](2, 1), trueFundMat(2, 1), 5e-5);
-    EXPECT_NEAR(solutionVec[0](2, 2), trueFundMat(2, 2), 5e-5);
+    EXPECT_NEAR(solutionVec[0](1, 2), trueFundMat(1, 2), 5e-6);
+    EXPECT_NEAR(solutionVec[0](2, 0), trueFundMat(2, 0), 5e-6);
+    EXPECT_NEAR(solutionVec[0](2, 1), trueFundMat(2, 1), 5e-6);
+    EXPECT_NEAR(solutionVec[0](2, 2), trueFundMat(2, 2), 5e-6);
 }

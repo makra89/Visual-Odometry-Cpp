@@ -18,6 +18,11 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
+/**
+  * /brief OBR feature detector and descriptor
+  * Like described in the ORB paper an oriented FAST detector and 
+  * rotated BRIEF descriptor is used.
+  */
 class OrbDetectorDescriptor
 {
 public:
@@ -25,15 +30,15 @@ public:
     /**
       * /brief Constructor
       */
-    OrbDetectorDescriptor(const int& in_numOctaves=7, const float& in_octaveScaleFactor=0.8);
+    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=4U, const float& in_layerScaleFactor=0.8);
 
     /**
-      * /brief Extract features from a provided grayscale image frame.
+      * /brief Extract descriptions from a provided grayscale image frame.
       *
       * \param[in] in_frame image frame from which features shall be extracted
       * \param[in] in_maxNumFeatures maximum number of features returned
-      * \param[out] out_features features extracted from the frame
-      * \return True if at least one feature has been detected, false otherwise
+      * \param[out] out_descriptions feature descriptions extracted from the frame
+      * \return True if at least one description has been detected, false otherwise
       */
     bool ExtractFeatureDescriptions(const Frame& in_frame, const int& in_maxNumFeatures, std::vector<BinaryFeatureDescription>& out_descriptions);
 
@@ -42,18 +47,18 @@ private:
     OrbDetectorDescriptor& operator=(const OrbDetectorDescriptor&);
     OrbDetectorDescriptor(const OrbDetectorDescriptor&);
 
-    struct Octave
+    struct PyramidLayer
     {
         float scale;
         float featureRatio;
+        cv::Mat1f image;
     };
 
-    const int m_numOctaves;
-    const float m_octaveScaleFactor;
+    const unsigned int m_numLayers; ///< number of pyramid layers generated for one frame
+    const float m_layerScaleFactor; ///< scale factor used to downsample the image for each octave
 
     FeatureHandling::OrientedFastDetector m_fastDetector;
     FeatureHandling::BriefDescriptor m_descriptor;
-    std::vector<Octave> m_octaves;
 };
 
 } //namespace FeatureHandling

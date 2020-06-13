@@ -26,7 +26,7 @@ static unsigned int s_invalidFrameId = UINT_MAX;
   */
 static bool IsValidFrameId(const unsigned int in_frameId)
 {
-    return in_frameId > s_invalidFrameId ? true : false;
+    return in_frameId < s_invalidFrameId ? true : false;
 }
 
 /**

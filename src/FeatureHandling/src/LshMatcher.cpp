@@ -43,6 +43,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
     {
         // Search for match candidates
         std::vector<int> candidateIds;
+        candidateIds.reserve(m_numHashFuncs);
         for (auto hashFunc : m_hashFuncs)
         {
             unsigned int bucketId = 0U;

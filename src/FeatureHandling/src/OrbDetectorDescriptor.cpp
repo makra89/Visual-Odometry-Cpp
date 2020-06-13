@@ -15,26 +15,12 @@ namespace FeatureHandling
 {
 
 
-OrbDetectorDescriptor::OrbDetectorDescriptor(const int& in_numOctaves, const float& in_octaveScaleFactor) :
-    m_numOctaves(in_numOctaves),
-    m_octaveScaleFactor(in_octaveScaleFactor),
+OrbDetectorDescriptor::OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers, const float& in_layerScaleFactor) :
+    m_numLayers(in_numPyramidLayers),
+    m_layerScaleFactor(in_layerScaleFactor),
     m_fastDetector(),
-    m_descriptor(),
-    m_octaves()
+    m_descriptor()
 {
-    // Calculate weighted norm (all scales summed up)
-    float scaleNorm = 0.0;
-    for (int octave = 0; octave < m_numOctaves; octave++)
-    {
-        scaleNorm += std::pow(m_octaveScaleFactor, octave);
-    }
-
-    // Fill octave vector
-    for (int octave = 0; octave < m_numOctaves; octave++)
-    {
-        const float scale = std::pow(m_octaveScaleFactor, octave);
-        m_octaves.push_back(Octave{ scale, scale / scaleNorm });
-    }
 }
 
 bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, const int& in_maxNumFeatures, 
@@ -49,38 +35,49 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
     }
     else
     {
-        unsigned int featureId = 0;
-        for (auto octave : m_octaves)
+        // Calculate weighted norm (all scales summed up)
+        float scaleNorm = 0.0F;
+        for (unsigned int layer = 0U; layer < m_numLayers; layer++)
         {
-            cv::Mat1f octaveImage;
-            if (octave.scale < 1.0)
-            {
-                cv::resize(in_frame.GetImage(), octaveImage, cv::Size(0, 0), octave.scale, octave.scale);
-            }
-            else
-            {
-                octaveImage = in_frame.GetImage();
-            }
+            const float scaleSq = static_cast<float>(std::pow(std::pow(m_layerScaleFactor, layer), 2));
+            scaleNorm += scaleSq;
+        }
+        
+        std::vector<PyramidLayer> pyramid;
+        // First layer
+        pyramid.push_back(PyramidLayer{ 1.0F, 1.0F / scaleNorm, in_frame.GetImage()});
 
-            
-            Frame octaveFrame(octaveImage, in_frame.GetId());
-            std::vector<Feature> octaveFeatures;
-            //cv::TickMeter tick;
-           // tick.start();
-            m_fastDetector.ExtractFeatures(octaveFrame, static_cast<int>(in_maxNumFeatures * octave.featureRatio), octaveFeatures);
-            //tick.stop();
-            //std::cout << "[ORB] OFast " << tick.getTimeMilli() << std::endl;
-            //cv::TickMeter tick2;
-            //tick2.start();
-            std::vector<BinaryFeatureDescription> octaveDescriptions;
-            m_descriptor.ComputeDescriptions(octaveFrame, octaveFeatures, octaveDescriptions);
-           // tick2.stop();
-           // std::cout << "[ORB] rBrief " << tick2.getTimeMilli() << std::endl;
-            for (auto desc : octaveDescriptions)
+        // Fill pyramid
+        for (unsigned int layer = 1U; layer < m_numLayers; layer++)
+        {
+            const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            const float scaleSq = static_cast<float>(std::pow(std::pow(m_layerScaleFactor, layer), 2));
+
+            // Kernel size for smoothing
+            cv::Size kernelSize(5U, 5U);
+
+            cv::Mat1f layerImage;
+            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, static_cast<float>(kernelSize.width), static_cast<float>(kernelSize.height));
+            cv::resize(layerImage, layerImage, cv::Size(0, 0), scale, scale);
+
+            pyramid.push_back(PyramidLayer{ scale, scaleSq / scaleNorm, layerImage });
+        }
+        
+        
+        unsigned int featureId = 0;
+        for (auto layer : pyramid)
+        { 
+            Frame layerFrame(layer.image, in_frame.GetId());
+            std::vector<Feature> layerFeatures;
+            m_fastDetector.ExtractFeatures(layerFrame, static_cast<int>(in_maxNumFeatures * layer.featureRatio), layerFeatures);
+            std::vector<BinaryFeatureDescription> layerDescriptions;
+            m_descriptor.ComputeDescriptions(layerFrame, layerFeatures, layerDescriptions);
+
+            for (auto desc : layerDescriptions)
             {
                 Feature outFeature{ featureId, desc.GetFeature().frameId,
-                    1.F / octave.scale * desc.GetFeature().imageCoordX, 1.F / octave.scale * desc.GetFeature().imageCoordY,
-                    desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / octave.scale, octave.scale };
+                    1.F / layer.scale * desc.GetFeature().imageCoordX, 1.F / layer.scale * desc.GetFeature().imageCoordY,
+                    desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / layer.scale, layer.scale };
 
                 out_descriptions.push_back(BinaryFeatureDescription(outFeature, desc.GetDescription()));
                 featureId++;
