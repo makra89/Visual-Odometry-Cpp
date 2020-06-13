@@ -12,8 +12,7 @@
 #include <Vocpp_Interface/DeltaCameraPose.h>
 #include <Vocpp_Interface/CameraPose.h>
 
-#include<Vocpp_FeatureHandling/OrFastDetector.h>
-#include<Vocpp_FeatureHandling/BriefDescriptor.h>
+#include<Vocpp_FeatureHandling/OrbDetectorDescriptor.h>
 #include<Vocpp_FeatureHandling/LshMatcher.h>
 
 #include<opencv2/core/types.hpp>
@@ -71,8 +70,7 @@ public:
 
 private:
 
-    FeatureHandling::OrientedFastDetector m_detector; ///< feature detector
-    FeatureHandling::BriefDescriptor m_descriptor; ///< feature descriptor
+    FeatureHandling::OrbDetectorDescriptor m_detectorDescriptor; ///< feature detector and descriptor
     FeatureHandling::LshMatcher m_matcher; ///< feature matcher
 
     RansacOptimizer* m_optimizer;
@@ -80,7 +78,6 @@ private:
     LocalMap* m_localMap;
 
     std::vector<FeatureHandling::BinaryFeatureDescription> m_descriptionsLastFrame;  ///< descriptions computed for last frame
-    std::vector<FeatureHandling::Feature> m_featuresLastFrame;  ///< features detected in last frame
     unsigned int m_lastFrameId;
 
     DeltaCameraPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
