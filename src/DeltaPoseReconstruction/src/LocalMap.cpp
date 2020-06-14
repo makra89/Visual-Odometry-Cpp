@@ -54,6 +54,7 @@ void LocalMap::InsertLandmark(const LandmarkPosition& in_position, const Feature
     unsigned int trackedLandmarks = 0U;
     // We assume here that first frame == current frame and second frame == last frame
     // TODO: Refactor the match interface!
+    std::cout << in_currentFrameId << " " << in_match.GetFirstFeature().frameId << " " << in_match.GetSecondFeature().frameId << std::endl;
     assert(in_currentFrameId == in_match.GetFirstFeature().frameId);
 
     for (auto& mark : m_landmarks)
