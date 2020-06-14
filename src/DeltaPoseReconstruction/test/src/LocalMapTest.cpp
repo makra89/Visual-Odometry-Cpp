@@ -5,27 +5,32 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include <LocalMap.h>
+#include <Vocpp_DeltaPoseReconstruction/LocalMap.h>
 
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 
 using namespace VOCPP::DeltaPoseReconstruction;
-
+using VOCPP::FeatureHandling::Feature;
+using VOCPP::FeatureHandling::BinaryFeatureDescription;
+using VOCPP::FeatureHandling::BinaryDescriptionMatch;
 
 // Check that it is possible to create new Landmarks for new frames and/or new keypoint ids
 TEST(LocalMapTest, CreateNewLandmarks)
 {
     // Create map and check that its empty
-    /*LocalMap map;
+    LocalMap map(5U);
     EXPECT_TRUE(map.GetLandmarks().size() == 0);
-
+    
     LandmarkPosition dummyLandmark = { 1.0, 2.0, 3.0 };
-    int currentFrameId = 1;
-    int lastFrameId = 0;
-    // Insert a landmark with current frame ID = 1 and keypoint Id = 5
-    // and last frame ID = 0 and keypoint Id = 7
-    cv::DMatch match(5, 7, lastFrameId, 0);
+    unsigned int currentFrameId = 1U;
+    unsigned int lastFrameId = 0U;
+    // Insert a landmark with current frame ID = 1 and feature Id = 5
+    // and last frame ID = 0 and feature Id = 7
+    std::vector<bool> dummyDesc;
+    BinaryFeatureDescription desc1(Feature{ 7U, 0U }, dummyDesc);
+    BinaryFeatureDescription desc2(Feature{ 5U, 1U }, dummyDesc);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match(desc2, desc1, 0U);
     map.InsertLandmark(dummyLandmark, match, currentFrameId);
     ASSERT_TRUE(map.GetLandmarks().size() == 1);
 
@@ -33,14 +38,16 @@ TEST(LocalMapTest, CreateNewLandmarks)
     EXPECT_TRUE(map.GetLandmarks()[0].IsPresentInFrame(currentFrameId, 5));
     EXPECT_TRUE(map.GetLandmarks()[0].IsPresentInFrame(lastFrameId, 7));
 
-    // Insert another one with different keypoint Ids
-    cv::DMatch newMatch(9, 10, lastFrameId, 0);
+    // Insert another one with different feature Ids
+    BinaryFeatureDescription desc3(Feature{ 11U, 0U }, dummyDesc);
+    BinaryFeatureDescription desc4(Feature{ 25U, 1U }, dummyDesc);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch newMatch(desc4, desc3, 0U);
     map.InsertLandmark(dummyLandmark, newMatch, currentFrameId);
     ASSERT_TRUE(map.GetLandmarks().size() == 2);
 
     // Check for current and last frame
-    EXPECT_TRUE(map.GetLandmarks()[1].IsPresentInFrame(currentFrameId, 9));
-    EXPECT_TRUE(map.GetLandmarks()[1].IsPresentInFrame(lastFrameId, 10));*/
+    EXPECT_TRUE(map.GetLandmarks()[1].IsPresentInFrame(currentFrameId, 25));
+    EXPECT_TRUE(map.GetLandmarks()[1].IsPresentInFrame(lastFrameId, 11));
 }
 
 // Check that it is possible to update an existing landmark if it has been seen in 
