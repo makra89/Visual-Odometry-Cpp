@@ -39,7 +39,6 @@ class Landmark
 {
 
 public:
-
     /**
       * \brief Constructor of a new landmark
       */
@@ -66,7 +65,17 @@ public:
     /**
       * \brief Queries whether a landmark is visible in a certain frame as a feature with a specific Id
       */
-    bool IsPresentInFrame(const unsigned int& in_frameId, const unsigned int& in_featureId) const;
+    bool IsPresentInFrameWithFeatureId(const unsigned int& in_frameId, const unsigned int& in_featureId) const;
+
+    /**
+      * \brief Queries whether a landmark is visible in a certain frame
+      */
+    bool IsPresentInFrame(const unsigned int& in_frameId) const;
+
+    const unsigned int GetLastSeenFrameId() const
+    {
+        return m_lastSeenFrameId;
+    }
 
     /**
       * \brief Helper struct for holding two keys for a map
@@ -82,15 +91,15 @@ public:
       */
     struct CompFramePairKey
     {
-        bool operator() (const FramePairKey& lhs, const FramePairKey& rhs)
+        bool operator() (const FramePairKey& lhs, const FramePairKey& rhs) const
         {
-            return (lhs.currentFrameId < rhs.currentFrameId &&
-                lhs.lastFrameId < rhs.lastFrameId);
+            return (lhs.currentFrameId < rhs.currentFrameId);
         }
     };
 
-private:
+    bool GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosition& out_position);
 
+private:
     int m_lastSeenFrameId; ///< frame Id for which this landmark has been seen last 
     std::map<int, int> m_frameVsFeatureId; ///< feature Ids of this landmark for all frames
     std::map<FramePairKey, LandmarkPosition, CompFramePairKey> m_framePairVsPosition; ///< frame Id pair vs triangulated position
@@ -103,18 +112,11 @@ class LocalMap
 {
 
 public:
-    
-    enum class Status {
-        TrackingLost,
-        TrackingActive
-    };
-    
     /**
       * \brief Constructor of an empty local map
       */
     LocalMap(const unsigned int in_minNumberOfTrackedLandmarks) : 
         m_landmarks(), 
-        m_status(Status::TrackingLost),
         m_minNumberOfTrackedLandmarks(in_minNumberOfTrackedLandmarks)
     {
         Reset();
@@ -131,26 +133,20 @@ public:
     void Reset()
     {
         m_landmarks.clear();
-        m_status = Status::TrackingLost;
     }
     
     /**
-      * \brief Insert landmark given a feature match and a frame Id. It will be checked whether this landmark has been seen before.
-      * If it has been seen before, the existing landmark will be updated.
+      * \brief Insert landmarks given feature matches and a frame Id. It will be checked whether these landmarks have been seen before.
+      * If they have been seen before, the existing landmarks will be updated. Elements with same index in position and match vector must
+      * correspond to each other. Furthermore, it is expected, that no more landmarks will be added for this frame!
       *
-      * \param[in] in_position landmark position in WCS(!)
-      * \param[in] in_match matching object, it is assumed that the frame ID of the "first" description in this match equals in_currentFrameId
+      * \param[in] in_positions landmark positions in WCS(!)
+      * \param[in] in_matches matching object, it is assumed that the frame ID of the "first" description in this match equals in_currentFrameId
       * \param[in] in_currentFrameId current frame Id
       */
-    void LocalMap::InsertLandmark(const LandmarkPosition& in_position, const FeatureHandling::BinaryDescriptionMatch& in_match, const unsigned int& in_currentFrameId);
+    void InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const unsigned int& in_currentFrameId);
 
-    /**
-      * /brief Return tracking status of the local map
-      */
-    Status GetTrackingStatus()
-    {
-        return m_status;
-    }
+    void RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId);
     
     /**
       * \brief Get all stored landmarks
@@ -162,8 +158,9 @@ public:
 
 private:
 
+    void ComputeRelativeScale(const unsigned int& in_currentFrameId);
+
     std::vector<Landmark> m_landmarks; ///< stored landmarks
-    Status m_status; ///< current landmark tracking status
     const unsigned int m_minNumberOfTrackedLandmarks; ///< Minimum number of tracked landmarks needed for setting the tracking status to active
 };
 

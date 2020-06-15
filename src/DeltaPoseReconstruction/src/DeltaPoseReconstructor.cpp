@@ -155,6 +155,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
 
 
                 // Triangulate all inliers
+                std::vector<LandmarkPosition> landmarks;
                 for (auto matchIdx : inlierMatchIndices)
                 {
                     cv::Mat1f invCalibMat = in_calibMat.inv();
@@ -167,9 +168,11 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                     Utils::PointTriangulationLinear(m_lastProjectionMat, currentProjMat, currFrameCamCoord, lastFrameCamCoord, triangulatedPoint);
 
                     // Add triangulated landmarks to local map
-                    LandmarkPosition pos = { triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z };
-                    m_localMap.InsertLandmark(pos, matches[matchIdx], in_frame.GetId());
+                    landmarks.push_back(LandmarkPosition{ triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z });
                 }
+                // Add triangulated landmarks to local map
+                m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
+
 
                 tick.stop();
                 std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;

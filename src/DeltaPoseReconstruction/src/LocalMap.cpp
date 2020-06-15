@@ -12,10 +12,9 @@ namespace VOCPP
 namespace DeltaPoseReconstruction
 {
 
-LocalMap::~LocalMap()
-{
-    m_landmarks.clear();
-}
+/////////////////////////////////
+//          LANDMARK           //
+/////////////////////////////////
 
 void Landmark::UpdateLandmark(const unsigned int& in_currentFrameId, const unsigned int& in_currentFeatureId,
     const unsigned int& in_lastFrameId, const unsigned int& in_lastFeatureId, const LandmarkPosition& in_position)
@@ -26,15 +25,9 @@ void Landmark::UpdateLandmark(const unsigned int& in_currentFrameId, const unsig
     FramePairKey keyPair{ in_currentFrameId, in_lastFrameId };
     m_framePairVsPosition.insert(std::pair<FramePairKey, LandmarkPosition>(keyPair, in_position));
     m_lastSeenFrameId = in_currentFrameId;
-
-    std::cout << "Found keypoint" << std::endl;
-    for (auto bla : m_frameVsFeatureId)
-    {
-        std::cout << bla.first << " " << bla.second << std::endl;
-    }
 }
 
-bool Landmark::IsPresentInFrame(const unsigned int& in_frameId, const unsigned int& in_featureId) const
+bool Landmark::IsPresentInFrameWithFeatureId(const unsigned int& in_frameId, const unsigned int& in_featureId) const
 {
     bool ret = m_frameVsFeatureId.count(in_frameId) > 0 ? true : false;
 
@@ -46,33 +39,94 @@ bool Landmark::IsPresentInFrame(const unsigned int& in_frameId, const unsigned i
     return ret;
 }
 
-void LocalMap::InsertLandmark(const LandmarkPosition& in_position, const FeatureHandling::BinaryDescriptionMatch& in_match, const unsigned int& in_currentFrameId)
+bool Landmark::IsPresentInFrame(const unsigned int& in_frameId) const
 {
-    // Check whether this landmark has been observed before
-    bool found = false;
-    // "Tracked" is defined as a landmark that is at least visible in three frames
-    unsigned int trackedLandmarks = 0U;
-    // We assume here that first frame == current frame and second frame == last frame
-    // TODO: Refactor the match interface!
-    std::cout << in_currentFrameId << " " << in_match.GetFirstFeature().frameId << " " << in_match.GetSecondFeature().frameId << std::endl;
-    assert(in_currentFrameId == in_match.GetFirstFeature().frameId);
+    return m_frameVsFeatureId.count(in_frameId) > 0 ? true : false;
+}
 
-    for (auto& mark : m_landmarks)
+
+bool Landmark::GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosition& out_position)
+{
+    std::map<FramePairKey,LandmarkPosition>::iterator it = m_framePairVsPosition.find(in_pairKey);
+    bool ret = it != m_framePairVsPosition.end();
+    if (ret)
     {
-        if (mark.IsPresentInFrame(in_match.GetSecondFeature().frameId, in_match.GetSecondFeature().id))
+        out_position = it->second;
+    }
+
+    return ret;
+}
+
+
+/////////////////////////////////
+//          LOCAL MAP          //
+/////////////////////////////////
+
+LocalMap::~LocalMap()
+{
+    m_landmarks.clear();
+}
+
+void LocalMap::InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const unsigned int& in_currentFrameId)
+{
+    for (unsigned int it = 0U; it < in_positions.size(); it++)
+    {
+        // Check whether this landmark has been observed before
+        bool found = false;
+        // We assume here that first frame == current frame and second frame == last frame
+        // TODO: Refactor the match interface!
+        assert(in_currentFrameId == in_matches[it].GetFirstFeature().frameId);
+        for (auto& mark : m_landmarks)
         {
-            mark.UpdateLandmark(in_currentFrameId, in_match.GetFirstFeature().id, in_match.GetSecondFeature().frameId, in_match.GetSecondFeature().id, in_position);
-            trackedLandmarks++;
-            found = true;
+            if (mark.IsPresentInFrameWithFeatureId(in_matches[it].GetSecondFeature().frameId, in_matches[it].GetSecondFeature().id))
+            {
+                mark.UpdateLandmark(in_currentFrameId, in_matches[it].GetFirstFeature().id, in_matches[it].GetSecondFeature().frameId, in_matches[it].GetSecondFeature().id, in_positions[it]);
+                found = true;
+            }
+        }
+
+        // If Landmark has not been found --> create new one
+        if (!found)
+        {
+            m_landmarks.push_back(Landmark(in_currentFrameId, in_matches[it].GetFirstFeature().id, in_matches[it].GetSecondFeature().frameId, in_matches[it].GetSecondFeature().id, in_positions[it]));
         }
     }
 
-    // If Landmark has not been found --> create new one
-    if (!found)
+    ComputeRelativeScale(in_currentFrameId);
+}
+
+void LocalMap::RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId)
+{
+    auto newEnd = std::remove_if(m_landmarks.begin(), m_landmarks.end(), [&in_currentFrameId](const Landmark& i) {return i.GetLastSeenFrameId() < in_currentFrameId; });
+    m_landmarks.erase(newEnd, m_landmarks.end());
+}
+
+void LocalMap::ComputeRelativeScale(const unsigned int& in_currentFrameId)
+{
+    std::vector<LandmarkPosition> currentPosVec;
+    std::vector<LandmarkPosition> lastPosVec;
+
+    for (auto landmark : m_landmarks)
     {
-        m_landmarks.push_back(Landmark(in_currentFrameId, in_match.GetFirstFeature().id, in_match.GetSecondFeature().frameId, in_match.GetSecondFeature().id, in_position));
+        // Check whether the landmark can be tracked three frames into the past (including the current one)
+        Landmark::FramePairKey keyCurrent{ in_currentFrameId, in_currentFrameId - 1U};
+        LandmarkPosition posCurrent;
+        Landmark::FramePairKey keyLast{ in_currentFrameId - 1U, in_currentFrameId -2U};
+        LandmarkPosition posLast;
+        bool present = landmark.GetFramePairPosition(keyLast, posLast) && landmark.GetFramePairPosition(keyCurrent, posCurrent);
+        if (present)
+        {
+            currentPosVec.push_back(posCurrent);
+            lastPosVec.push_back(posLast);
+        }
+    }
+
+    if (currentPosVec.size() >= m_minNumberOfTrackedLandmarks)
+    {
+        std::cout << currentPosVec.size() << std::endl;
     }
 }
+
 
 } //namespace DeltaPoseReconstruction
 } //namespace VOCPP
