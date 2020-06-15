@@ -57,8 +57,8 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
             cv::Size kernelSize(5U, 5U);
 
             cv::Mat1f layerImage;
-            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, static_cast<float>(kernelSize.width), static_cast<float>(kernelSize.height));
-            cv::resize(layerImage, layerImage, cv::Size(0, 0), scale, scale);
+            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 1.4F, 1.4F);
+            cv::resize(layerImage, layerImage, cv::Size(0, 0), scale, scale, cv::INTER_AREA);
 
             pyramid.push_back(PyramidLayer{ scale, scaleSq / scaleNorm, layerImage });
         }

@@ -6,6 +6,7 @@
 */
 
 #include <Vocpp_DeltaPoseReconstruction/LocalMap.h>
+#include <algorithm>
 
 namespace VOCPP
 {
@@ -45,9 +46,9 @@ bool Landmark::IsPresentInFrame(const unsigned int& in_frameId) const
 }
 
 
-bool Landmark::GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosition& out_position)
+bool Landmark::GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosition& out_position) const
 {
-    std::map<FramePairKey,LandmarkPosition>::iterator it = m_framePairVsPosition.find(in_pairKey);
+    std::map<FramePairKey,LandmarkPosition>::const_iterator it = m_framePairVsPosition.find(in_pairKey);
     bool ret = it != m_framePairVsPosition.end();
     if (ret)
     {
@@ -56,6 +57,35 @@ bool Landmark::GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosi
 
     return ret;
 }
+
+bool Landmark::HasBeenScaledForFramePair(const FramePairKey& in_key) const
+{
+    std::map<FramePairKey, bool>::const_iterator it =m_framePairVsScaled.find(in_key);
+    bool ret = it != m_framePairVsScaled.end();
+    if (ret)
+    {
+        ret = it->second;
+    }
+
+    return ret;
+}
+
+bool Landmark::RescalePosition(const FramePairKey& in_pairKey, const float& in_scale)
+{
+    std::map<FramePairKey, LandmarkPosition>::iterator it = m_framePairVsPosition.find(in_pairKey);
+    bool ret = it != m_framePairVsPosition.end();
+    if (ret)
+    {
+        it->second.x *= in_scale;
+        it->second.y *= in_scale;
+        it->second.z *= in_scale;
+
+        m_framePairVsScaled.insert(std::pair<FramePairKey, bool>(in_pairKey, true));
+    }
+
+    return ret;
+}
+
 
 
 /////////////////////////////////
@@ -93,6 +123,7 @@ void LocalMap::InsertLandmarks(const std::vector<LandmarkPosition>& in_positions
     }
 
     ComputeRelativeScale(in_currentFrameId);
+    m_lastFrameId = in_currentFrameId;
 }
 
 void LocalMap::RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId)
@@ -101,29 +132,77 @@ void LocalMap::RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId)
     m_landmarks.erase(newEnd, m_landmarks.end());
 }
 
+bool LocalMap::GetLastRelativeScale(const unsigned int& in_lastFrameId, const unsigned int& in_currentFrameId, float& out_scale) const
+{
+    bool ret = false;
+
+    if (m_lastFrameId == in_currentFrameId && (m_lastFrameId - 1U) == in_lastFrameId && m_validTrackedLandmarks >= m_minNumberOfTrackedLandmarks)
+    {
+        ret = true;
+        out_scale = m_lastRelativeScale;
+    }
+
+    return ret;
+}
+
+
 void LocalMap::ComputeRelativeScale(const unsigned int& in_currentFrameId)
 {
     std::vector<LandmarkPosition> currentPosVec;
     std::vector<LandmarkPosition> lastPosVec;
+    std::vector<int> validLandmarkIndices;
 
-    for (auto landmark : m_landmarks)
+    for (unsigned int it=0U; it < m_landmarks.size(); it++)
     {
         // Check whether the landmark can be tracked three frames into the past (including the current one)
         Landmark::FramePairKey keyCurrent{ in_currentFrameId, in_currentFrameId - 1U};
         LandmarkPosition posCurrent;
-        Landmark::FramePairKey keyLast{ in_currentFrameId - 1U, in_currentFrameId -2U};
+        Landmark::FramePairKey keyLast{ in_currentFrameId - 1U, in_currentFrameId - 2U};
         LandmarkPosition posLast;
-        bool present = landmark.GetFramePairPosition(keyLast, posLast) && landmark.GetFramePairPosition(keyCurrent, posCurrent);
-        if (present)
+        bool present = m_landmarks[it].GetFramePairPosition(keyLast, posLast) && m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
+        bool lastScaled = m_landmarks[it].HasBeenScaledForFramePair(keyLast);
+        if (present && lastScaled)
         {
             currentPosVec.push_back(posCurrent);
             lastPosVec.push_back(posLast);
+            validLandmarkIndices.push_back(it);
         }
     }
 
-    if (currentPosVec.size() >= m_minNumberOfTrackedLandmarks)
+    // Update number of valid tracked landmarks
+    m_validTrackedLandmarks = static_cast<unsigned int>(currentPosVec.size());
+
+    if (currentPosVec.size() >= 2U)
     {
-        std::cout << currentPosVec.size() << std::endl;
+        std::vector<float> scales;
+        for (unsigned int i = 0U; i < currentPosVec.size() - 1U; i++)
+        {
+            unsigned int j = i + 1U;
+            const float lastFramePairDist = std::sqrt(std::pow(lastPosVec[i].x - lastPosVec[j].x, 2)
+                    + std::pow(lastPosVec[i].y - lastPosVec[j].y, 2)
+                    + std::pow(lastPosVec[i].z - lastPosVec[j].z, 2));
+            const float currentFramePairDist = std::sqrt(std::pow(currentPosVec[i].x - currentPosVec[j].x, 2)
+                    + std::pow(currentPosVec[i].y - currentPosVec[j].y, 2)
+                    + std::pow(currentPosVec[i].z - currentPosVec[j].z, 2));
+
+            // Compute relative scale
+            scales.push_back(lastFramePairDist / currentFramePairDist);
+        }
+
+        std::nth_element(scales.begin(), scales.begin() + scales.size() / 2, scales.end());
+        // Update current scale
+        m_lastRelativeScale = scales[scales.size() / 2U];
+        std::cout << "Tracked Landmarks: " << m_validTrackedLandmarks << std::endl;
+
+        for (auto it : validLandmarkIndices)
+        {
+            // Check whether the landmark can be tracked three frames into the past (including the current one)
+            Landmark::FramePairKey keyCurrent{ in_currentFrameId, in_currentFrameId - 1U };
+            LandmarkPosition posCurrent;
+            m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
+            (void)m_landmarks[it].RescalePosition(keyCurrent, m_lastRelativeScale);
+            m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
+        }
     }
 }
 

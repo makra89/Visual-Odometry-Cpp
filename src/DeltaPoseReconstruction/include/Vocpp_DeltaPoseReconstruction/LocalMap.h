@@ -8,6 +8,7 @@
 #ifndef VOCPP_LOCAL_MAP_H
 #define VOCPP_LOCAL_MAP_H
 
+#include <Vocpp_Interface/Frame.h>
 #include <Vocpp_FeatureHandling/Common.h>
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
@@ -46,6 +47,7 @@ public:
         const unsigned int& in_lastFrameId, const unsigned int& in_lastFeatureId, const LandmarkPosition& in_position) :
         m_lastSeenFrameId(in_currentFrameId),
         m_frameVsFeatureId(),
+        m_framePairVsScaled(),
         m_framePairVsPosition()
     {
         m_frameVsFeatureId.insert(std::pair<int, int>(in_lastFrameId, in_lastFeatureId));
@@ -54,6 +56,9 @@ public:
         // Add triangulated position
         FramePairKey keyPair{ in_currentFrameId, in_lastFrameId};
         m_framePairVsPosition.insert(std::pair<FramePairKey, LandmarkPosition>(keyPair, in_position));
+
+        // For the first frame pair we cannot apply any relative scale --> always indicate that it has been scaled
+        m_framePairVsScaled.insert(std::pair<FramePairKey, bool>(keyPair, true));
     }
 
     /**
@@ -97,11 +102,16 @@ public:
         }
     };
 
-    bool GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosition& out_position);
+    bool GetFramePairPosition(const FramePairKey& in_pairKey, LandmarkPosition& out_position) const;
+
+    bool HasBeenScaledForFramePair(const FramePairKey& in_key) const;
+
+    bool RescalePosition(const FramePairKey& in_pairKey, const float& in_scale);
 
 private:
     int m_lastSeenFrameId; ///< frame Id for which this landmark has been seen last 
     std::map<int, int> m_frameVsFeatureId; ///< feature Ids of this landmark for all frames
+    std::map<FramePairKey, bool, CompFramePairKey> m_framePairVsScaled; ///< indicates whether a landmark has already been scaled for certain frame pair
     std::map<FramePairKey, LandmarkPosition, CompFramePairKey> m_framePairVsPosition; ///< frame Id pair vs triangulated position
 };
 
@@ -117,7 +127,10 @@ public:
       */
     LocalMap(const unsigned int in_minNumberOfTrackedLandmarks) : 
         m_landmarks(), 
-        m_minNumberOfTrackedLandmarks(in_minNumberOfTrackedLandmarks)
+        m_minNumberOfTrackedLandmarks(in_minNumberOfTrackedLandmarks),
+        m_lastFrameId(s_invalidFrameId),
+        m_validTrackedLandmarks(0U),
+        m_lastRelativeScale(0.0)
     {
         Reset();
     }
@@ -147,6 +160,8 @@ public:
     void InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const unsigned int& in_currentFrameId);
 
     void RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId);
+
+    bool GetLastRelativeScale(const unsigned int& in_lastFrameId, const unsigned int& in_currentFrameId, float& out_scale) const;
     
     /**
       * \brief Get all stored landmarks
@@ -162,6 +177,9 @@ private:
 
     std::vector<Landmark> m_landmarks; ///< stored landmarks
     const unsigned int m_minNumberOfTrackedLandmarks; ///< Minimum number of tracked landmarks needed for setting the tracking status to active
+    unsigned int m_lastFrameId;
+    unsigned int m_validTrackedLandmarks;
+    float m_lastRelativeScale;
 };
 
 } //namespace DeltaPoseReconstruction

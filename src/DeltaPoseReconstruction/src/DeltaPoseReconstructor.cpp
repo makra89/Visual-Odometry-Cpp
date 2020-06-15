@@ -91,7 +91,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
 
         // Get features and descriptions
         std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
-        ret = ret && m_detectorDescriptor.ExtractFeatureDescriptions(in_frame, 2000U, descriptions);
+        ret = ret && m_detectorDescriptor.ExtractFeatureDescriptions(in_frame, 1000U, descriptions);
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose to the center of the world coordinate system
         // TODO: Set it to the last valid pose
@@ -120,6 +120,10 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 cv::Mat1f translation;
                 m_optimizer.Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation);
 
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                ///////                             RAW TRANSLATION (Without applying a relative scale        //////
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                
                 // Up to now the rotation and translation are in the camera coordinate system
                 // We want to transform it into the body system in which the x-Axis is aligned
                 // with the longitudinal body axis
@@ -127,32 +131,26 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 cv::Mat1f rotationBodySyst = rotBodyToCamera.t() * (rotation * rotBodyToCamera);
                 translation = rotBodyToCamera.t() * translation;
 
-                cv::Vec3f eulerAngles = Utils::ExtractRollPitchYaw(rotationBodySyst);
-                DeltaOrientation deltaOrientation = { eulerAngles[0], eulerAngles[1] , eulerAngles[2] };
-                DeltaTranslation deltaTranslation = { translation(0,0), translation(1,0) , translation(2,0) };
-                m_lastDeltaPose = DeltaCameraPose(deltaTranslation, deltaOrientation);
-
                 // Concatenate delta poses to get absolute pose in world coordinate system
                 m_lastOrientationWcs = rotationBodySyst * m_lastOrientationWcs;
-                cv::Vec3f eulerAnglesWcs = Utils::ExtractRollPitchYaw(m_lastOrientationWcs);
                 // The translation is given from last frame to current frame in the last frame coordinate system
                 // --> Transform the translation vector back to world coordinate system using the inverse rotation of the last frame
-                m_lastPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
-
-                Orientation currentOrientWcs = { eulerAnglesWcs[0], eulerAnglesWcs[1] , eulerAnglesWcs[2] };
-                Translation currentPosWcs = { m_lastPosWcs(0,0), m_lastPosWcs(1,0) , m_lastPosWcs(2,0) };
-                m_lastPose = CameraPose(currentPosWcs, currentOrientWcs);
-
-                // Now calculate the current projection marix to be able to triangulate all features
+                cv::Mat1f rawPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
+                
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                ///////                            TRANSLATION REFINEMENT (with relative scale                //////
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                
+                // Calculate an intermediate (without applied relative scale) projection marix to be able to triangulate all features
                 cv::Mat1f currentProjMat;
-                Utils::GetProjectionMatrix(m_lastOrientationWcs, -m_lastOrientationWcs * m_lastPosWcs, currentProjMat);
-                // And create a vector with all inlier matches
+                Utils::GetProjectionMatrix(m_lastOrientationWcs, -m_lastOrientationWcs * rawPosWcs, currentProjMat);
+                
+                // Create a vector with all inlier matches
                 std::vector<FeatureHandling::BinaryDescriptionMatch> inlierMatches;
                 for (auto matchIdx : inlierMatchIndices)
                 {
                     inlierMatches.push_back(matches[matchIdx]);
                 }
-
 
                 // Triangulate all inliers
                 std::vector<LandmarkPosition> landmarks;
@@ -171,8 +169,31 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                     landmarks.push_back(LandmarkPosition{ triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z });
                 }
                 // Add triangulated landmarks to local map
-                m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
+                // m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
+                // And calculate scale, apply it to translation vector
+                float scale = 0.0;
+                if (m_localMap.GetLastRelativeScale(m_lastFrameId, in_frame.GetId(), scale))
+                {
+                    // Currently deactivated, there is a memory leak somewhere
+                    // translation = translation * scale;
+                }
+                
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
+                ///////                            REFINED POSE CALCULATION                                   //////
+                ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+                // Calculate last delta pose
+                cv::Vec3f eulerAngles = Utils::ExtractRollPitchYaw(rotationBodySyst);
+                DeltaOrientation deltaOrientation = { eulerAngles[0], eulerAngles[1] , eulerAngles[2] };
+                DeltaTranslation deltaTranslation = { translation(0,0), translation(1,0) , translation(2,0) };
+                m_lastDeltaPose = DeltaCameraPose(deltaTranslation, deltaOrientation);
+
+                // And last absolute pose
+                cv::Vec3f eulerAnglesWcs = Utils::ExtractRollPitchYaw(m_lastOrientationWcs);
+                m_lastPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
+                Orientation currentOrientWcs = { eulerAnglesWcs[0], eulerAnglesWcs[1] , eulerAnglesWcs[2] };
+                Translation currentPosWcs = { m_lastPosWcs(0,0), m_lastPosWcs(1,0) , m_lastPosWcs(2,0) };
+                m_lastPose = CameraPose(currentPosWcs, currentOrientWcs);
 
                 tick.stop();
                 std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;

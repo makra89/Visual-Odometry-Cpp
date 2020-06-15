@@ -11,6 +11,7 @@
 #include <opencv2/opencv.hpp>
 
 using VOCPP::DeltaPoseReconstruction::LocalMap;
+using VOCPP::DeltaPoseReconstruction::Landmark;
 using VOCPP::DeltaPoseReconstruction::LandmarkPosition;
 using VOCPP::FeatureHandling::Feature;
 using VOCPP::FeatureHandling::BinaryFeatureDescription;
@@ -230,5 +231,22 @@ TEST(LocalMapTest, CalculateRelativeScale)
     matches.push_back(newMatch2);
     map.InsertLandmarks(landmarks, matches, currentFrameId);
     ASSERT_TRUE(map.GetLandmarks().size() == 2);
+
+    float relativeScale = 0.0;
+    EXPECT_TRUE(map.GetLastRelativeScale(1U /*last frame*/, 2U /*current frame*/, relativeScale));
+    EXPECT_FLOAT_EQ(relativeScale, 0.5);
+
+    // Check that the positions in the last frame pair have been rescaled
+    LandmarkPosition position;
+    Landmark::FramePairKey key{ currentFrameId, lastFrameId };
+    EXPECT_TRUE(map.GetLandmarks()[0].GetFramePairPosition(key, position));
+    EXPECT_DOUBLE_EQ(position.x, landmarkPos1.x);
+    EXPECT_DOUBLE_EQ(position.y, landmarkPos1.y);
+    EXPECT_DOUBLE_EQ(position.z, landmarkPos1.z);
+
+    EXPECT_TRUE(map.GetLandmarks()[1].GetFramePairPosition(key, position));
+    EXPECT_DOUBLE_EQ(position.x, landmarkPos2.x);
+    EXPECT_DOUBLE_EQ(position.y, landmarkPos2.y);
+    EXPECT_DOUBLE_EQ(position.z, landmarkPos2.z);
 }
 
