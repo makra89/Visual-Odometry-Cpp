@@ -30,7 +30,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=4U, const float& in_layerScaleFactor=0.8);
+    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=1U, const float& in_layerScaleFactor=0.7);
 
     /**
       * /brief Extract descriptions from a provided grayscale image frame.

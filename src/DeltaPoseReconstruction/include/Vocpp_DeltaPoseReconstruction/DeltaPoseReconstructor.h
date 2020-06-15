@@ -15,6 +15,9 @@
 #include<Vocpp_FeatureHandling/OrbDetectorDescriptor.h>
 #include<Vocpp_FeatureHandling/LshMatcher.h>
 
+#include<Vocpp_DeltaPoseReconstruction/RansacOptimizer.h>
+#include<Vocpp_DeltaPoseReconstruction/LocalMap.h>
+
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
 
@@ -25,8 +28,6 @@ namespace DeltaPoseReconstruction
 {
 
 class EpipolarModel;
-class RansacOptimizer;
-class LocalMap;
 
 /**
   * /brief Reconstructs epipolar geometry out of feature matches and 
@@ -70,12 +71,17 @@ public:
 
 private:
 
+    /**
+      * /brief Internally used to reset all members (e.g. used during construction or when tracking has been lost)
+      */
+    void Reset();
+
     FeatureHandling::OrbDetectorDescriptor m_detectorDescriptor; ///< feature detector and descriptor
     FeatureHandling::LshMatcher m_matcher; ///< feature matcher
 
-    RansacOptimizer* m_optimizer;
+    RansacOptimizer m_optimizer;
     std::vector<EpipolarModel*> m_epiPolModels;
-    LocalMap* m_localMap;
+    LocalMap m_localMap;
 
     std::vector<FeatureHandling::BinaryFeatureDescription> m_descriptionsLastFrame;  ///< descriptions computed for last frame
     unsigned int m_lastFrameId;

@@ -5,9 +5,9 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include <RansacOptimizer.h>
+#include <Vocpp_DeltaPoseReconstruction/RansacOptimizer.h>
 #include <Vocpp_Utils/NumericalUtilities.h>
-
+#include <EpipolarModel.h>
 #include <iostream>
 
 namespace VOCPP

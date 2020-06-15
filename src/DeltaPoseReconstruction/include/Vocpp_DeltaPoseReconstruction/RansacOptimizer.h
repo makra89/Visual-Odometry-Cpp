@@ -8,8 +8,6 @@
 #ifndef VOCPP_RANSAC_OPTIMIZER_H
 #define VOCPP_RANSAC_OPTIMIZER_H
 
-#include <EpipolarModel.h>
-
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 
@@ -18,6 +16,8 @@ namespace VOCPP
 {
 namespace DeltaPoseReconstruction
 {
+
+class EpipolarModel;
 
 /**
   * /brief Tries to minimize the error of each EpipolarModel given a set of corresponding image points in two frames,
