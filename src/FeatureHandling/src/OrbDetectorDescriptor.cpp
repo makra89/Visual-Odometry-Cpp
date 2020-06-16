@@ -39,8 +39,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         float scaleNorm = 0.0F;
         for (unsigned int layer = 0U; layer < m_numLayers; layer++)
         {
-            const float scaleSq = static_cast<float>(std::pow(std::pow(m_layerScaleFactor, layer), 2));
-            scaleNorm += scaleSq;
+            scaleNorm += std::pow(m_layerScaleFactor, layer);
         }
         
         std::vector<PyramidLayer> pyramid;
@@ -51,40 +50,38 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         for (unsigned int layer = 1U; layer < m_numLayers; layer++)
         {
             const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
-            const float scaleSq = static_cast<float>(std::pow(std::pow(m_layerScaleFactor, layer), 2));
 
             // Kernel size for smoothing
-            cv::Size kernelSize(3U, 3U);
+            cv::Size kernelSize(5U, 5U);
 
             cv::Mat1f layerImage;
-            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 1.4F, 1.4F);
-            cv::resize(layerImage, layerImage, cv::Size(0, 0), scale, scale, cv::INTER_AREA);
+            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 1.0F, 1.0F);
+            cv::resize(layerImage, layerImage, cv::Size(0, 0), m_layerScaleFactor, m_layerScaleFactor, cv::INTER_LINEAR_EXACT);
 
-            pyramid.push_back(PyramidLayer{ scale, scaleSq / scaleNorm, layerImage });
+            pyramid.push_back(PyramidLayer{ scale, scale / scaleNorm, layerImage });
         }
         
         
         unsigned int featureId = 0;
-        std::vector<Feature> features;
         for (auto layer : pyramid)
         {
             Frame layerFrame(layer.image, in_frame.GetId());
             std::vector<Feature> layerFeatures;
             m_fastDetector.ExtractFeatures(layerFrame, static_cast<int>(in_maxNumFeatures * layer.featureRatio), layerFeatures);
+            std::vector<BinaryFeatureDescription> layerDescriptions;
+            m_descriptor.ComputeDescriptions(layerFrame, layerFeatures, layerDescriptions);
 
-            for (auto feature : layerFeatures)
+            for (auto desc : layerDescriptions)
             {
-                features.push_back(Feature{ featureId, in_frame.GetId(),
-                    1.F / layer.scale * feature.imageCoordX, 1.F / layer.scale * feature.imageCoordY,
-                    feature.response, feature.angle, feature.size / layer.scale, layer.scale });
+                Feature feature { featureId, in_frame.GetId(),
+                    cvRound(1.F / layer.scale * desc.GetFeature().imageCoordX), cvRound(1.F / layer.scale * desc.GetFeature().imageCoordY),
+                    desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / layer.scale, layer.scale };
 
+                out_descriptions.push_back(BinaryFeatureDescription(feature, desc.GetDescription()));
                 featureId++;
             }
 
         }
-        
-        // Compute descriptors on original image (TODO: We should rescale the patch size here!)
-        m_descriptor.ComputeDescriptions(in_frame, features, out_descriptions);
     }
 
     return ret;

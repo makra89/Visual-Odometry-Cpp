@@ -5,4 +5,4 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-std::string testDirectory = "${CMAKE_CURRENT_SOURCE_DIR}/resources/";
+static std::string testDirectory = "${CMAKE_CURRENT_SOURCE_DIR}/resources/";
