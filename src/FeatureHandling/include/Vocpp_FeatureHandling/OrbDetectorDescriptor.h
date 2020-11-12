@@ -50,7 +50,7 @@ private:
     struct PyramidLayer
     {
         float scale;
-        float featureRatio;
+        int numFeatures;
         cv::Mat1f image;
     };
 

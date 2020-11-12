@@ -137,13 +137,18 @@ TEST(OrFastChainTest, MatchTriangles_Rotated)
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsRotated, matches));
 
     // We requested 500 features, not all features will be matched
-    EXPECT_EQ(497U, matches.size());
+    EXPECT_GE(matches.size(), 495U);
     
     // Since we rotated by 90 degrees, we know the exact matching pixel locations
     for (unsigned int idx = 0U; idx < matches.size(); idx++)
     {
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
+
+        // We expect that the feature angle differ by pi/2
+        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
+        EXPECT_NEAR(angleDiff, CV_PI / 2., 0.2);
     }
 }
 
@@ -178,12 +183,17 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Rotated)
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsRotated, matches));
 
     // We requested 500 features, not all features will be matched
-    EXPECT_EQ(491U, matches.size());
+    EXPECT_GE(matches.size(), 490U);
 
     // Since we rotated by 90 degrees, we know the exact matching pixel locations
     for (unsigned int idx = 0U; idx < matches.size(); idx++)
     {
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
+
+        // We expect that the feature angle differ by pi/2
+        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
+        EXPECT_NEAR(angleDiff, CV_PI / 2., 0.2);
     }
 }
