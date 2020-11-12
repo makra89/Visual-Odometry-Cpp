@@ -5,12 +5,14 @@ add_library(Vocpp_FeatureHandling STATIC
     ./include/Vocpp_FeatureHandling/Common.h
     ./include/Vocpp_FeatureHandling/BriefDescriptor.h
     ./include/Vocpp_FeatureHandling/HarrisEdgeDetector.h
+    ./include/Vocpp_FeatureHandling/BruteForceMatcher.h
     ./include/Vocpp_FeatureHandling/LshMatcher.h
     ./include/Vocpp_FeatureHandling/OrbDetectorDescriptor.h
     ./include/Vocpp_FeatureHandling/OrFastDetector.h
     #src   
     ./src/HarrisEdgeDetector.cpp
     ./src/BriefDescriptor.cpp
+    ./src/BruteForceMatcher.cpp
     ./src/LshMatcher.cpp
     ./src/OrFastDetector.cpp
     ./src/OrbDetectorDescriptor.cpp

@@ -49,6 +49,8 @@ public:
       * /brief Frame constructor using a pointer to the image data. Constructing a frame this way 
       * no memory is allocated. The frame is just a view on the data. The pointer has to be valid
       * for the whole lifetime of the frame object.
+      *
+      * Layout of the image data in memory: [row1, row2, row3, ....]
       */
     Frame(float* const in_grayImgData, unsigned int in_width, unsigned int in_height, unsigned int in_frameId) : m_Id(s_invalidFrameId)
     {
