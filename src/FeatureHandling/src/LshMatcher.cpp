@@ -32,10 +32,10 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
 
     if (in_descFirst.size() == 0 || in_descSecond.size() == 0)
     {
-        std::cout << "[BruteForceMatcher]: No descriptions found in one or both of the provided frames" << std::endl;
+        std::cout << "[LshMatcher]: No descriptions found in one or both of the provided frames" << std::endl;
         return false;
     }
-    std::vector<BinaryDescriptionMatch> testMatches;
+
     std::unordered_map<unsigned int, std::vector<unsigned int>> bucketTable;
     IndexDescriptions(in_descSecond, bucketTable);
     
@@ -84,30 +84,6 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
             out_matches.push_back(BinaryDescriptionMatch{ descFirst,in_descSecond[candidateIds[smallestIdx2]] , static_cast<float>(smallestDist) });
         }
     }
-
-    /* Brute Force Approach - Keep for now */
-    /* Loop over all descriptions
-    for (auto desc1 : in_descFirst)
-    {
-        int smallestDist = INT_MAX;
-        int smallestIdx2 = 0;
-        
-        for (int index2 = 0; index2 < in_descSecond.size(); index2++)
-        {
-            int distance = ComputeHammingDistance(desc1, in_descSecond[index2]);
-            if (distance < smallestDist)
-            {
-                smallestDist = distance;
-                smallestIdx2 = index2;
-            }
-        }
-
-        // Check if distance is smaller than threshold
-        if (smallestDist <= m_maxDistance)
-        {
-            //out_matches.push_back(BinaryDescriptionMatch{ desc1,in_descSecond[smallestIdx2], static_cast<float>(smallestDist)});
-        }
-    }*/
     
     return ret;
 }

@@ -5,8 +5,8 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#ifndef VOCPP_BRUTE_FORCE_BINARY_MATCHER_H
-#define VOCPP_BRUTE_FORCE_BINARY_MATCHER_H
+#ifndef VOCPP_LSH_BINARY_MATCHER_H
+#define VOCPP_LSH_BINARY_MATCHER_H
 
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
@@ -20,7 +20,7 @@ namespace FeatureHandling
 {
 
 /**
-  * /brief Brute force binary feature matcher class
+  * /brief LSH binary feature matcher class
   */
 class LshMatcher
 {
@@ -70,4 +70,4 @@ private:
 } //namespace FeatureHandling
 } //namespace VOCPP
 
-#endif /* VOCPP_BRUTE_FORCE_BINARY_MATCHER_H */
+#endif /* VOCPP_LSH_BINARY_MATCHER_H */

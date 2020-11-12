@@ -4,6 +4,7 @@ add_executable(Vocpp_FeatureHandlingTest
     src/input.h
     #src
     src/OrFastDetectorTest.cpp
+    src/OrFastChainTest.cpp
     src/OrbTest.cpp
     src/main.cpp
 )
