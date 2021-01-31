@@ -32,9 +32,13 @@ TEST(FrameTest, Constructor_NoImageData)
 TEST(FrameTest, Constructor_Valid)
 {
     // Creating a valid frame
-    float img[] = { 1, 3 ,4 ,5 };    
-    Frame f(img, 2, 2, 1);
+    float img[] = {1, 2, 3, 4, 5, 6};    
+    Frame f(img, 3, 2, 1);
 
     EXPECT_TRUE(f.IsValid());
     EXPECT_EQ(f.GetId(), 1);
+
+    EXPECT_EQ(f.GetImage().at<float>(0, 0), 1);
+    EXPECT_EQ(f.GetImage().at<float>(0, 2), 3);
+    EXPECT_EQ(f.GetImage().at<float>(1, 2), 6);
 }

@@ -39,12 +39,42 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         float scaleNorm = 0.0F;
         for (unsigned int layer = 0U; layer < m_numLayers; layer++)
         {
-            scaleNorm += std::pow(m_layerScaleFactor, layer);
+            scaleNorm += static_cast<float>(std::pow(m_layerScaleFactor, layer));
+        }
+
+        // Calculate number of features per layer
+        std::vector<int> numFeaturesPerLevel(m_numLayers);
+        int numRequestedFeatures = 0;
+        for (unsigned int layer = 0U; layer < m_numLayers; layer++)
+        {
+            const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            const unsigned int numFeaturesForScale = static_cast<unsigned int>(ceil(scale / scaleNorm * in_maxNumFeatures));
+            
+            numFeaturesPerLevel[layer] = numFeaturesForScale;
+            numRequestedFeatures += numFeaturesForScale;
+        }
+
+        // If we have more events than requested, remove from lower layers
+        int currentLayer = m_numLayers - 1;
+        while (numRequestedFeatures > in_maxNumFeatures)
+        {
+            if (numFeaturesPerLevel[currentLayer] > (numRequestedFeatures - in_maxNumFeatures))
+            {
+                numFeaturesPerLevel[currentLayer] -= (numRequestedFeatures - in_maxNumFeatures);
+                numRequestedFeatures = in_maxNumFeatures;
+            }
+            else
+            {
+                numRequestedFeatures -= numFeaturesPerLevel[currentLayer];
+                numFeaturesPerLevel[currentLayer] = 0U;
+            }
+
+            currentLayer -= 1;
         }
         
         std::vector<PyramidLayer> pyramid;
         // First layer
-        pyramid.push_back(PyramidLayer{ 1.0F, 1.0F / scaleNorm, in_frame.GetImage()});
+        pyramid.push_back(PyramidLayer{ 1.0F, numFeaturesPerLevel[0], in_frame.GetImage()});
 
         // Fill pyramid
         for (unsigned int layer = 1U; layer < m_numLayers; layer++)
@@ -52,35 +82,36 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
             const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
 
             // Kernel size for smoothing
-            cv::Size kernelSize(5U, 5U);
+            cv::Size kernelSize(7U, 7U);
 
             cv::Mat1f layerImage;
-            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 1.0F, 1.0F);
-            cv::resize(layerImage, layerImage, cv::Size(0, 0), m_layerScaleFactor, m_layerScaleFactor, cv::INTER_LINEAR_EXACT);
+            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 2.F, 2.F);
+            cv::resize(layerImage, layerImage, cv::Size(0, 0), m_layerScaleFactor, m_layerScaleFactor, cv::INTER_AREA);
 
-            pyramid.push_back(PyramidLayer{ scale, scale / scaleNorm, layerImage });
+            pyramid.push_back(PyramidLayer{ scale, numFeaturesPerLevel[layer], layerImage });
         }
         
         
         unsigned int featureId = 0;
         for (auto layer : pyramid)
         {
-            Frame layerFrame(layer.image, in_frame.GetId());
-            std::vector<Feature> layerFeatures;
-            m_fastDetector.ExtractFeatures(layerFrame, static_cast<int>(in_maxNumFeatures * layer.featureRatio), layerFeatures);
-            std::vector<BinaryFeatureDescription> layerDescriptions;
-            m_descriptor.ComputeDescriptions(layerFrame, layerFeatures, layerDescriptions);
-
-            for (auto desc : layerDescriptions)
+            if (layer.numFeatures > 0)
             {
-                Feature feature { featureId, in_frame.GetId(),
-                    cvRound(1.F / layer.scale * desc.GetFeature().imageCoordX), cvRound(1.F / layer.scale * desc.GetFeature().imageCoordY),
-                    desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / layer.scale, layer.scale };
+                Frame layerFrame(layer.image, in_frame.GetId());
+                std::vector<Feature> layerFeatures;
+                m_fastDetector.ExtractFeatures(layerFrame, layer.numFeatures, layerFeatures);
+                std::vector<BinaryFeatureDescription> layerDescriptions;
+                m_descriptor.ComputeDescriptions(layerFrame, layerFeatures, layerDescriptions);
 
-                out_descriptions.push_back(BinaryFeatureDescription(feature, desc.GetDescription()));
-                featureId++;
+                for (auto desc : layerDescriptions)
+                {
+                    Feature feature{ featureId, in_frame.GetId(),
+                        1.F / layer.scale * desc.GetFeature().imageCoordX, 1.F / layer.scale * desc.GetFeature().imageCoordY,
+                        desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / layer.scale, layer.scale };
+                    out_descriptions.push_back(BinaryFeatureDescription(feature, desc.GetDescription()));
+                    featureId++;
+                }
             }
-
         }
     }
 

@@ -85,37 +85,99 @@ TEST(OrbTest, DetectTriangleEdges_OneLayer)
     EXPECT_GT(descriptions[1].GetFeature().response, descriptions[2].GetFeature().response);
 }
 
-// Check that if multiple layers are configured and we provide an image of a triangle, the 
-// three edges are detected on all layers
-TEST(OrbTest, DetectTriangleEdges_MultipleLayers)
+
+// Check that the ORB descriptor + matcher is rotation invariant
+TEST(OrbTestWithMatching, RotationInvariance_OneLayer)
 {
     cv::Mat grayScaleImg;
-    cv::cvtColor(cv::imread(testDirectory + "Triangle.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(cv::imread(testDirectory + "far-north.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
     grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
-    // Copy the image to a larger one to take care of the boundaries
-    cv::Mat img = cv::Mat::ones(1700, 1700, CV_32FC1);
-    grayScaleImg.copyTo(img(cv::Rect(500, 500, grayScaleImg.cols, grayScaleImg.rows)));
+    cv::Mat rotatedGrayScaleImg;
+    cv::rotate(grayScaleImg, rotatedGrayScaleImg, cv::ROTATE_90_CLOCKWISE);
 
-    VOCPP::FeatureHandling::OrbDetectorDescriptor detector(3U /*three layers*/, 0.7F /*scale factor*/);
+    VOCPP::FeatureHandling::OrbDetectorDescriptor detector(1U /*one layers*/, 0.7F /*scale factor*/);
 
-    VOCPP::Frame frameFirst(img.ptr<float>(0), img.cols, img.rows, 1);
+    VOCPP::Frame frameUnscaled(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+    VOCPP::Frame frameRotated(rotatedGrayScaleImg.ptr<float>(0), rotatedGrayScaleImg.cols, rotatedGrayScaleImg.rows, 1);
     std::vector<VOCPP::FeatureHandling::BinaryFeatureDescription> descriptions;
-    // The three edges should be the strongest features
-    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameFirst, 3000U, descriptions));
-    // 3 Layers * 3 Edges = 9
-    std::cout << descriptions.size() << std::endl;
-    ASSERT_TRUE(descriptions.size() == 9);
+    std::vector<VOCPP::FeatureHandling::BinaryFeatureDescription> descriptionsRotated;
+    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameUnscaled, 500U, descriptions));
+    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameRotated, 500U, descriptionsRotated));
 
-    EXPECT_FLOAT_EQ(descriptions[0].GetFeature().scale, 1.0F);
-    EXPECT_FLOAT_EQ(descriptions[1].GetFeature().scale, 1.0F);
-    EXPECT_FLOAT_EQ(descriptions[2].GetFeature().scale, 1.0F);
-    EXPECT_FLOAT_EQ(descriptions[3].GetFeature().scale, 0.7F);
-    EXPECT_FLOAT_EQ(descriptions[4].GetFeature().scale, 0.7F);
-    EXPECT_FLOAT_EQ(descriptions[5].GetFeature().scale, 0.7F);
-    EXPECT_FLOAT_EQ(descriptions[6].GetFeature().scale, 0.49F);
-    EXPECT_FLOAT_EQ(descriptions[7].GetFeature().scale, 0.49F);
-    EXPECT_FLOAT_EQ(descriptions[8].GetFeature().scale, 0.49F);
+    // Instantiate Matcher
+    VOCPP::FeatureHandling::LshMatcher matcher;
+    std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
+    matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
+    EXPECT_GE(matches.size(), 490);
+
+    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    {
+        EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
+        EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
+        
+        // All features should have unit scale (only one layer)
+        EXPECT_EQ(matches[idx].GetFirstFeature().scale, 1.0);
+        EXPECT_EQ(matches[idx].GetSecondFeature().scale, 1.0);
+
+        // We expect that the feature angle differ by pi/2
+        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
+        EXPECT_NEAR(angleDiff, CV_PI / 2., 0.2);
+    }   
 }
+
+// Check that the ORB descriptor + matcher is rotation invariant using three layers
+TEST(OrbTestWithMatching, RotationInvariance_ThreeLayers)
+{
+    cv::Mat grayScaleImg;
+    cv::cvtColor(cv::imread(testDirectory + "far-north.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
+    grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
+    cv::Mat rotatedGrayScaleImg;
+    cv::rotate(grayScaleImg, rotatedGrayScaleImg, cv::ROTATE_90_CLOCKWISE);
+
+    VOCPP::FeatureHandling::OrbDetectorDescriptor detector(3U /*three layers*/, 0.5F /*scale factor*/);
+
+    VOCPP::Frame frameUnscaled(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+    VOCPP::Frame frameRotated(rotatedGrayScaleImg.ptr<float>(0), rotatedGrayScaleImg.cols, rotatedGrayScaleImg.rows, 1);
+    std::vector<VOCPP::FeatureHandling::BinaryFeatureDescription> descriptions;
+    std::vector<VOCPP::FeatureHandling::BinaryFeatureDescription> descriptionsRotated;
+    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameUnscaled, 500U, descriptions));
+    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameRotated, 500U, descriptionsRotated));
+
+    // Instantiate Matcher
+    VOCPP::FeatureHandling::LshMatcher matcher;
+    std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
+    matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
+    EXPECT_GE(matches.size(), 440);
+
+    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    {
+        EXPECT_EQ(matches[idx].GetFirstFeature().scale, matches[idx].GetSecondFeature().scale);
+
+        if (matches[idx].GetFirstFeature().scale == 1.0)
+        {
+            EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
+            EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
+        }
+        else if(matches[idx].GetFirstFeature().scale == 0.5)
+        {
+            EXPECT_NEAR(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY, 1.0);
+            EXPECT_NEAR(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX, 1.0);
+        }
+        else
+        {
+            EXPECT_NEAR(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY, 5.0);
+            EXPECT_NEAR(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX, 5.0);
+        }
+
+        // We expect that the feature angle differ by pi/2
+        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
+        EXPECT_NEAR(angleDiff, CV_PI / 2., 0.3);
+    }
+}
+
+
 
 // Check that the ORB descriptor + matcher is scale invariant
 TEST(OrbTestWithMatching, ScaleInvariance)
@@ -148,39 +210,6 @@ TEST(OrbTestWithMatching, ScaleInvariance)
         // We expect that the feature angle should be similar
         // TODO: Has been deactivated, there are some outliers
         // EXPECT_NEAR(matches[idx].GetFirstFeature().angle, matches[idx].GetSecondFeature().angle, 0.2);
-    }
-}
-
-// Check that the ORB descriptor + matcher is rotation invariant
-TEST(OrbTestWithMatching, RotationInvariance)
-{
-    cv::Mat grayScaleImg;
-    cv::cvtColor(cv::imread(testDirectory + "far-north.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
-    grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
-    cv::Mat rescaledGrayScaleImg;
-    cv::rotate(grayScaleImg, rescaledGrayScaleImg, cv::ROTATE_90_CLOCKWISE);
-
-    VOCPP::FeatureHandling::OrbDetectorDescriptor detector(5U /*five layers*/, 0.7F /*scale factor*/);
-
-    VOCPP::Frame frameUnscaled(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
-    VOCPP::Frame frameRescaled(rescaledGrayScaleImg.ptr<float>(0), rescaledGrayScaleImg.cols, rescaledGrayScaleImg.rows, 1);
-    std::vector<VOCPP::FeatureHandling::BinaryFeatureDescription> descriptionsUnscaled;
-    std::vector<VOCPP::FeatureHandling::BinaryFeatureDescription> descriptionsRescaled;
-    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameUnscaled, 25U, descriptionsUnscaled));
-    EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameRescaled, 25U, descriptionsRescaled));
-
-    // Instantiate Matcher
-    VOCPP::FeatureHandling::LshMatcher matcher;
-    std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
-    matcher.MatchDesriptions(descriptionsUnscaled, descriptionsRescaled, matches);
-    EXPECT_GE(matches.size(), 10);
-
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
-    {
-        // We expect that the feature angle differ by pi/2
-        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
-        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
-        EXPECT_NEAR(angleDiff, CV_PI / 2., 0.2);
     }
 
     /* Remove comment for visualization

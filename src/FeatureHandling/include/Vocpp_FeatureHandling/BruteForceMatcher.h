@@ -5,14 +5,13 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#ifndef VOCPP_LSH_BINARY_MATCHER_H
-#define VOCPP_LSH_BINARY_MATCHER_H
+#ifndef VOCPP_BRUTE_FORCE_BINARY_MATCHER_H
+#define VOCPP_BRUTE_FORCE_BINARY_MATCHER_H
 
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 #include <Vocpp_FeatureHandling/Common.h>
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
-#include <unordered_map>
 
 namespace VOCPP
 {
@@ -20,17 +19,16 @@ namespace FeatureHandling
 {
 
 /**
-  * /brief LSH binary feature matcher class
+  * /brief Brute force binary feature matcher class
   */
-class LshMatcher
+class BruteForceMatcher
 {
 public:
     
     /**
       * \brief Constructor
       */
-    LshMatcher(const unsigned int& in_maxDistance = 50U, const unsigned int& in_numHashFuncs = 30U, const unsigned int& in_lengthHashFunc = 15U,
-        const unsigned int& in_lengthDescription = 256U);
+    BruteForceMatcher(const unsigned int& in_maxDistance = 50U);
 
     /**
       * \brief Compares binary feature descriptions and return matches.
@@ -45,29 +43,15 @@ public:
 
 private:
     // It is not allowed to copy the matcher directly
-    LshMatcher& operator=(const LshMatcher&);
-    LshMatcher(const LshMatcher&);
+    BruteForceMatcher& operator=(const BruteForceMatcher&);
+    BruteForceMatcher(const BruteForceMatcher&);
 
-    void GenerateHashFuncs();
-
-    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<unsigned int, std::vector<unsigned int>>& out_bucketTable);
-    /**
-      * \brief Compute Hamming Distance for two BRIEF descriptions
-      *
-      * \param[ín] in_first first (binary) description
-      * \param[ín] in_second second (binary) description
-      * \return True distance of descriptions
-      */
     unsigned int ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const;
 
     unsigned int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
-    unsigned int m_numHashFuncs;
-    unsigned int m_lengthHashFunc;
-    unsigned int m_lengthDescription;
-    std::vector<std::vector<unsigned int>> m_hashFuncs;
 };
 
 } //namespace FeatureHandling
 } //namespace VOCPP
 
-#endif /* VOCPP_LSH_BINARY_MATCHER_H */
+#endif /* VOCPP_BRUTE_FORCE_BINARY_MATCHER_H */
