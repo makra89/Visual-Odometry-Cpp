@@ -27,7 +27,7 @@ jobs:
           
     - name: cmake configure without opencv
       if: steps.cache-opencv.outputs.cache-hit != 'true'
-      run: cmake . 
+      run: cmake . -DBUILD_OPENCV=ON
     - name: cmake configure with opencv
       if: steps.cache-opencv.outputs.cache-hit == 'true'
       run: cmake . -DOpenCV_DIR=opencv-install/ -DBUILD_OPENCV=OFF

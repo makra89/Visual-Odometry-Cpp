@@ -32,12 +32,12 @@ bool BruteForceMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescript
     // Loop over all descriptions 
     for (auto desc1 : in_descFirst)
     {
-        int smallestDist = INT_MAX;
+        unsigned int smallestDist = UINT_MAX;
         int smallestIdx2 = 0;
         
         for (int index2 = 0; index2 < in_descSecond.size(); index2++)
         {
-            int distance = ComputeHammingDistance(desc1, in_descSecond[index2]);
+            unsigned int distance = ComputeHammingDistance(desc1, in_descSecond[index2]);
             if (distance < smallestDist)
             {
                 smallestDist = distance;
