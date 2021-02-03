@@ -10,7 +10,6 @@
 #include<input.h>
 
 #include<Vocpp_FeatureHandling/OrbDetectorDescriptor.h>
-#include<Vocpp_FeatureHandling/OpenCvOrbDetectorDescriptor.h>
 #include<Vocpp_FeatureHandling/LshMatcher.h>
 
 // Check that all three edges of a triangle are detected
@@ -150,7 +149,7 @@ TEST(OrbTestWithMatching, RotationInvariance_ThreeLayers)
     VOCPP::FeatureHandling::LshMatcher matcher;
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
-    EXPECT_GE(matches.size(), 490);
+    EXPECT_GE(matches.size(), 400);
 
     cv::resize(grayScaleImg, grayScaleImg, cv::Size(0, 0), 1.0, grayScaleImg.cols/grayScaleImg.rows);
 
@@ -186,7 +185,7 @@ TEST(OrbTestWithMatching, ScaleInvariance)
     cv::Mat rescaledGrayScaleImg;
     cv::resize(grayScaleImg, rescaledGrayScaleImg, cv::Size(0, 0), 0.5, 0.5);
 
-    VOCPP::FeatureHandling::OrbDetectorDescriptor detector(8U /*five layers*/, 0.833F /*scale factor*/);
+    VOCPP::FeatureHandling::OrbDetectorDescriptor detector(8U /*eight layers*/, 0.833F /*scale factor*/);
 
     VOCPP::Frame frameUnscaled(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
     VOCPP::Frame frameRescaled(rescaledGrayScaleImg.ptr<float>(0), rescaledGrayScaleImg.cols, rescaledGrayScaleImg.rows, 1);
@@ -200,18 +199,25 @@ TEST(OrbTestWithMatching, ScaleInvariance)
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
 
     matcher.MatchDesriptions(descriptionsUnscaled, descriptionsRescaled, matches);
-    EXPECT_GE(matches.size(), 10);
-    std::cout << matches.size() << std::endl;
-    for (unsigned int idx = 0U; idx < descriptionsUnscaled.size(); idx++)
-    {
+    EXPECT_GE(matches.size(), 200);
 
+    unsigned int numOutlierAngle = 0U;
+
+    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    {
         // We expect that we have to downscale the unscaled image to find matches
-        //EXPECT_LT(matches[idx].GetFirstFeature().scale, matches[idx].GetSecondFeature().scale);
+        EXPECT_LT(matches[idx].GetFirstFeature().scale, matches[idx].GetSecondFeature().scale);
         // We expect that the feature angle should be similar
         // TODO: Has been deactivated, there are some outliers
-        // EXPECT_NEAR(matches[idx].GetFirstFeature().angle, matches[idx].GetSecondFeature().angle, 0.2);
+        if (abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle) > 0.2)
+        {
+            numOutlierAngle++;
+        }
     }
+    // Expect low number of outliers
+    EXPECT_LE(numOutlierAngle, 7U);
 
+    /* Comment in for visualization
     cv::Mat matchImg = cv::Mat::ones(1000, 2000, CV_32FC1);
     grayScaleImg.copyTo(matchImg(cv::Rect(0, 0, grayScaleImg.cols, grayScaleImg.rows)));
     rescaledGrayScaleImg.copyTo(matchImg(cv::Rect(1000, 0, rescaledGrayScaleImg.cols, rescaledGrayScaleImg.rows)));
@@ -228,5 +234,5 @@ TEST(OrbTestWithMatching, ScaleInvariance)
     }
 
     cv::imshow("Unscaled", matchImg);
-    cv::waitKey(0);
+    cv::waitKey(0); */
 }

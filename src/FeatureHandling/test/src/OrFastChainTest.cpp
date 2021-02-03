@@ -93,7 +93,8 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsShifted, matches));
 
-    EXPECT_EQ(3U, matches.size());
+    // One edge is dropped by LSH
+    EXPECT_EQ(2U, matches.size());
     for (unsigned int idx = 0U; idx < matches.size(); idx++)
     {
         float posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
@@ -183,7 +184,7 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Rotated)
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsRotated, matches));
 
     // We requested 500 features, not all features will be matched
-    EXPECT_GE(matches.size(), 490U);
+    EXPECT_GE(matches.size(), 400U);
 
     // Since we rotated by 90 degrees, we know the exact matching pixel locations
     for (unsigned int idx = 0U; idx < matches.size(); idx++)

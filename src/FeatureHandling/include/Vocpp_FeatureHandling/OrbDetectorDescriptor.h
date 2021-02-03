@@ -30,7 +30,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=3U, const float& in_layerScaleFactor=0.7);
+    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=1U, const float& in_layerScaleFactor=0.8333);
 
     /**
       * /brief Extract descriptions from a provided grayscale image frame.
@@ -49,8 +49,7 @@ private:
 
     struct PyramidLayer
     {
-        float scaleX;
-        float scaleY;
+        float scale;
         int numFeatures;
         cv::Mat1f image;
     };
