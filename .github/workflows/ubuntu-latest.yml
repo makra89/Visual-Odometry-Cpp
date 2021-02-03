@@ -27,7 +27,7 @@ jobs:
 
     - name: cmake configure without opencv
       if: steps.cache-opencv.outputs.cache-hit != 'true'
-      run: cmake . -DCMAKE_BUILD_TYPE=Release
+      run: cmake . -DCMAKE_BUILD_TYPE=Release -DBUILD_OPENCV=ON
     - name: cmake configure with opencv
       if: steps.cache-opencv.outputs.cache-hit == 'true'
       run: cmake . -DOpenCV_DIR=opencv-install/lib/cmake/opencv4/ -DBUILD_OPENCV=OFF

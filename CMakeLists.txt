@@ -8,7 +8,7 @@ project(VisualOdometryCpp)
 # =========================
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_PYTHON_WRAPPER "Generate Python Wrapper" OFF)
-option(BUILD_OPENCV "Build opencv as external project" ON)
+option(BUILD_OPENCV "Build opencv as external project" OFF)
 
 # Check for build type, if nothing set, choose Release
 if(NOT DEFINED CMAKE_BUILD_TYPE)
@@ -22,6 +22,13 @@ if(BUILD_TESTS)
     option(INSTALL_GTEST OFF)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/googletest-release-1.10.0)
     enable_testing()
+endif()
+
+# Check whether the generator supports the platform identifier
+# If yes use it for OpenCV configuration
+set(PLATFORM_STRING "")
+if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "")
+	set(PLATFORM_STRING "-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
 endif()
 
 # Optionally build opencv as external project
@@ -39,7 +46,7 @@ if(BUILD_OPENCV)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/OpenCV-Download/CMakeLists.txt.in
         ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/OpenCV-Download/CMakeLists.txt)
 
-    execute_process( COMMAND ${CMAKE_COMMAND} -S ${CMAKE_SOURCE_DIR}/3rdParty/OpenCV-Download -B ${CMAKE_BINARY_DIR}/OpenCV-Download)
+    execute_process( COMMAND ${CMAKE_COMMAND} ${PLATFORM_STRING} -S ${CMAKE_SOURCE_DIR}/3rdParty/OpenCV-Download -B ${CMAKE_BINARY_DIR}/OpenCV-Download)
     # I did not found another way than always building both Debug and Release for MultiConfig generators
     if(NOT ${_isMultiConfig})
         execute_process( COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/OpenCV-Download )
