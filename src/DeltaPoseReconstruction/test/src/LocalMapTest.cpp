@@ -32,7 +32,7 @@ TEST(LocalMapTest, CreateNewLandmarks)
     
     // Create a landmark with current frame ID = 1 and feature Id = 5
     // and last frame ID = 0 and feature Id = 7
-    std::vector<bool> dummyDesc;
+    std::vector<uint8_t> dummyDesc;
     BinaryFeatureDescription desc1(Feature{ 7U, 0U }, dummyDesc);
     BinaryFeatureDescription desc2(Feature{ 5U, 1U }, dummyDesc);
     VOCPP::FeatureHandling::BinaryDescriptionMatch match(desc2, desc1, 0.F);
@@ -78,7 +78,7 @@ TEST(LocalMapTest, UpdateExistingLandmarks)
 
     // Create a landmark with current frame ID = 1 and feature Id = 5
     // and last frame ID = 0 and feature Id = 7
-    std::vector<bool> dummyDesc;
+    std::vector<uint8_t> dummyDesc;
     BinaryFeatureDescription desc1(Feature{ 7U, 0U }, dummyDesc);
     BinaryFeatureDescription desc2(Feature{ 5U, 1U }, dummyDesc);
     VOCPP::FeatureHandling::BinaryDescriptionMatch match(desc2, desc1, 0.F);
@@ -143,7 +143,7 @@ TEST(LocalMapTest, RemoveUntrackedLandmarks)
 
     // Create a landmark with current frame ID = 1 and feature Id = 5
     // and last frame ID = 0 and feature Id = 7
-    std::vector<bool> dummyDesc;
+    std::vector<uint8_t> dummyDesc;
     BinaryFeatureDescription desc1(Feature{ 7U, 0U }, dummyDesc);
     BinaryFeatureDescription desc2(Feature{ 5U, 1U }, dummyDesc);
     VOCPP::FeatureHandling::BinaryDescriptionMatch match(desc2, desc1, 0.F);
@@ -200,7 +200,7 @@ TEST(LocalMapTest, CalculateRelativeScale)
     unsigned int currentFrameId = 1U;
     unsigned int lastFrameId = 0U;
     // Insert two landmarks
-    std::vector<bool> dummyDesc;
+    std::vector<uint8_t> dummyDesc;
     BinaryFeatureDescription desc1(Feature{ 0U, 0U }, dummyDesc);
     BinaryFeatureDescription desc2(Feature{ 0U, 1U }, dummyDesc);
     BinaryFeatureDescription desc3(Feature{ 1U, 0U }, dummyDesc);

@@ -10,7 +10,7 @@
 
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
-
+#include <iostream>
 
 namespace VOCPP
 {
@@ -64,6 +64,7 @@ private:
     void UpdateOutlierRatio(const float in_measuredRatio)
     {
         m_outlierRatio = (1.0F - m_smoothingFactor) * m_outlierRatio + m_smoothingFactor * in_measuredRatio;
+        std::cout << m_outlierRatio << std::endl;
     }
 
     float m_outlierRatio; ///< ratio of outliers expected in frames, controls number of trials for models

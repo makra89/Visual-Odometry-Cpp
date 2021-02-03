@@ -149,7 +149,23 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
 
         if (numSucessfulPairs == s_numRandomPairs)
         {
-            out_descriptions.push_back(BinaryFeatureDescription(feature, description));
+            std::vector<uint8_t> descriptionUint;
+            descriptionUint.reserve(BinaryFeatureDescription::GetSizeInBytes());
+
+            for (unsigned int i = 0U; i < description.size(); i=i+8U)
+            {
+                uint8_t val = static_cast<uint8_t>(description[i]);
+                val += static_cast<uint8_t>(pow(2, 1) * description[i + 1U]);
+                val += static_cast<uint8_t>(pow(2, 2) * description[i + 2U]);
+                val += static_cast<uint8_t>(pow(2, 3) * description[i + 3U]);
+                val += static_cast<uint8_t>(pow(2, 4) * description[i + 4U]);
+                val += static_cast<uint8_t>(pow(2, 5) * description[i + 5U]);
+                val += static_cast<uint8_t>(pow(2, 6) * description[i + 6U]);
+                val += static_cast<uint8_t>(pow(2, 7) * description[i + 7U]);
+                descriptionUint.push_back(val);
+            }
+
+            out_descriptions.push_back(BinaryFeatureDescription(feature, descriptionUint));
             ret = true;
         }
     }

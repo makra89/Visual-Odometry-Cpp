@@ -54,7 +54,7 @@ public:
     /**
       * /brief Constructor
       */
-    BinaryFeatureDescription(Feature in_feature, std::vector<bool> in_description) :
+    BinaryFeatureDescription(Feature in_feature, std::vector<uint8_t> in_description) :
         m_feature(in_feature),
         m_description(in_description)
     {
@@ -62,7 +62,7 @@ public:
         m_feature = in_feature;
     }
 
-    const std::vector<bool>& GetDescription() const
+    const std::vector<uint8_t>& GetDescription() const
     {
         return m_description;
     }
@@ -71,10 +71,32 @@ public:
     {
         return m_feature;
     }
+
+    constexpr static unsigned int GetSizeInBytes()
+    {
+        return 32U;
+    }
+
+    static unsigned int ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second, unsigned int in_earlyStop)
+    {
+        unsigned int distance = 0U;
+
+        for (unsigned int i = 0U; i < in_first.GetDescription().size(); i++)
+        {
+            distance += static_cast<unsigned int>(std::bitset<BinaryFeatureDescription::GetSizeInBytes()>(in_first.GetDescription()[i] ^ in_second.GetDescription()[i]).count());
+
+            if (distance >= in_earlyStop)
+            {
+                break;
+            }
+        }
+
+        return distance;
+    }
     
 private:
     Feature m_feature; ///< described feature
-    std::vector<bool> m_description; ///< feature description
+    std::vector<uint8_t> m_description; ///< feature description
 };
 
 /**

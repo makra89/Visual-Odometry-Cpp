@@ -91,7 +91,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
 
         // Get features and descriptions
         std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
-        ret = ret && m_detectorDescriptor.ExtractFeatureDescriptions(in_frame, 1000U, descriptions);
+        ret = ret && m_detectorDescriptor.ExtractFeatureDescriptions(in_frame, 5000U, descriptions);
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose to the center of the world coordinate system
         // TODO: Set it to the last valid pose

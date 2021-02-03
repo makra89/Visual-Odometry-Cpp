@@ -74,21 +74,26 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         
         std::vector<PyramidLayer> pyramid;
         // First layer
-        pyramid.push_back(PyramidLayer{ 1.0F, numFeaturesPerLevel[0], in_frame.GetImage()});
+        pyramid.push_back(PyramidLayer{ 1.0F, 1.0F, numFeaturesPerLevel[0], in_frame.GetImage()});
 
         // Fill pyramid
         for (unsigned int layer = 1U; layer < m_numLayers; layer++)
         {
-            const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            const float requestedScale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            std::cout << requestedScale << std::endl;
+            cv::Size sz(std::round(requestedScale * static_cast<float>(pyramid[0].image.cols)), std::round(requestedScale * static_cast<float>(pyramid[0].image.rows)));
+            if (sz.height % 2 != 0) sz.height++;
+            if (sz.width % 2 != 0) sz.width++;
 
-            // Kernel size for smoothing
-            cv::Size kernelSize(7U, 7U);
+            std::cout << requestedScale * static_cast<float>(pyramid[0].image.cols) << " " << requestedScale * static_cast<float>(pyramid[0].image.rows) << std::endl;
+            const float scaleX = static_cast<float>(sz.width) / static_cast<float>(pyramid[0].image.cols);
+            const float scaleY = static_cast<float>(sz.height) / static_cast<float>(pyramid[0].image.rows);
 
+            std::cout << requestedScale << " " << scaleX << " " << std::endl;
+            std::cout << requestedScale << " " << scaleY << " " << std::endl;
             cv::Mat1f layerImage;
-            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 2.F, 2.F);
-            cv::resize(layerImage, layerImage, cv::Size(0, 0), m_layerScaleFactor, m_layerScaleFactor, cv::INTER_AREA);
-
-            pyramid.push_back(PyramidLayer{ scale, numFeaturesPerLevel[layer], layerImage });
+            cv::resize(pyramid[layer - 1].image, layerImage, sz, 0., 0., cv::INTER_LINEAR_EXACT);
+            pyramid.push_back(PyramidLayer{ requestedScale, requestedScale, numFeaturesPerLevel[layer], layerImage });
         }
         
         
@@ -99,15 +104,20 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
             {
                 Frame layerFrame(layer.image, in_frame.GetId());
                 std::vector<Feature> layerFeatures;
-                m_fastDetector.ExtractFeatures(layerFrame, layer.numFeatures, layerFeatures);
+                m_fastDetector.ExtractFeatures(layerFrame, layer.numFeatures * 1.2, layerFeatures);
                 std::vector<BinaryFeatureDescription> layerDescriptions;
+                
+                // Kernel size for smoothing
+                cv::Size kernelSize(7U, 7U);
+                
+                cv::GaussianBlur(layer.image, layer.image, kernelSize, 2.F, 2.F, cv::BORDER_REFLECT101);
                 m_descriptor.ComputeDescriptions(layerFrame, layerFeatures, layerDescriptions);
-
                 for (auto desc : layerDescriptions)
                 {
+                    const float meanScale = 0.5F * (layer.scaleX + layer.scaleY);
                     Feature feature{ featureId, in_frame.GetId(),
-                        1.F / layer.scale * desc.GetFeature().imageCoordX, 1.F / layer.scale * desc.GetFeature().imageCoordY,
-                        desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / layer.scale, layer.scale };
+                        1.F / layer.scaleX * desc.GetFeature().imageCoordX, 1.F / layer.scaleY * desc.GetFeature().imageCoordY,
+                        desc.GetFeature().response, desc.GetFeature().angle, desc.GetFeature().size / meanScale, meanScale };
                     out_descriptions.push_back(BinaryFeatureDescription(feature, desc.GetDescription()));
                     featureId++;
                 }

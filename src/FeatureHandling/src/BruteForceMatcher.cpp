@@ -32,12 +32,12 @@ bool BruteForceMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescript
     // Loop over all descriptions 
     for (auto desc1 : in_descFirst)
     {
-        int smallestDist = INT_MAX;
-        int smallestIdx2 = 0;
+        unsigned int smallestDist = UINT_MAX;
+        unsigned int smallestIdx2 = 0;
         
         for (int index2 = 0; index2 < in_descSecond.size(); index2++)
         {
-            int distance = ComputeHammingDistance(desc1, in_descSecond[index2]);
+            unsigned int distance = BinaryFeatureDescription::ComputeHammingDistance(desc1, in_descSecond[index2], m_maxDistance + 1U);
             if (distance < smallestDist)
             {
                 smallestDist = distance;
@@ -54,22 +54,6 @@ bool BruteForceMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescript
     
     return ret;
 }
-
-unsigned int BruteForceMatcher::ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const
-{
-    unsigned int distance = 0U;
-    
-    for (unsigned int i = 0U; i < in_first.GetDescription().size(); i++)
-    {
-        if (in_first.GetDescription()[i] != in_second.GetDescription()[i])
-        {
-            distance++;
-        }
-    }
-
-    return distance;
-}
-
 
 } //namespace FeatureHandling
 } //namespace VOCPP
