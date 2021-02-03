@@ -164,6 +164,7 @@ TEST(OrbTestWithMatching, RotationInvariance_ThreeLayers)
         else
         {
             EXPECT_NEAR(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY, 0.0);
+            // Todo: This is still worrysome!
             EXPECT_NEAR(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX, 1.0);
         }
 
