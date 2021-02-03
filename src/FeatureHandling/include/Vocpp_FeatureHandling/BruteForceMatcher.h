@@ -46,8 +46,6 @@ private:
     BruteForceMatcher& operator=(const BruteForceMatcher&);
     BruteForceMatcher(const BruteForceMatcher&);
 
-    unsigned int ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second) const;
-
     unsigned int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
 };
 

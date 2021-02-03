@@ -29,7 +29,7 @@ DeltaPoseReconstructor::DeltaPoseReconstructor() :
     m_detectorDescriptor(),
     m_matcher(),
     // Instantiate optimizer with an initial estimate of 30% outlier ratio
-    m_optimizer(RansacOptimizer(0.3F, 0.01F)),
+    m_optimizer(RansacOptimizer(0.2F, 0.01F)),
     m_epiPolModels(),
     // Minimum number of tracked landmarks = 10
     m_localMap(10U),
@@ -91,7 +91,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
 
         // Get features and descriptions
         std::vector<FeatureHandling::BinaryFeatureDescription> descriptions;
-        ret = ret && m_detectorDescriptor.ExtractFeatureDescriptions(in_frame, 1000U, descriptions);
+        ret = ret && m_detectorDescriptor.ExtractFeatureDescriptions(in_frame, 750U, descriptions);
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose to the center of the world coordinate system
         // TODO: Set it to the last valid pose
@@ -151,6 +151,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 {
                     inlierMatches.push_back(matches[matchIdx]);
                 }
+
+                std::cout << inlierMatches.size() << std::endl;
 
                 // Triangulate all inliers
                 std::vector<LandmarkPosition> landmarks;

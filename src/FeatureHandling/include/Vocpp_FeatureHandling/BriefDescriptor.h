@@ -34,7 +34,7 @@ public:
     /**
       * /brief Number of pairs drawn, also specifies number of bits in the returned binary description
       */
-    static const uint s_numRandomPairs = 256U;
+    constexpr static uint s_numRandomPairs = BinaryFeatureDescription::GetSizeInBytes() * 8U;
 
     /**
       * \brief Constructor

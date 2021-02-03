@@ -79,16 +79,13 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         // Fill pyramid
         for (unsigned int layer = 1U; layer < m_numLayers; layer++)
         {
-            const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
-
-            // Kernel size for smoothing
-            cv::Size kernelSize(7U, 7U);
+            const float layerScale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            cv::Size sz(static_cast<unsigned int>(std::round(layerScale * static_cast<float>(pyramid[0].image.cols))), 
+                static_cast<unsigned int>(std::round(layerScale * static_cast<float>(pyramid[0].image.rows))));
 
             cv::Mat1f layerImage;
-            cv::GaussianBlur(pyramid[layer - 1].image, layerImage, kernelSize, 2.F, 2.F);
-            cv::resize(layerImage, layerImage, cv::Size(0, 0), m_layerScaleFactor, m_layerScaleFactor, cv::INTER_AREA);
-
-            pyramid.push_back(PyramidLayer{ scale, numFeaturesPerLevel[layer], layerImage });
+            cv::resize(pyramid[layer - 1].image, layerImage, sz, 0., 0., cv::INTER_LINEAR_EXACT);
+            pyramid.push_back(PyramidLayer{layerScale, numFeaturesPerLevel[layer], layerImage });
         }
         
         
@@ -98,11 +95,17 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
             if (layer.numFeatures > 0)
             {
                 Frame layerFrame(layer.image, in_frame.GetId());
+                
+                // Get features for layer
                 std::vector<Feature> layerFeatures;
-                m_fastDetector.ExtractFeatures(layerFrame, layer.numFeatures, layerFeatures);
+                m_fastDetector.ExtractFeatures(layerFrame, layer.numFeatures, layerFeatures);                
+                
+                // Smooth image using gaussian blur
+                cv::Size kernelSize(7U, 7U);       
+                cv::GaussianBlur(layer.image, layer.image, kernelSize, 2.F, 2.F, cv::BORDER_REFLECT101);
                 std::vector<BinaryFeatureDescription> layerDescriptions;
                 m_descriptor.ComputeDescriptions(layerFrame, layerFeatures, layerDescriptions);
-
+                
                 for (auto desc : layerDescriptions)
                 {
                     Feature feature{ featureId, in_frame.GetId(),
