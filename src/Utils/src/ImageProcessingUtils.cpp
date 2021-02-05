@@ -205,6 +205,8 @@ bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f&
     camProjectionMatCandidates.push_back(CameraProjectionMatrix(R2f, t1f));
     camProjectionMatCandidates.push_back(CameraProjectionMatrix(R2f, t2f));
 
+    bool ret = false;
+
     // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
     for (auto candidate : camProjectionMatCandidates)
     {
@@ -218,11 +220,12 @@ bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f&
         {
             out_rotMatrix = candidate.GetRotationMat();
             out_translation = candidate.GetTranslation();
+            ret = true;
         }
     }
   
 
-    return false;
+    return ret;
 }
 
 bool PointTriangulationLinear(const ImageProjectionMatrix& in_projMatLeft, const ImageProjectionMatrix& in_projMatRight, const cv::Point2f& in_imageCoordLeft,

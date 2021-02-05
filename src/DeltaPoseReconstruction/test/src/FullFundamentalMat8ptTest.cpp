@@ -66,7 +66,6 @@ TEST(FullFundamentalMat8pt, RotationAndTranslation)
         cv::Mat1f rotTrue = GetFrameRotationX(DrawFloatInRange(-angleRange, angleRange)) * GetFrameRotationY(DrawFloatInRange(-angleRange, angleRange)) * GetFrameRotationZ(DrawFloatInRange(-angleRange, angleRange));
         cv::Mat1f translationTrue = (cv::Mat1f(3, 1) << DrawFloatInRange(-2.0F, 2.0F), DrawFloatInRange(-2.0F, 2.0F), DrawFloatInRange(-2.0F, 2.0F));
         ImageProjectionMatrix projMat(rotTrue, translationTrue, calMat);
-        VOCPP::Utils::CameraProjectionMatrix projMatCam(rotTrue, translationTrue);
 
         for (auto coord : realWorldPoints)
         {

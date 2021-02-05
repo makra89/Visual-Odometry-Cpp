@@ -28,7 +28,7 @@ namespace DeltaPoseReconstruction
 DeltaPoseReconstructor::DeltaPoseReconstructor() :
     m_detectorDescriptor(),
     m_matcher(),
-    // Instantiate optimizer with an initial estimate of 30% outlier ratio
+    // Instantiate optimizer with an initial estimate of 20% outlier ratio
     m_optimizer(RansacOptimizer(0.2F, 0.01F)),
     m_epiPolModels(),
     // Minimum number of tracked landmarks = 10
