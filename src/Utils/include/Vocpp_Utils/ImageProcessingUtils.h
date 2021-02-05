@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <Vocpp_Utils/ConversionUtils.h>
+
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
 
@@ -73,9 +75,90 @@ point set.
 void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv::Point2f>& out_normPoints, cv::Mat1f& out_transform);
 
 /**
-* /brief Get 4x3 projection matrix using a rotation + translation
+* /brief Projection matrix using a rotation + translation + camera calibration matrix
+* to a 3D world coordinate --> result will be the 2D image coordinates of the 3D point
 */
-bool GetProjectionMatrix(const cv::Mat1f& in_rotationMatrix, const cv::Mat1f& in_translation, cv::Mat1f& out_projMat);
+class ImageProjectionMatrix
+{
+public:
+    ImageProjectionMatrix()
+    {
+        cv::hconcat(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), m_projectMat);
+    }
+
+    ImageProjectionMatrix(const cv::Mat1f& in_rotationMatrix, const cv::Mat1f& in_translation,
+        const cv::Mat1f& in_calibMatrix)
+    {
+        cv::hconcat(in_rotationMatrix, in_translation, m_projectMat);
+        m_projectMat = in_calibMatrix * m_projectMat;
+    }
+
+    cv::Point2f Apply(cv::Point3f in_worldCoord)
+    {
+        cv::Mat1f homWorldCoord = Point3fToMatHomCoordinates(in_worldCoord);
+        cv::Mat1f imageCoord = m_projectMat * homWorldCoord;
+        cv::Point2f imageCoordOut;
+        imageCoordOut.x = imageCoord(0, 0) / imageCoord(0, 2);
+        imageCoordOut.y = imageCoord(1, 0) / imageCoord(0, 2);
+
+        return imageCoordOut;
+    }
+
+    const cv::Mat1f& GetRawProjMat() const
+    {
+        return m_projectMat;
+    }
+
+private:
+    cv::Mat1f m_projectMat;
+};
+
+/**
+* /brief Projection matrix using a rotation + translation + camera calibration matrix
+* to a 3D world coordinate --> result will be the coordinates of the 3D point in camera perspective
+*/
+class CameraProjectionMatrix
+{
+public:
+    CameraProjectionMatrix(const cv::Mat1f& in_rotationMatrix, const cv::Mat1f& in_translation)
+    {
+        cv::hconcat(in_rotationMatrix, in_translation, m_projectMat);
+        m_rotation = in_rotationMatrix;
+        m_translation = in_translation;
+    }
+
+    cv::Point3f Apply(cv::Point3f in_worldCoord)
+    {
+        cv::Mat1f homWorldCoord = Point3fToMatHomCoordinates(in_worldCoord);
+        cv::Mat1f cameraCoord = m_projectMat * homWorldCoord;
+        cv::Point3f cameraCoordOut;
+        cameraCoordOut.x = cameraCoord(0, 0);
+        cameraCoordOut.y = cameraCoord(1, 0);
+        cameraCoordOut.z = cameraCoord(2, 0);
+
+        return cameraCoordOut;
+    }
+
+    ImageProjectionMatrix ConvertToImageProjectionMatrix(const cv::Mat1f& in_calibMatrix)
+    {
+        return ImageProjectionMatrix(m_rotation, m_translation, in_calibMatrix);
+    }
+
+    const cv::Mat1f& GetRotationMat() const
+    {
+        return m_rotation;
+    }
+
+    const cv::Mat1f& GetTranslation() const
+    {
+        return m_translation;
+    }
+
+private:
+    cv::Mat1f m_projectMat;
+    cv::Mat1f m_translation;
+    cv::Mat1f m_rotation;
+};
 
 /**
 * /brief Get cross product generating matrix from a vector
@@ -88,20 +171,21 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat);
 * The provided points have to be in homogenous camera coordinates (Undo multiplication with calib mat).
 * The terms "left" and "right" refer to the formulate x_left * E * x_right = 0
 * \param[in] in_essentialMat essential matrix to be composed
-* \param[in] in_matchPointLeft correspondence point in camera coordinates in left image
-* \param[in] in_matchPointRight correspondence point in camera coordinates in right image
+* \param[in] in_calibMat calibration matrix
+* \param[in] in_imageCoordLeft correspondence point in camera coordinates in left image
+* \param[in] in_imageCoordRight correspondence point in camera coordinates in right image
 * \param[out] out_translation translation from left camera center to right camera center in the left camera coordinate system
 * \param[out] out_rotMatrix rotation matrix used to transfrom a point in right camera frame to left camera frame
 */
-bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Point2f& in_matchPointLeft,
-    const cv::Point2f& in_matchPointRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix);
+bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const cv::Point2f& in_imageCoordLeft,
+    const cv::Point2f& in_imageCoordRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix);
 
 /**
 * /brief Triangulates a point in 3D given two camera coordinates and two projection matrices
 *
 */
-bool PointTriangulationLinear(const cv::Mat1f& in_projMatLeft, const cv::Mat1f& in_projMatRight, const cv::Point2f& in_cameraCoordLeft,
-    const cv::Point2f& in_cameraCoordRight, cv::Point3f& out_triangulatedPoint);
+bool PointTriangulationLinear(const ImageProjectionMatrix& projMatLeft, const ImageProjectionMatrix& in_projMatRight, const cv::Point2f& in_imageCoordLeft,
+    const cv::Point2f& in_imageCoordRight, cv::Point3f& out_triangulatedPoint);
 
 } //namespace Utils
 } //namespace VOCPP

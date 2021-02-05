@@ -103,7 +103,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 m_lastDeltaPose = DeltaCameraPose();
                 m_lastOrientationWcs = cv::Mat1f::eye(3, 3);
                 m_lastPosWcs = cv::Mat1f::zeros(3, 1);
-                Utils::GetProjectionMatrix(m_lastOrientationWcs, m_lastPosWcs, m_lastProjectionMat);
+                m_lastProjectionMat = Utils::ImageProjectionMatrix(m_lastOrientationWcs, m_lastPosWcs, in_calibMat);
             }
             else
             {
@@ -141,9 +141,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 ///////                            TRANSLATION REFINEMENT (with relative scale                //////
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 
-                // Calculate an intermediate (without applied relative scale) projection marix to be able to triangulate all features
-                cv::Mat1f currentProjMat;
-                Utils::GetProjectionMatrix(m_lastOrientationWcs, -m_lastOrientationWcs * rawPosWcs, currentProjMat);
+                // Calculate an intermediate (without applied relative scale) image projection marix to be able to triangulate all features
+                Utils::ImageProjectionMatrix currentProjMat(m_lastOrientationWcs, -m_lastOrientationWcs * rawPosWcs, in_calibMat);
                 
                 // Create a vector with all inlier matches
                 std::vector<FeatureHandling::BinaryDescriptionMatch> inlierMatches;

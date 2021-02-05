@@ -93,17 +93,27 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
         realWorldPoints.push_back(cv::Point3f(DrawFloatInRange(-minDist, minDist), DrawFloatInRange(-minDist, minDist), DrawFloatInRange(50.0, 150.0)));
     }
 
+    // Kalibration matrix with shifted image center
+    cv::Mat1f calMat = cv::Mat1f::zeros(3, 3);
+    calMat(0, 0) = 5.0;
+    calMat(1, 1) = 5.0;
+    calMat(2, 2) = 1.0;
+    calMat(0, 2) = 300;
+    calMat(1, 2) = 300;
+
+
     for (auto coord : realWorldPoints)
     {
         // Projection matrix for left image, the translation is measured in the system of the left frame
-        cv::Mat1f projMatLeft;
         cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0, 1.0), DrawFloatInRange(-1.0, 1.0), DrawFloatInRange(-5.0, 5.0));
-        EXPECT_TRUE(GetProjectionMatrix(cv::Mat1f::eye(3, 3), translationLeft, projMatLeft));
+        ImageProjectionMatrix projMatLeft(cv::Mat1f::eye(3, 3), translationLeft, calMat);
 
-        // Get projected points in both camera frames, the right ones uses a trivial projection matrix
-        cv::Mat1f projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        cv::Point2f imgPointsLeft = cv::Point2f(projPointLeft(0, 0) / projPointLeft(2, 0), projPointLeft(1, 0) / projPointLeft(2, 0));
-        cv::Point2f imgPointsRight = cv::Point2f(coord.x / coord.z, coord.y / coord.z);
+        // The right ones uses a trivial projection matrix
+        ImageProjectionMatrix projMatRight(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), calMat);
+
+        // Get projected points in both camera frames
+        cv::Point2f imgPointsLeft = projMatLeft.Apply(coord);
+        cv::Point2f imgPointsRight = projMatRight.Apply(coord);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
         cv::Mat1f translatCross;
@@ -113,7 +123,7 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
         // Decompose the essential matrix
         cv::Mat1f decompTranslat;
         cv::Mat1f decompRotMat;
-        DecomposeEssentialMatrix(essentialMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
+        DecomposeEssentialMatrix(essentialMat, calMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
         // The true translation and the extracted one may differ by a global scale
         decompTranslat = decompTranslat * (translationLeft(0, 0) / decompTranslat(0, 0));
 
@@ -142,18 +152,27 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         realWorldPoints.push_back(cv::Point3f(DrawFloatInRange(-minDist, minDist), DrawFloatInRange(-minDist, minDist), DrawFloatInRange(50.0, 150.0)));
     }
 
+    // Kalibration matrix with shifted image center
+    cv::Mat1f calMat = cv::Mat1f::zeros(3, 3);
+    calMat(0, 0) = 5.0;
+    calMat(1, 1) = 5.0;
+    calMat(2, 2) = 1.0;
+    calMat(0, 2) = 300;
+    calMat(1, 2) = 300;
+
     for (auto coord : realWorldPoints)
     {
         // Projection matrix for left image, the translation is measured in the system of the left frame
-        cv::Mat1f projMatLeft;
-        cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-1.0F, 1.0F), DrawFloatInRange(-5.0F, 5.0F));
+        cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-10.0F, 10.0F), DrawFloatInRange(-10.0F, 10.0F), DrawFloatInRange(-5.0F, 5.0F));
         cv::Mat1f rotMat = GetFrameRotationX(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationY(DrawFloatInRange(-0.2F, 0.2F)) * GetFrameRotationZ(DrawFloatInRange(-0.2F, 0.2F));
-        EXPECT_TRUE(GetProjectionMatrix(rotMat, translationLeft, projMatLeft));
+        ImageProjectionMatrix projMatLeft(rotMat, translationLeft, calMat);
 
-        // Get projected points in both camera frames, the right ones uses a trivial projection matrix
-        cv::Mat1f projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        cv::Point2f imgPointsLeft = cv::Point2f(projPointLeft(0, 0) / projPointLeft(2, 0), projPointLeft(1, 0) / projPointLeft(2, 0));
-        cv::Point2f imgPointsRight = cv::Point2f(coord.x / coord.z, coord.y / coord.z);
+        // The right ones uses a trivial projection matrix
+        ImageProjectionMatrix projMatRight(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), calMat);
+
+        // Get projected points in both camera frames
+        cv::Point2f imgPointsLeft = projMatLeft.Apply(coord);
+        cv::Point2f imgPointsRight = projMatRight.Apply(coord);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
         cv::Mat1f translatCross;
@@ -163,7 +182,7 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         // Decompose the essential matrix
         cv::Mat1f decompTranslat;
         cv::Mat1f decompRotMat;
-        DecomposeEssentialMatrix(essentialMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
+        DecomposeEssentialMatrix(essentialMat, calMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
         // The true translation and the extracted one may differ by a global scale
         decompTranslat = decompTranslat * (translationLeft(0, 0) / decompTranslat(0, 0));
 
@@ -186,35 +205,38 @@ TEST(PointTriangulationLinearTest, TwoCamerasRotationAndTranslation)
     // Construct set of 3D points in world coordinate system
     std::vector<cv::Point3f> realWorldPoints;
     const float minDist = 150.0;
-    for (int it = 0; it < 12; it++)
+    for (int it = 0; it < 100; it++)
     {
         realWorldPoints.push_back(cv::Point3f(DrawFloatInRange(-minDist, minDist), DrawFloatInRange(-minDist, minDist), DrawFloatInRange(50.0, 150.0)));
     }
+
+    // Kalibration matrix with shifted image center
+    cv::Mat1f calMat = cv::Mat1f::zeros(3, 3);
+    calMat(0, 0) = 5.0;
+    calMat(1, 1) = 5.0;
+    calMat(2, 2) = 1.0;
+    calMat(0, 2) = 300;
+    calMat(1, 2) = 300;
 
     std::vector<cv::Point2f> imgPointsLeft;
     std::vector<cv::Point2f> imgPointsRight;
 
     // Projection matrix for left image
-    cv::Mat1f projMatLeft;
     cv::Mat1f rotMatLeft = GetFrameRotationX(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationY(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationZ(DrawFloatInRange(-0.5, 0.5));
     cv::Mat1f translationLeft = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));
-    EXPECT_TRUE(GetProjectionMatrix(rotMatLeft, translationLeft, projMatLeft));
+    ImageProjectionMatrix projMatLeft(rotMatLeft, translationLeft, calMat);
     
     // Projection matrix for right image
-    cv::Mat1f projMatRight;
     cv::Mat1f rotMatRight = GetFrameRotationX(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationY(DrawFloatInRange(-0.5, 0.5)) * GetFrameRotationZ(DrawFloatInRange(-0.5, 0.5));
     cv::Mat1f translationRight = (cv::Mat1f(3, 1) << DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-1.0, 5.0), DrawFloatInRange(-5.0, 5.0));
-    EXPECT_TRUE(GetProjectionMatrix(rotMatRight, translationRight, projMatRight));
+    ImageProjectionMatrix projMatRight(rotMatRight, translationRight, calMat);
 
 
-    // Get camera coordinates of real world points
+    // Get image coordinates of real world points
     for (auto coord : realWorldPoints)
     {
-        cv::Mat1f projPointLeft = (projMatLeft * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        imgPointsLeft.push_back(cv::Point2f(projPointLeft(0, 0) / projPointLeft(2, 0), projPointLeft(1, 0) / projPointLeft(2, 0)));
-
-        cv::Mat1f projPointRight = (projMatRight * VOCPP::Utils::Point3fToMatHomCoordinates(coord));
-        imgPointsRight.push_back(cv::Point2f(projPointRight(0, 0) / projPointRight(2, 0), projPointRight(1, 0) / projPointRight(2, 0)));
+        imgPointsLeft.push_back(projMatLeft.Apply(coord));
+        imgPointsRight.push_back(projMatRight.Apply(coord));
     }
 
     // Triangulate points and check
