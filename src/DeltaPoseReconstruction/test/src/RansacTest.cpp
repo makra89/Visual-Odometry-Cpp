@@ -340,14 +340,14 @@ TEST(RansacTest, PureTranslation_WithOutliers)
         EXPECT_GE(inlierIndices.size(), 90);
 
         // Should be very close to true one, but due to the outliers it might be that the "Full" model is picked
-        EXPECT_NEAR(1.F, rotation(0, 0), 1e-4);
-        EXPECT_NEAR(0.F, rotation(0, 1), 1e-4);
-        EXPECT_NEAR(0.F, rotation(0, 2), 1e-4);
-        EXPECT_NEAR(0.F, rotation(1, 0), 1e-4);
-        EXPECT_NEAR(1.F, rotation(1, 1), 1e-4);
-        EXPECT_NEAR(0.F, rotation(1, 2), 1e-4);
-        EXPECT_NEAR(0.F, rotation(2, 1), 1e-4);
-        EXPECT_NEAR(1.F, rotation(2, 2), 1e-4);
+        EXPECT_NEAR(1.F, rotation(0, 0), 1e-3);
+        EXPECT_NEAR(0.F, rotation(0, 1), 1e-3);
+        EXPECT_NEAR(0.F, rotation(0, 2), 1e-3);
+        EXPECT_NEAR(0.F, rotation(1, 0), 1e-3);
+        EXPECT_NEAR(1.F, rotation(1, 1), 1e-3);
+        EXPECT_NEAR(0.F, rotation(1, 2), 1e-3);
+        EXPECT_NEAR(0.F, rotation(2, 1), 1e-3);
+        EXPECT_NEAR(1.F, rotation(2, 2), 1e-3);
 
         // Translation is only known up to a global scale
         translationTrue = translationTrue / cv::norm(translationTrue);
