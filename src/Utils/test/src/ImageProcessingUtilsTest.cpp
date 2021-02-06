@@ -244,8 +244,8 @@ TEST(PointTriangulationLinearTest, TwoCamerasRotationAndTranslation)
     {
         cv::Point3f triangPoint;
         PointTriangulationLinear(projMatLeft, projMatRight, imgPointsLeft[it], imgPointsRight[it], triangPoint);
-        EXPECT_NEAR(triangPoint.x, realWorldPoints[it].x, 5e-2);
-        EXPECT_NEAR(triangPoint.y, realWorldPoints[it].y, 5e-2);
-        EXPECT_NEAR(triangPoint.z, realWorldPoints[it].z, 5e-2);
+        EXPECT_NEAR(triangPoint.x, realWorldPoints[it].x, 9e-2);
+        EXPECT_NEAR(triangPoint.y, realWorldPoints[it].y, 9e-2);
+        EXPECT_NEAR(triangPoint.z, realWorldPoints[it].z, 9e-2);
     }
 }
