@@ -18,6 +18,8 @@
 #include<Vocpp_DeltaPoseReconstruction/RansacOptimizer.h>
 #include<Vocpp_DeltaPoseReconstruction/LocalMap.h>
 
+#include <Vocpp_Utils/ImageProcessingUtils.h>
+
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
 
@@ -90,7 +92,7 @@ private:
     CameraPose m_lastPose; ///< Current Pose in world coordinate system calculated for last frame
     cv::Mat1f m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
     cv::Mat1f m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
-    cv::Mat1f m_lastProjectionMat; ///< projection matrix of last frame defined as x_image = Rx_wcs - T
+    Utils::ImageProjectionMatrix m_lastProjectionMat; ///< projection matrix of last frame defined as x_image = K * (Rx_wcs - T)
 };
 
 } //namespace DeltaPoseReconstruction

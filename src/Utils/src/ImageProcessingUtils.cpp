@@ -140,28 +140,6 @@ void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv
     out_transform(2, 2) = 1.0;
 }
 
-bool GetProjectionMatrix(const cv::Mat1f& in_rotationMatrix, const cv::Mat1f& in_translation, cv::Mat1f& out_projMat)
-{
-    bool ret = true;
-
-    if (in_rotationMatrix.rows != 3 || in_rotationMatrix.cols != 3)
-    {
-        std::cout << "[CalculateProjectionMatrix]: Rotation matrix has to be 3x3" << std::endl;
-        ret = false;
-    }
-    else if (in_translation.rows != 3 || in_translation.cols != 1)
-    {
-        std::cout << "[CalculateProjectionMatrix]: translation matrix has to be 3x1" << std::endl;
-        ret = false;
-    }
-    else
-    {
-        cv::hconcat(in_rotationMatrix, in_translation, out_projMat);
-    }
-
-    return ret;
-}
-
 void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat)
 {
     out_crossMat = cv::Mat1f::zeros(3, 3);
@@ -173,101 +151,108 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat)
     out_crossMat(2, 1) = in_vec[0];
 }
 
-bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Point2f& in_matchPointLeft,
-    const cv::Point2f& in_matchPointRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix)
+bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const cv::Point2f& in_imageCoordLeft,
+    const cv::Point2f& in_imageCoordRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix)
 {
     // Compute SVD
-    cv::Mat1f U, D, V_t;
-    cv::SVDecomp(in_essentialMat, D, U, V_t, cv::SVD::FULL_UV);
+    cv::Mat1d U, D, V_t;
+    cv::Mat1d essentialMatd;
+    in_essentialMat.convertTo(essentialMatd, CV_64F);
+    cv::SVDecomp(essentialMatd, D, U, V_t, cv::SVD::FULL_UV);
    
     // Set smallest singular value to zero and recompute SVD
-    cv::Mat1f newDiag = cv::Mat1f::zeros(3, 3);
+    cv::Mat1d newDiag = cv::Mat1d::zeros(3, 3);
     newDiag(0, 0) = 1.0;
     newDiag(1, 1) = 1.0;
 
-    cv::Mat1f newEssentialMat = U * (newDiag * V_t);
+    cv::Mat1d newEssentialMat = U * (newDiag * V_t);
     cv::SVDecomp(newEssentialMat, D, U, V_t, cv::SVD::FULL_UV);
     if (cv::determinant(U * V_t) < 0.0)
     {
         V_t = -V_t;
     }
 
-    cv::Mat1f Y = cv::Mat1f::zeros(3, 3);
+    cv::Mat1d Y = cv::Mat1d::zeros(3, 3);
     Y(0, 1) = -1.0;
     Y(1, 0) = 1.0;
     Y(2, 2) = 1.0;
 
     // Two solutions for translation
-    cv::Mat1f t1 = U.col(2);
-    cv::Mat1f t2 = -t1;
+    cv::Mat1d t1 = U.col(2);
+    cv::Mat1d t2 = -t1;
 
     // Two solutions for rotation matrix
-    cv::Mat1f R1 = U * (Y * V_t);
-    cv::Mat1f R2 = U * (Y.t() * V_t);
+    cv::Mat1d R1 = U * (Y * V_t);
+    cv::Mat1d R2 = U * (Y.t() * V_t);
+
+    cv::Mat1f t1f;
+    t1.convertTo(t1f, CV_32F);
+    cv::Mat1f t2f;
+    t2.convertTo(t2f, CV_32F);
+    cv::Mat1f R1f;
+    R1.convertTo(R1f, CV_32F);
+    cv::Mat1f R2f;
+    R2.convertTo(R2f, CV_32F);
 
     // Right projection matrix is trivial one
-    cv::Mat1f projMatRight;
-    GetProjectionMatrix(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), projMatRight);
+    CameraProjectionMatrix camProjMatRight(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1));
 
     // Four different projection matrices for right one
-    std::vector<cv::Mat1f> projectionMatCandidates;
+    std::vector<CameraProjectionMatrix> camProjectionMatCandidates;
 
-    cv::Mat1f projMatLeft1;
-    cv::Mat1f projMatLeft2;
-    GetProjectionMatrix(R1, t1, projMatLeft1);
-    GetProjectionMatrix(R1, t2, projMatLeft2);
-    projectionMatCandidates.push_back(projMatLeft1);
-    projectionMatCandidates.push_back(projMatLeft2);
- 
-    cv::Mat1f projMatLeft3;
-    cv::Mat1f projMatLeft4;
-    GetProjectionMatrix(R2, t1, projMatLeft3);
-    GetProjectionMatrix(R2, t2, projMatLeft4);
-    projectionMatCandidates.push_back(projMatLeft3);
-    projectionMatCandidates.push_back(projMatLeft4);
+    camProjectionMatCandidates.push_back(CameraProjectionMatrix(R1f, t1f));
+    camProjectionMatCandidates.push_back(CameraProjectionMatrix(R1f, t2f));
+    camProjectionMatCandidates.push_back(CameraProjectionMatrix(R2f, t1f));
+    camProjectionMatCandidates.push_back(CameraProjectionMatrix(R2f, t2f));
+
+    bool ret = false;
 
     // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
-    for (auto candidate : projectionMatCandidates)
+    for (auto candidate : camProjectionMatCandidates)
     {
         cv::Point3f triangPoint;
-        PointTriangulationLinear(candidate, projMatRight, in_matchPointLeft, in_matchPointRight, triangPoint);
-        cv::Mat1f projPointLeft = candidate * VOCPP::Utils::Point3fToMatHomCoordinates(triangPoint);
-        if (triangPoint.z > 0.0 && projPointLeft(2,0) > 0)
+        PointTriangulationLinear(candidate.ConvertToImageProjectionMatrix(in_calibMat), camProjMatRight.ConvertToImageProjectionMatrix(in_calibMat),
+            in_imageCoordLeft, in_imageCoordRight, triangPoint);
+        cv::Point3f projPointLeft = candidate.Apply(triangPoint);
+        cv::Point3f projPointRight = camProjMatRight.Apply(triangPoint);
+
+        if (projPointLeft.z > 0.0 && projPointRight.z > 0)
         {
-            candidate(cv::Range(0, 3), cv::Range(0, 3)).copyTo(out_rotMatrix);
-            candidate(cv::Range(0, 3), cv::Range(3, 4)).copyTo(out_translation);
+            out_rotMatrix = candidate.GetRotationMat();
+            out_translation = candidate.GetTranslation();
+            ret = true;
         }
     }
   
 
-    return false;
+    return ret;
 }
 
-bool PointTriangulationLinear(const cv::Mat1f& in_projMatLeft, const cv::Mat1f& in_projMatRight, const cv::Point2f& in_cameraCoordLeft,
-    const cv::Point2f& in_cameraCoordRight, cv::Point3f& out_triangulatedPoint)
+bool PointTriangulationLinear(const ImageProjectionMatrix& in_projMatLeft, const ImageProjectionMatrix& in_projMatRight, const cv::Point2f& in_imageCoordLeft,
+    const cv::Point2f& in_imageCoordRight, cv::Point3f& out_triangulatedPoint)
 {
     cv::Mat1f A = cv::Mat1f::zeros(4, 4);
 
     // Construct matrix to decompose (see for example https://www.uio.no/studier/emner/matnat/its/nedlagte-emner/UNIK4690/v16/forelesninger/lecture_7_2-triangulation.pdf)
-    A(0, 0) = in_cameraCoordLeft.y * in_projMatLeft(2, 0) - in_projMatLeft(1, 0);
-    A(0, 1) = in_cameraCoordLeft.y * in_projMatLeft(2, 1) - in_projMatLeft(1, 1);
-    A(0, 2) = in_cameraCoordLeft.y * in_projMatLeft(2, 2) - in_projMatLeft(1, 2);
-    A(0, 3) = in_cameraCoordLeft.y * in_projMatLeft(2, 3) - in_projMatLeft(1, 3);
+    A(0, 0) = in_imageCoordLeft.y * in_projMatLeft.GetRawProjMat()(2, 0) - in_projMatLeft.GetRawProjMat()(1, 0);
+    A(0, 1) = in_imageCoordLeft.y * in_projMatLeft.GetRawProjMat()(2, 1) - in_projMatLeft.GetRawProjMat()(1, 1);
+    A(0, 2) = in_imageCoordLeft.y * in_projMatLeft.GetRawProjMat()(2, 2) - in_projMatLeft.GetRawProjMat()(1, 2);
+    A(0, 3) = in_imageCoordLeft.y * in_projMatLeft.GetRawProjMat()(2, 3) - in_projMatLeft.GetRawProjMat()(1, 3);
 
-    A(1, 0) = in_cameraCoordLeft.x * in_projMatLeft(2, 0) - in_projMatLeft(0, 0);
-    A(1, 1) = in_cameraCoordLeft.x * in_projMatLeft(2, 1) - in_projMatLeft(0, 1);
-    A(1, 2) = in_cameraCoordLeft.x * in_projMatLeft(2, 2) - in_projMatLeft(0, 2);
-    A(1, 3) = in_cameraCoordLeft.x * in_projMatLeft(2, 3) - in_projMatLeft(0, 3);
+    A(1, 0) = in_imageCoordLeft.x * in_projMatLeft.GetRawProjMat()(2, 0) - in_projMatLeft.GetRawProjMat()(0, 0);
+    A(1, 1) = in_imageCoordLeft.x * in_projMatLeft.GetRawProjMat()(2, 1) - in_projMatLeft.GetRawProjMat()(0, 1);
+    A(1, 2) = in_imageCoordLeft.x * in_projMatLeft.GetRawProjMat()(2, 2) - in_projMatLeft.GetRawProjMat()(0, 2);
+    A(1, 3) = in_imageCoordLeft.x * in_projMatLeft.GetRawProjMat()(2, 3) - in_projMatLeft.GetRawProjMat()(0, 3);
 
-    A(2, 0) = in_cameraCoordRight.y * in_projMatRight(2, 0) - in_projMatRight(1, 0);
-    A(2, 1) = in_cameraCoordRight.y * in_projMatRight(2, 1) - in_projMatRight(1, 1);
-    A(2, 2) = in_cameraCoordRight.y * in_projMatRight(2, 2) - in_projMatRight(1, 2);
-    A(2, 3) = in_cameraCoordRight.y * in_projMatRight(2, 3) - in_projMatRight(1, 3);
+    A(2, 0) = in_imageCoordRight.y * in_projMatRight.GetRawProjMat()(2, 0) - in_projMatRight.GetRawProjMat()(1, 0);
+    A(2, 1) = in_imageCoordRight.y * in_projMatRight.GetRawProjMat()(2, 1) - in_projMatRight.GetRawProjMat()(1, 1);
+    A(2, 2) = in_imageCoordRight.y * in_projMatRight.GetRawProjMat()(2, 2) - in_projMatRight.GetRawProjMat()(1, 2);
+    A(2, 3) = in_imageCoordRight.y * in_projMatRight.GetRawProjMat()(2, 3) - in_projMatRight.GetRawProjMat()(1, 3);
 
-    A(3, 0) = in_cameraCoordRight.x * in_projMatRight(2, 0) - in_projMatRight(0, 0);
-    A(3, 1) = in_cameraCoordRight.x * in_projMatRight(2, 1) - in_projMatRight(0, 1);
-    A(3, 2) = in_cameraCoordRight.x * in_projMatRight(2, 2) - in_projMatRight(0, 2);
-    A(3, 3) = in_cameraCoordRight.x * in_projMatRight(2, 3) - in_projMatRight(0, 3);
+    A(3, 0) = in_imageCoordRight.x * in_projMatRight.GetRawProjMat()(2, 0) - in_projMatRight.GetRawProjMat()(0, 0);
+    A(3, 1) = in_imageCoordRight.x * in_projMatRight.GetRawProjMat()(2, 1) - in_projMatRight.GetRawProjMat()(0, 1);
+    A(3, 2) = in_imageCoordRight.x * in_projMatRight.GetRawProjMat()(2, 2) - in_projMatRight.GetRawProjMat()(0, 2);
+    A(3, 3) = in_imageCoordRight.x * in_projMatRight.GetRawProjMat()(2, 3) - in_projMatRight.GetRawProjMat()(0, 3);
 
     // Compute SVD
     cv::Mat1f U, D, V_t;

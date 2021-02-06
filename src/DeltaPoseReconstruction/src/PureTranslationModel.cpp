@@ -36,8 +36,8 @@ bool PureTranslationModel::Compute(const std::vector<cv::Point2f>& in_pointCorrL
         combinedPoints.insert(combinedPoints.end(), in_pointCorrRight.begin(), in_pointCorrRight.end());
         std::vector< cv::Point2f> normCombinedPoints;  
         Utils::NormalizePointSet(combinedPoints, normCombinedPoints, normTransform);
-        std::vector<cv::Point2f> normLeftPoints(normCombinedPoints.begin(), normCombinedPoints.begin() + normCombinedPoints.size() / 2);
-        std::vector<cv::Point2f> normRightPoints(normCombinedPoints.begin() + normCombinedPoints.size() / 2, normCombinedPoints.end());
+        std::vector<cv::Point2f> normLeftPoints(normCombinedPoints.begin(), normCombinedPoints.begin() + in_pointCorrLeft.size());
+        std::vector<cv::Point2f> normRightPoints(normCombinedPoints.begin() + in_pointCorrLeft.size(), normCombinedPoints.end());
 
         // Do this in double precision
         cv::Mat1d A = cv::Mat1d::zeros(static_cast<int>(normLeftPoints.size()), 3);

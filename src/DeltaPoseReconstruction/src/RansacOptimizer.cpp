@@ -31,22 +31,6 @@ namespace DeltaPoseReconstruction
     int testedModels = 0;
     for (auto model : in_testedModels)
     {
-        
-        // The "no motion" model needs a special treatment
-        if (model->GetModelType() == EpipolarModel::Types::NoMotionModel)
-        {
-            std::vector<unsigned int> indicesInliers;
-            cv::Mat1f dummySolution = cv::Mat1f::zeros(3, 3);
-            model->Test(in_correspondFirst, in_correspondSecond, dummySolution, assumedDistanceError, indicesInliers);
-            int plunderScore = model->ComputePlunderScore(static_cast<int>(indicesInliers.size()), static_cast<int>(in_correspondFirst.size() - indicesInliers.size()));
-            if (plunderScore < bestPlunderScore)
-            {
-                bestPlunderScore = plunderScore;
-                inliers = indicesInliers;
-                bestModelId = testedModels;
-            }
-        }
-
         // Calculate number of necessary iterations
         // We want 95% certainty to have a pure set
         int N = CalculateNecessaryIterations(0.95F, m_outlierRatio, model->GetNumCorrespondences());
@@ -81,16 +65,14 @@ namespace DeltaPoseReconstruction
                     inliers = indicesInliers;
                     bestModelId = testedModels;
                 }
-
-            }
-        
+            }        
         }
         testedModels++;
     }
     // Get all inliers and compute best solution given best model
     std::vector<cv::Point2f> inliersFirst;
     std::vector<cv::Point2f> inliersSecond;
-
+    
     for (auto it : inliers)
     {
         inliersFirst.push_back(in_correspondFirst[it]);
@@ -116,9 +98,10 @@ namespace DeltaPoseReconstruction
     return ret;
 }
 
-int  RansacOptimizer::CalculateNecessaryIterations(const float in_prob, const float in_outlierRatio, const int in_numCorrespondences)
+int RansacOptimizer::CalculateNecessaryIterations(const float in_prob, const float in_outlierRatio, const int in_numCorrespondences)
 {
-    return static_cast<int>(std::log(1 - in_prob) / std::log(1.0 - std::pow(1.0 - in_outlierRatio, in_numCorrespondences)));
+    const int numIt = static_cast<int>(std::log(1 - in_prob) / std::log(1.0 - std::pow(1.0 - in_outlierRatio, in_numCorrespondences)));
+    return std::max(numIt, 1);
 }
 
 
