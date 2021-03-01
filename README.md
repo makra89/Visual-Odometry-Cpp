@@ -11,15 +11,11 @@ After taking part in the coursera course Robotics:Perception, I decided to just 
 
 # The task
 
-It would be rather straightforward to use opencv and just connect the provided functionality to some kind of visual odometry pipeline. What I rather try to do:
+The goal is to:
 
 - Creating a visual odometry pipeline from scratch (see below) extracting poses from monocular camera images
-- Implementing all major algorithms (like feature detection, description,..) myself
-- Using only utility functions and structs from opencv. For me also things like SVD count as such.
+- Implementing some of the major algorithms (like feature detection, description, especially ORB would be interesting) myself
 - Having fun, so please pardon the lack of testing and documentation. I do enough of this at work.
-- ....... And finally hop on the open-source train ;) 
-
-The goal is not to create yet another visual odometry pipeline that can easily be used by everyone. There exist multiple sophisticated open-source projects for this. But maybe this project helps someone understanding visual odometry. 
 
 # Current functionality
 
@@ -28,8 +24,7 @@ All individual parts of an ORB detector-descriptor-matcher chain are implemented
 - Rotated BRIEF descriptor
 - LSH matcher
 
-Additionally, fundamental matrix estimation and essential matrix decomposition, including RANSAC, is implemented. 
-Having this functionality at least some (low quality) delta poses can be computed. 
+Additionally, delta pose reconstruction between subsequent frames is implemented
 
 A python package can be built optionally that exposes the Master interface.
 

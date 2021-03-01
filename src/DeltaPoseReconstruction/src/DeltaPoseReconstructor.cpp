@@ -6,19 +6,16 @@
 */
 
 #include <Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h>
+#include <EpipolarSolution.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <Vocpp_Utils/ConversionUtils.h>
-#include <FullFundamentalMat8pt.h>
-#include <PureTranslationModel.h>
-#include <NoMotionModel.h>
-#include<EpipolarModel.h>
 #include <Vocpp_Utils/FrameRotations.h>
 #include <Vocpp_Utils/NumericalUtilities.h>
+
 #include <cmath>
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
-
 
 namespace VOCPP
 {
@@ -28,9 +25,6 @@ namespace DeltaPoseReconstruction
 DeltaPoseReconstructor::DeltaPoseReconstructor() :
     m_detectorDescriptor(),
     m_matcher(),
-    // Instantiate optimizer with an initial estimate of 20% outlier ratio
-    m_optimizer(RansacOptimizer(0.2F, 0.01F)),
-    m_epiPolModels(),
     // Minimum number of tracked landmarks = 10
     m_localMap(10U),
     m_descriptionsLastFrame(),
@@ -41,11 +35,6 @@ DeltaPoseReconstructor::DeltaPoseReconstructor() :
     m_lastPosWcs(),
     m_lastProjectionMat()
 {
-    m_epiPolModels.clear();
-    //m_epiPolModels.push_back(new PureTranslationModel());
-    m_epiPolModels.push_back(new FullFundamentalMat8pt());
-    m_epiPolModels.push_back(new NoMotionModel());
-
     Reset();
 }
 
@@ -66,12 +55,6 @@ void DeltaPoseReconstructor::Reset()
 DeltaPoseReconstructor::~DeltaPoseReconstructor()
 {
     Reset();
-
-    for (auto model : m_epiPolModels)
-    {
-        delete model;
-    }
-    m_epiPolModels.clear();
 }
 
 bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat)
@@ -118,7 +101,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 std::vector<unsigned int> inlierMatchIndices;
                 cv::Mat1f rotation;
                 cv::Mat1f translation;
-                m_optimizer.Run(m_epiPolModels, pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation);
+                RecoverPoseRansac(pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 ///////                             RAW TRANSLATION (Without applying a relative scale        //////
