@@ -166,15 +166,15 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation));
         EXPECT_GE(inlierIndices.size(), 90);
 
-        EXPECT_NEAR(rotTrue(0, 0), rotation(0, 0), 1e-2);
-        EXPECT_NEAR(rotTrue(0, 1), rotation(0, 1), 1e-2);
-        EXPECT_NEAR(rotTrue(0, 2), rotation(0, 2), 1e-2);
-        EXPECT_NEAR(rotTrue(1, 0), rotation(1, 0), 1e-2);
-        EXPECT_NEAR(rotTrue(1, 1), rotation(1, 1), 1e-2);
-        EXPECT_NEAR(rotTrue(1, 2), rotation(1, 2), 1e-2);
-        EXPECT_NEAR(rotTrue(2, 0), rotation(2, 0), 1e-2);
-        EXPECT_NEAR(rotTrue(2, 1), rotation(2, 1), 1e-2);
-        EXPECT_NEAR(rotTrue(2, 2), rotation(2, 2), 1e-2);
+        EXPECT_NEAR(rotTrue(0, 0), rotation(0, 0), 5e-2);
+        EXPECT_NEAR(rotTrue(0, 1), rotation(0, 1), 5e-2);
+        EXPECT_NEAR(rotTrue(0, 2), rotation(0, 2), 5e-2);
+        EXPECT_NEAR(rotTrue(1, 0), rotation(1, 0), 5e-2);
+        EXPECT_NEAR(rotTrue(1, 1), rotation(1, 1), 5e-2);
+        EXPECT_NEAR(rotTrue(1, 2), rotation(1, 2), 5e-2);
+        EXPECT_NEAR(rotTrue(2, 0), rotation(2, 0), 5e-2);
+        EXPECT_NEAR(rotTrue(2, 1), rotation(2, 1), 5e-2);
+        EXPECT_NEAR(rotTrue(2, 2), rotation(2, 2), 5e-2);
 
         // Translation is only known up to a global scale
         translationTrue = translationTrue / cv::norm(translationTrue);
@@ -183,8 +183,8 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
             translation = -translation;
         }
 
-        EXPECT_NEAR(translationTrue(0, 0), translation(0, 0), 1e-2);
-        EXPECT_NEAR(translationTrue(1, 0), translation(1, 0), 1e-2);
-        EXPECT_NEAR(translationTrue(2, 0), translation(2, 0), 1e-2);
+        EXPECT_NEAR(translationTrue(0, 0), translation(0, 0), 5e-2);
+        EXPECT_NEAR(translationTrue(1, 0), translation(1, 0), 5e-2);
+        EXPECT_NEAR(translationTrue(2, 0), translation(2, 0), 5e-2);
     }
 }
