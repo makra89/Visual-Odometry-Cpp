@@ -1,10 +1,8 @@
 
 add_executable(Vocpp_DeltaPoseReconstructionTest
-    #src
-    src/FullFundamentalMat8ptTest.cpp
-    src/PureTranslationModelTest.cpp
+    #src  
     src/LocalMapTest.cpp
-    src/RansacTest.cpp
+    src/EpipolarSolutionTest.cpp
     src/main.cpp
 )
 

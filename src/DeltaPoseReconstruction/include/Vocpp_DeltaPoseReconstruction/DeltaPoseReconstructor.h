@@ -15,7 +15,6 @@
 #include<Vocpp_FeatureHandling/OrbDetectorDescriptor.h>
 #include<Vocpp_FeatureHandling/LshMatcher.h>
 
-#include<Vocpp_DeltaPoseReconstruction/RansacOptimizer.h>
 #include<Vocpp_DeltaPoseReconstruction/LocalMap.h>
 
 #include <Vocpp_Utils/ImageProcessingUtils.h>
@@ -28,8 +27,6 @@ namespace VOCPP
 
 namespace DeltaPoseReconstruction
 {
-
-class EpipolarModel;
 
 /**
   * /brief Reconstructs epipolar geometry out of feature matches and 
@@ -81,8 +78,6 @@ private:
     FeatureHandling::OrbDetectorDescriptor m_detectorDescriptor; ///< feature detector and descriptor
     FeatureHandling::LshMatcher m_matcher; ///< feature matcher
 
-    RansacOptimizer m_optimizer;
-    std::vector<EpipolarModel*> m_epiPolModels;
     LocalMap m_localMap;
 
     std::vector<FeatureHandling::BinaryFeatureDescription> m_descriptionsLastFrame;  ///< descriptions computed for last frame

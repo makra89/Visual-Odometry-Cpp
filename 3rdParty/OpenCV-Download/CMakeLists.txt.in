@@ -17,7 +17,7 @@ ExternalProject_Add(opencv
     -DBUILD_PACKAGE:BOOL=OFF
     -DBUILD_SHARED_LIBS:BOOL=ON
   -DBUILD_TESTS:BOOL=OFF
-  -DBUILD_LIST=core,imgproc,imgcodecs,highgui
+  -DBUILD_LIST=core,imgproc,imgcodecs,highgui,calib3d
     -DCMAKE_INSTALL_PREFIX:PATH=${OpenCV_Install_Dir}
   ${OpenCV_LinuxBuildTypeArgs}
 )

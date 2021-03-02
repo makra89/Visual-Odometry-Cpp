@@ -4,17 +4,10 @@ add_library(Vocpp_DeltaPoseReconstruction STATIC
     #include
     ./include/Vocpp_DeltaPoseReconstruction/DeltaPoseReconstructor.h
     ./include/Vocpp_DeltaPoseReconstruction/LocalMap.h
-    ./include/Vocpp_DeltaPoseReconstruction/RansacOptimizer.h
     #src
     ./src/DeltaPoseReconstructor.cpp
-    ./src/EpipolarModel.h
-    ./src/RansacOptimizer.cpp
-    ./src/FullFundamentalMat8pt.h
-    ./src/FullFundamentalMat8pt.cpp
-    ./src/PureTranslationModel.h
-    ./src/PureTranslationModel.cpp
-    ./src/NoMotionModel.h
-    ./src/NoMotionModel.cpp
+    ./src/EpipolarSolution.h
+    ./src/EpipolarSolution.cpp
     ./src/LocalMap.cpp
 )
 
