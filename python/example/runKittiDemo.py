@@ -61,6 +61,9 @@ if __name__ == "__main__":
     skew = 0.0
     mono_calib = Vocpp.MonoCameraCalibration(foc_length, cam_center_x, cam_center_y, skew)
 
+    # Activate debug output
+    master.ActivateDebugOutput()
+
     # Load calibration to master
     ret = master.LoadCalibration(mono_calib)
 

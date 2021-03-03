@@ -57,7 +57,7 @@ DeltaPoseReconstructor::~DeltaPoseReconstructor()
     Reset();
 }
 
-bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat)
+bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat, bool in_debugOutputFlag)
 {
     bool ret = true;
 
@@ -134,8 +134,6 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                     inlierMatches.push_back(matches[matchIdx]);
                 }
 
-                std::cout << inlierMatches.size() << std::endl;
-
                 // Triangulate all inliers
                 std::vector<LandmarkPosition> landmarks;
                 for (auto matchIdx : inlierMatchIndices)
@@ -149,19 +147,21 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                     cv::Point3f triangulatedPoint;
                     Utils::PointTriangulationLinear(m_lastProjectionMat, currentProjMat, currFrameCamCoord, lastFrameCamCoord, triangulatedPoint);
 
-                    // Add triangulated landmarks to local map
                     landmarks.push_back(LandmarkPosition{ triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z });
                 }
+
+                /* Relative scale calculation currently deactivated
                 // Add triangulated landmarks to local map
-                // m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
+                m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
                 // And calculate scale, apply it to translation vector
                 float scale = 0.0;
                 if (m_localMap.GetLastRelativeScale(m_lastFrameId, in_frame.GetId(), scale))
                 {
                     // Currently deactivated, there is a memory leak somewhere
-                    // translation = translation * scale;
+                    translation = translation * scale;
                 }
-                
+                */
+
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 ///////                            REFINED POSE CALCULATION                                   //////
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -180,21 +180,25 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 m_lastPose = CameraPose(currentPosWcs, currentOrientWcs);
 
                 tick.stop();
-                std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
-                cv::Mat matchImage = in_frame.GetImageCopy();
-                cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
-                for (auto matchIdx : inlierMatchIndices)
+                // Only show debug output if requested
+                if (in_debugOutputFlag)
                 {
-                    // Draw keypoints from current frame
-                    cv::circle(matchImage, pCurrFrame[matchIdx], 5, cv::Scalar(0, 0.0, 255.0), 2);
-                    // Draw keypoints from last frame
-                    cv::circle(matchImage, pLastFrame[matchIdx], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
-                    // Draw connecting line
-                    cv::line(matchImage, pCurrFrame[matchIdx], pLastFrame[matchIdx], cv::Scalar(0.0, 0.0, 255.0), 2);
-                }
+                    std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
+                    cv::Mat matchImage = in_frame.GetImageCopy();
+                    cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
+                    for (auto matchIdx : inlierMatchIndices)
+                    {
+                        // Draw keypoints from current frame
+                        cv::circle(matchImage, pCurrFrame[matchIdx], 5, cv::Scalar(0, 0.0, 255.0), 2);
+                        // Draw keypoints from last frame
+                        cv::circle(matchImage, pLastFrame[matchIdx], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
+                        // Draw connecting line
+                        cv::line(matchImage, pCurrFrame[matchIdx], pLastFrame[matchIdx], cv::Scalar(0.0, 0.0, 255.0), 2);
+                    }
 
-                cv::imshow("Optical Flow", matchImage);
-                cv::waitKey(1);
+                    cv::imshow("Optical Flow", matchImage);
+                    cv::waitKey(1);
+                }
             }
 
             // Save last frame, descriptions and keypoints

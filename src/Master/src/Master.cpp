@@ -16,7 +16,7 @@ namespace VOCPP
 namespace Master
 {
 
-Master::Master() : m_reconstructor(), m_calibModule()
+Master::Master() : m_reconstructor(), m_calibModule(), m_debugOutputActive(false)
 {
 }
 
@@ -31,7 +31,7 @@ bool Master::FeedNextFrame(const Frame& in_frame)
     bool ret = m_calibModule.GetSavedMonoCalib(monoCalib);
 
     // Only if a valid calibration is there we can feed the frame to the reconstructor
-    ret = ret && m_reconstructor.FeedNextFrame(in_frame, monoCalib.GetCalibrationMatrix());
+    ret = ret && m_reconstructor.FeedNextFrame(in_frame, monoCalib.GetCalibrationMatrix(), m_debugOutputActive);
     return ret;
 }
 
@@ -43,6 +43,16 @@ DeltaCameraPose Master::GetLastDeltaPose()
 CameraPose Master::GetLastPose()
 {
     return m_reconstructor.GetLastPose();
+}
+
+void Master::ActivateDebugOutput()
+{
+    m_debugOutputActive = true;
+}
+
+void Master::DeactivateDebugOutput()
+{
+    m_debugOutputActive = false;
 }
 
 bool Master::LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration)
