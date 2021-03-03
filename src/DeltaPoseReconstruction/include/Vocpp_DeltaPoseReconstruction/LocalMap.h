@@ -159,8 +159,6 @@ public:
       */
     void InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const unsigned int& in_currentFrameId);
 
-    void RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId);
-
     bool GetLastRelativeScale(const unsigned int& in_lastFrameId, const unsigned int& in_currentFrameId, float& out_scale) const;
     
     /**
@@ -172,6 +170,8 @@ public:
     }
 
 private:
+
+    void RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId);
 
     void ComputeRelativeScale(const unsigned int& in_currentFrameId);
 

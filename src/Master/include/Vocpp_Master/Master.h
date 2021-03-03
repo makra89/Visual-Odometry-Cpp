@@ -57,6 +57,16 @@ public:
     CameraPose GetLastPose();
 
     /**
+      * /brief Activate debug output (like drawing current frame + matches)
+      */
+    void ActivateDebugOutput();
+
+    /**
+      * /brief Deactivate debug output
+      */
+    void DeactivateDebugOutput();
+
+    /**
       * /brief Load a mono camera calibration
       */
     bool LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration);
@@ -65,6 +75,7 @@ private:
 
     DeltaPoseReconstruction::DeltaPoseReconstructor m_reconstructor; /// reconstructor which provides delta poses between consecutive frames
     Calibration::CalibrationModule m_calibModule; ///< calibration module which stores a loaded calibration (and in future computes it)
+    bool m_debugOutputActive; ///< indicates whether debug output is currently active
 
 };
 

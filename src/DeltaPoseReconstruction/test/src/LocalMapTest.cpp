@@ -174,12 +174,13 @@ TEST(LocalMapTest, RemoveUntrackedLandmarks)
     VOCPP::FeatureHandling::BinaryDescriptionMatch evenNewerMatch(desc5, desc4, 0.F);
     landmarks.push_back(dummyLandmark);
     matches.push_back(evenNewerMatch);
-    map.InsertLandmarks(landmarks, matches, currentFrameId);
-    ASSERT_TRUE(map.GetLandmarks().size() == 2);
 
-    // Now remove all untracked landmarks (should remove the first one)
-    map.RemoveUntrackedLandmarks(currentFrameId);
+    // Inserting the new landmarks will automatically remove the outdated ones
+    ASSERT_TRUE(map.GetLandmarks().size() == 2);
+    map.InsertLandmarks(landmarks, matches, currentFrameId);
+    // Only one should be left
     ASSERT_TRUE(map.GetLandmarks().size() == 1);
+
     // Check that we really removed the correct landmark
     map.GetLandmarks()[0].IsPresentInFrameWithFeatureId(lastFrameId, 25U);
     map.GetLandmarks()[0].IsPresentInFrameWithFeatureId(currentFrameId, 31U);
@@ -195,58 +196,85 @@ TEST(LocalMapTest, CalculateRelativeScale)
 
     std::vector<LandmarkPosition> landmarks;
     std::vector<BinaryDescriptionMatch> matches;
-    LandmarkPosition landmarkPos1 = { 1.0, 2.0, 3.0 };
-    LandmarkPosition landmarkPos2 = { 1.5, 2.5, 3.5 };
+    LandmarkPosition landmarkPos0Frame1Frame0 = { 1.0, 2.0, 3.0 };
+    LandmarkPosition landmarkPos1Frame1Frame0 = { 1.5, 2.5, 3.5 };
     unsigned int currentFrameId = 1U;
     unsigned int lastFrameId = 0U;
     // Insert two landmarks
     std::vector<uint8_t> dummyDesc;
-    BinaryFeatureDescription desc1(Feature{ 0U, 0U }, dummyDesc);
-    BinaryFeatureDescription desc2(Feature{ 0U, 1U }, dummyDesc);
-    BinaryFeatureDescription desc3(Feature{ 1U, 0U }, dummyDesc);
-    BinaryFeatureDescription desc4(Feature{ 1U, 1U }, dummyDesc);
-    VOCPP::FeatureHandling::BinaryDescriptionMatch match1(desc2, desc1, 0.F);
-    VOCPP::FeatureHandling::BinaryDescriptionMatch match2(desc4, desc3, 0.F);
-    landmarks.push_back(landmarkPos1);
-    landmarks.push_back(landmarkPos2);
-    matches.push_back(match1);
-    matches.push_back(match2);
+    BinaryFeatureDescription frame0feat0(Feature{ 0U, 0U }, dummyDesc);
+    BinaryFeatureDescription frame0feat1(Feature{ 1U, 0U }, dummyDesc);
+    BinaryFeatureDescription frame1feat0(Feature{ 0U, 1U }, dummyDesc);
+    BinaryFeatureDescription frame1feat1(Feature{ 1U, 1U }, dummyDesc);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match0Frame1Frame0(frame1feat0, frame0feat0, 0.F);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match1Frame1Frame0(frame1feat1, frame0feat1, 0.F);
+    landmarks.push_back(landmarkPos0Frame1Frame0);
+    landmarks.push_back(landmarkPos1Frame1Frame0);
+    matches.push_back(match0Frame1Frame0);
+    matches.push_back(match1Frame1Frame0);
     map.InsertLandmarks(landmarks, matches, currentFrameId);
     ASSERT_TRUE(map.GetLandmarks().size() == 2);
 
     // Now go on to another frame and track the landmarks with a new position (simulate scale factor of 2.0)
     matches.clear();
     landmarks.clear();
-    LandmarkPosition newLandmarkPos1 = { 2.0, 4.0, 6.0 };
-    LandmarkPosition newLandmarkPos2 = { 3.0, 5.0, 7.0 };
+    LandmarkPosition landmarkPos0Frame2Frame1 = { 2.0, 4.0, 6.0 };
+    LandmarkPosition landmarkPos1Frame2Frame1 = { 3.0, 5.0, 7.0 };
     currentFrameId = 2U;
     lastFrameId = 1U;
-    BinaryFeatureDescription desc5(Feature{ 0U, 2U }, dummyDesc);
-    BinaryFeatureDescription desc6(Feature{ 1U, 2U }, dummyDesc);
-    VOCPP::FeatureHandling::BinaryDescriptionMatch newMatch1(desc5, desc2, 0.F);
-    VOCPP::FeatureHandling::BinaryDescriptionMatch newMatch2(desc6, desc4, 0.F);
-    landmarks.push_back(newLandmarkPos1);
-    landmarks.push_back(newLandmarkPos2);
-    matches.push_back(newMatch1);
-    matches.push_back(newMatch2);
+    BinaryFeatureDescription frame2feat0(Feature{ 0U, 2U }, dummyDesc);
+    BinaryFeatureDescription frame2feat1(Feature{ 1U, 2U }, dummyDesc);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match0Frame2Frame1(frame2feat0, frame1feat0, 0.F);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match1Frame2Frame1(frame2feat1, frame1feat1, 0.F);
+    landmarks.push_back(landmarkPos0Frame2Frame1);
+    landmarks.push_back(landmarkPos1Frame2Frame1);
+    matches.push_back(match0Frame2Frame1);
+    matches.push_back(match1Frame2Frame1);
     map.InsertLandmarks(landmarks, matches, currentFrameId);
     ASSERT_TRUE(map.GetLandmarks().size() == 2);
 
     float relativeScale = 0.0;
     EXPECT_TRUE(map.GetLastRelativeScale(1U /*last frame*/, 2U /*current frame*/, relativeScale));
     EXPECT_FLOAT_EQ(relativeScale, 0.5);
-
+    
     // Check that the positions in the last frame pair have been rescaled
     LandmarkPosition position;
     Landmark::FramePairKey key{ currentFrameId, lastFrameId };
     EXPECT_TRUE(map.GetLandmarks()[0].GetFramePairPosition(key, position));
-    EXPECT_DOUBLE_EQ(position.x, landmarkPos1.x);
-    EXPECT_DOUBLE_EQ(position.y, landmarkPos1.y);
-    EXPECT_DOUBLE_EQ(position.z, landmarkPos1.z);
+    EXPECT_DOUBLE_EQ(position.x, landmarkPos0Frame1Frame0.x);
+    EXPECT_DOUBLE_EQ(position.y, landmarkPos0Frame1Frame0.y);
+    EXPECT_DOUBLE_EQ(position.z, landmarkPos0Frame1Frame0.z);
 
     EXPECT_TRUE(map.GetLandmarks()[1].GetFramePairPosition(key, position));
-    EXPECT_DOUBLE_EQ(position.x, landmarkPos2.x);
-    EXPECT_DOUBLE_EQ(position.y, landmarkPos2.y);
-    EXPECT_DOUBLE_EQ(position.z, landmarkPos2.z);
+    EXPECT_DOUBLE_EQ(position.x, landmarkPos1Frame1Frame0.x);
+    EXPECT_DOUBLE_EQ(position.y, landmarkPos1Frame1Frame0.y);
+    EXPECT_DOUBLE_EQ(position.z, landmarkPos1Frame1Frame0.z);
+
+    // Check another frame with a scale value of 0.5
+    matches.clear();
+    landmarks.clear();
+    LandmarkPosition landmarkPos0Frame3Frame2 = { 0.5, 1.0, 1.5 };
+    LandmarkPosition landmarkPos1Frame3Frame2 = { 0.75, 1.25, 1.75 };
+    currentFrameId = 3U;
+    lastFrameId = 2U;
+    BinaryFeatureDescription frame3feat0(Feature{ 0U, 3U }, dummyDesc);
+    BinaryFeatureDescription frame3feat1(Feature{ 1U, 3U }, dummyDesc);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match0Frame3Frame2(frame3feat0, frame2feat0, 0.F);
+    VOCPP::FeatureHandling::BinaryDescriptionMatch match1Frame3Frame2(frame3feat1, frame2feat1, 0.F);
+    landmarks.push_back(landmarkPos0Frame3Frame2);
+    landmarks.push_back(landmarkPos1Frame3Frame2);
+    matches.push_back(match0Frame3Frame2);
+    matches.push_back(match1Frame3Frame2);
+    map.InsertLandmarks(landmarks, matches, currentFrameId);
+    ASSERT_TRUE(map.GetLandmarks().size() == 2);
+
+    relativeScale = 0.0;
+    // Try to get with outdated frame ids --> should fail
+    EXPECT_FALSE(map.GetLastRelativeScale(1U /*last frame*/, 2U /*current frame*/, relativeScale));
+    EXPECT_FLOAT_EQ(relativeScale, 0.0);
+
+    // Now with correct ones --> success
+    EXPECT_TRUE(map.GetLastRelativeScale(2U /*last frame*/, 3U /*current frame*/, relativeScale));
+    EXPECT_FLOAT_EQ(relativeScale, 2.0);
 }
 

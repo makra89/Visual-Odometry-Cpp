@@ -122,6 +122,8 @@ void LocalMap::InsertLandmarks(const std::vector<LandmarkPosition>& in_positions
         }
     }
 
+    RemoveUntrackedLandmarks(in_currentFrameId);
+
     ComputeRelativeScale(in_currentFrameId);
     m_lastFrameId = in_currentFrameId;
 }

@@ -50,7 +50,7 @@ public:
     /**
       * /brief Provide next image frame to reconstructor together with a calibration matrix
       */
-    bool FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat);
+    bool FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat, bool in_debugOutputFlag);
 
     /**
       * /brief Get computed delta pose of last frame to the frame before
