@@ -180,7 +180,7 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat);
 * \param[out] out_triangulatedPoints 3D triangulated points
 */
 bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_imageCoordLeft,
-    const const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix, std::vector<cv::Point3f>& out_triangulatedPoints);
+    const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix, std::vector<cv::Point3f>& out_triangulatedPoints);
 
 /**
 * /brief Triangulates a point in 3D given two camera coordinates and two projection matrices
