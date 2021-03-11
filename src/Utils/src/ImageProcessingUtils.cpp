@@ -152,7 +152,7 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat)
 }
 
 bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_imageCoordLeft,
-    const const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, 
+    const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, 
     cv::Mat1f& out_rotMatrix, std::vector<cv::Point3f>& out_triangulatedPoints)
 {
     // Compute SVD
