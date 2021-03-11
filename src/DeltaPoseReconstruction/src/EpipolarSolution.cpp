@@ -5,7 +5,7 @@
 * Copyright (C) 2020 Manuel Kraus
 */
 
-#include <Vocpp_DeltaPoseReconstruction/EpipolarSolver.h>
+#include <EpipolarSolution.h>
 #include <Vocpp_Utils/NumericalUtilities.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <opencv2/calib3d.hpp>
@@ -18,7 +18,7 @@ namespace DeltaPoseReconstruction
 {
 
 bool RecoverPoseRansac(const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat1f& in_calibMat, std::vector<unsigned int>& out_inlierMatchIndices, cv::Mat1f &out_translation, cv::Mat1f& out_rotation)
+        const cv::Mat1f& in_calibMat, std::vector<unsigned int>& out_inlierMatchIndices, cv::Mat1f &out_translation, cv::Mat1f& out_rotation, std::vector<cv::Point3f>& out_triangulatedPoints)
 {
     // Set from outside, or set here hardcoded?
     // This is the gaussian noise in the distance to the epipolar line
@@ -28,25 +28,39 @@ bool RecoverPoseRansac(const std::vector<cv::Point2f>& in_correspondFirst, const
     // We assume the essential mat (or fundamental mat) gives x_first.T * F * x_second
     // But OpenCv computes x_second.T * F * x_first --> reorder arguments
     cv::Mat inlierMask = cv::Mat::zeros(in_correspondFirst.size(), 2, CV_8UC1);
-    cv::Mat1f essentialMat = cv::findEssentialMat(in_correspondSecond, in_correspondFirst, in_calibMat, cv::RANSAC, 0.999, assumedDistanceError, inlierMask);
+    cv::Mat essentialMat = cv::findEssentialMat(in_correspondSecond, in_correspondFirst, in_calibMat, cv::RANSAC, 0.999, assumedDistanceError, inlierMask);
 
     for (unsigned int i = 0U; i < in_correspondFirst.size(); i++)
     {
         if (inlierMask.at<uint8_t>(i) == 1) out_inlierMatchIndices.push_back(i);
     }
-
-    bool ret = out_inlierMatchIndices.size() > 0U;
     
-    if (ret && VOCPP::Utils::DecomposeEssentialMatrix(essentialMat, in_calibMat, in_correspondFirst[out_inlierMatchIndices[0]], in_correspondSecond[out_inlierMatchIndices[0]], out_translation, out_rotation))
+    std::vector<cv::Point3f> triangulatedPoints;
+    if (out_inlierMatchIndices.size() > 0 && VOCPP::Utils::DecomposeEssentialMatrix(essentialMat, in_calibMat, in_correspondFirst, in_correspondSecond, 
+        out_inlierMatchIndices, out_translation, out_rotation, out_triangulatedPoints))
     {
+        cv::Mat rod;
+        cv::Rodrigues(out_rotation, rod);
+
+        std::vector<cv::Point2f> inlierFirst;
+        for (auto idx : out_inlierMatchIndices)
+        {
+            inlierFirst.push_back(in_correspondFirst[idx]);
+        }
+
+        // Try to refine the current pose by PnP
+        cv::solvePnP(out_triangulatedPoints, inlierFirst, in_calibMat, cv::Mat(), rod, out_translation, true /*useExtrinsicGuess*/, cv::SOLVEPNP_ITERATIVE);
+
+        cv::Rodrigues(rod, out_rotation);
+
         // Normalize translation
         out_translation = out_translation / cv::norm(out_translation);
-
 
         // We want to output the translation vector from second to first camera center in the second camera coordinate system
         out_translation = -(out_rotation.t() * out_translation);
     }
-        return ret;
+
+    return out_inlierMatchIndices.size() > 0U;
 }
 
 } //namespace DeltaPoseReconstruction

@@ -174,11 +174,13 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat);
 * \param[in] in_calibMat calibration matrix
 * \param[in] in_imageCoordLeft correspondence point in camera coordinates in left image
 * \param[in] in_imageCoordRight correspondence point in camera coordinates in right image
+* \param[in, out] inout_inlierMask gives inliers, 1 for inlier, 0 for outlier
 * \param[out] out_translation translation from left camera center to right camera center in the left camera coordinate system
 * \param[out] out_rotMatrix rotation matrix used to transfrom a point in right camera frame to left camera frame
+* \param[out] out_triangulatedPoints 3D triangulated points
 */
-bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const cv::Point2f& in_imageCoordLeft,
-    const cv::Point2f& in_imageCoordRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix);
+bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_imageCoordLeft,
+    const const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix, std::vector<cv::Point3f>& out_triangulatedPoints);
 
 /**
 * /brief Triangulates a point in 3D given two camera coordinates and two projection matrices

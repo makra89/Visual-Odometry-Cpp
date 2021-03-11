@@ -88,7 +88,7 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
     // Construct set of 3D points in world coordinate system
     std::vector<cv::Point3f> realWorldPoints;
     const float minDist = 150.0;
-    for (int it = 0; it < 1000; it++)
+    for (int it = 0; it < 2; it++)
     {
         realWorldPoints.push_back(cv::Point3f(DrawFloatInRange(-minDist, minDist), DrawFloatInRange(-minDist, minDist), DrawFloatInRange(50.0, 150.0)));
     }
@@ -101,7 +101,6 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
     calMat(0, 2) = 300;
     calMat(1, 2) = 300;
 
-
     for (auto coord : realWorldPoints)
     {
         // Projection matrix for left image, the translation is measured in the system of the left frame
@@ -112,8 +111,13 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
         ImageProjectionMatrix projMatRight(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), calMat);
 
         // Get projected points in both camera frames
-        cv::Point2f imgPointsLeft = projMatLeft.Apply(coord);
-        cv::Point2f imgPointsRight = projMatRight.Apply(coord);
+        std::vector<cv::Point2f> imgPointLeft;
+        std::vector<cv::Point2f> imgPointRight;
+        imgPointLeft.push_back(projMatLeft.Apply(coord));
+        imgPointRight.push_back(projMatRight.Apply(coord));
+
+        std::vector<unsigned int> inlierIndices;
+        inlierIndices.push_back(0);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
         cv::Mat1f translatCross;
@@ -123,7 +127,8 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
         // Decompose the essential matrix
         cv::Mat1f decompTranslat;
         cv::Mat1f decompRotMat;
-        DecomposeEssentialMatrix(essentialMat, calMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
+        std::vector<cv::Point3f> triangulatedPoint;
+        DecomposeEssentialMatrix(essentialMat, calMat, imgPointLeft, imgPointRight, inlierIndices, decompTranslat, decompRotMat, triangulatedPoint);
         // The true translation and the extracted one may differ by a global scale
         decompTranslat = decompTranslat * (translationLeft(0, 0) / decompTranslat(0, 0));
 
@@ -137,6 +142,10 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
                 EXPECT_NEAR(decompRotMat.at<float>(rowIt, colIt), eye(rowIt, colIt), 1e-2);
             }
         }
+
+        // Check triangulated point, may differ by a global scale
+        EXPECT_NEAR(triangulatedPoint[0].y * coord.x / triangulatedPoint[0].x, coord.y, 0.1);
+        EXPECT_NEAR(triangulatedPoint[0].z * coord.x / triangulatedPoint[0].x, coord.z, 0.1);
     }
   
 }
@@ -171,8 +180,13 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         ImageProjectionMatrix projMatRight(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), calMat);
 
         // Get projected points in both camera frames
-        cv::Point2f imgPointsLeft = projMatLeft.Apply(coord);
-        cv::Point2f imgPointsRight = projMatRight.Apply(coord);
+        std::vector<cv::Point2f> imgPointLeft;
+        std::vector<cv::Point2f> imgPointRight;
+        imgPointLeft.push_back(projMatLeft.Apply(coord));
+        imgPointRight.push_back(projMatRight.Apply(coord));
+
+        std::vector<unsigned int> inlierIndices;
+        inlierIndices.push_back(0);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
         cv::Mat1f translatCross;
@@ -182,7 +196,8 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         // Decompose the essential matrix
         cv::Mat1f decompTranslat;
         cv::Mat1f decompRotMat;
-        DecomposeEssentialMatrix(essentialMat, calMat, imgPointsLeft, imgPointsRight, decompTranslat, decompRotMat);
+        std::vector<cv::Point3f> triangulatedPoint;
+        DecomposeEssentialMatrix(essentialMat, calMat, imgPointLeft, imgPointRight, inlierIndices, decompTranslat, decompRotMat, triangulatedPoint);
         // The true translation and the extracted one may differ by a global scale
         decompTranslat = decompTranslat * (translationLeft(0, 0) / decompTranslat(0, 0));
 
@@ -244,8 +259,8 @@ TEST(PointTriangulationLinearTest, TwoCamerasRotationAndTranslation)
     {
         cv::Point3f triangPoint;
         PointTriangulationLinear(projMatLeft, projMatRight, imgPointsLeft[it], imgPointsRight[it], triangPoint);
-        EXPECT_NEAR(triangPoint.x, realWorldPoints[it].x, 9e-2);
-        EXPECT_NEAR(triangPoint.y, realWorldPoints[it].y, 9e-2);
-        EXPECT_NEAR(triangPoint.z, realWorldPoints[it].z, 9e-2);
+        EXPECT_NEAR(triangPoint.x, realWorldPoints[it].x, 1e-1);
+        EXPECT_NEAR(triangPoint.y, realWorldPoints[it].y, 1e-1);
+        EXPECT_NEAR(triangPoint.z, realWorldPoints[it].z, 1e-1);
     }
 }
