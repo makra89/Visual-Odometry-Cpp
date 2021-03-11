@@ -101,7 +101,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 std::vector<unsigned int> inlierMatchIndices;
                 cv::Mat1f rotation;
                 cv::Mat1f translation;
-                RecoverPoseRansac(pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation);
+                std::vector<cv::Point3f> triangulatedPoints;
+                RecoverPoseRansac(pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation, triangulatedPoints);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 ///////                             RAW TRANSLATION (Without applying a relative scale        //////
@@ -124,9 +125,6 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 ///////                            TRANSLATION REFINEMENT (with relative scale                //////
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 
-                // Calculate an intermediate (without applied relative scale) image projection marix to be able to triangulate all features
-                Utils::ImageProjectionMatrix currentProjMat(m_lastOrientationWcs, -m_lastOrientationWcs * rawPosWcs, in_calibMat);
-                
                 // Create a vector with all inlier matches
                 std::vector<FeatureHandling::BinaryDescriptionMatch> inlierMatches;
                 for (auto matchIdx : inlierMatchIndices)
@@ -134,33 +132,21 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                     inlierMatches.push_back(matches[matchIdx]);
                 }
 
-                // Triangulate all inliers
                 std::vector<LandmarkPosition> landmarks;
-                for (auto matchIdx : inlierMatchIndices)
+                for (auto point : triangulatedPoints)
                 {
-                    cv::Mat1f invCalibMat = in_calibMat.inv();
-                    cv::Mat1f currFrameCamCoordMat = invCalibMat * Utils::Point2fToMatHomCoordinates(pCurrFrame[matchIdx]);
-                    cv::Mat1f lastFrameCamCoordMat = invCalibMat * Utils::Point2fToMatHomCoordinates(pLastFrame[matchIdx]);
-                    cv::Point2f currFrameCamCoord(currFrameCamCoordMat(0, 0) / currFrameCamCoordMat(2, 0), currFrameCamCoordMat(1, 0) / currFrameCamCoordMat(2, 0));
-                    cv::Point2f lastFrameCamCoord(lastFrameCamCoordMat(0, 0) / lastFrameCamCoordMat(2, 0), lastFrameCamCoordMat(1, 0) / lastFrameCamCoordMat(2, 0));
-
-                    cv::Point3f triangulatedPoint;
-                    Utils::PointTriangulationLinear(m_lastProjectionMat, currentProjMat, currFrameCamCoord, lastFrameCamCoord, triangulatedPoint);
-
-                    landmarks.push_back(LandmarkPosition{ triangulatedPoint.x, triangulatedPoint.y, triangulatedPoint.z });
+                    landmarks.push_back(LandmarkPosition{ point.x, point.y, point.z });
                 }
 
-                /* Relative scale calculation currently deactivated
                 // Add triangulated landmarks to local map
                 m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
                 // And calculate scale, apply it to translation vector
                 float scale = 0.0;
                 if (m_localMap.GetLastRelativeScale(m_lastFrameId, in_frame.GetId(), scale))
                 {
-                    // Currently deactivated, there is a memory leak somewhere
                     translation = translation * scale;
                 }
-                */
+                
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 ///////                            REFINED POSE CALCULATION                                   //////

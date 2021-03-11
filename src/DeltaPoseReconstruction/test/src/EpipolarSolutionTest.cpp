@@ -74,8 +74,8 @@ TEST(RansacTest, TranslationAndRotation)
         std::vector<unsigned int> inlierIndices;
         cv::Mat1f translation;
         cv::Mat1f rotation;
-
-        EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation));
+        std::vector<cv::Point3f> triangulatedPoints;
+        EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation, triangulatedPoints));        
         // Expect that all matches are flagged as inliers
         EXPECT_EQ(100, inlierIndices.size());
 
@@ -102,10 +102,9 @@ TEST(RansacTest, TranslationAndRotation)
     }
 }
 
-// Disabled since currently Ransac is not so robust against outliers --> improve and activate
 TEST(RansacTest, TranslationAndRotation_WithOutliers)
 {
-    for (int testIt = 0; testIt < 100; testIt++)
+    for (int testIt = 0; testIt < 2; testIt++)
     {
         std::vector<cv::Point3f> realWorldPoints;
         std::vector<cv::Point2f> imgPoints;
@@ -162,9 +161,9 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         std::vector<unsigned int> inlierIndices;
         cv::Mat1f translation;
         cv::Mat1f rotation;
-
-        EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation));
-        EXPECT_GE(inlierIndices.size(), 90);
+        std::vector<cv::Point3f> triangulatedPoints;
+        EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation, triangulatedPoints));
+        EXPECT_GE(inlierIndices.size(), 95);
 
         EXPECT_NEAR(rotTrue(0, 0), rotation(0, 0), 5e-2);
         EXPECT_NEAR(rotTrue(0, 1), rotation(0, 1), 5e-2);

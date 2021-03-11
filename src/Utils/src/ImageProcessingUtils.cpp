@@ -151,8 +151,9 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat)
     out_crossMat(2, 1) = in_vec[0];
 }
 
-bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const cv::Point2f& in_imageCoordLeft,
-    const cv::Point2f& in_imageCoordRight, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix)
+bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_imageCoordLeft,
+    const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, 
+    cv::Mat1f& out_rotMatrix, std::vector<cv::Point3f>& out_triangulatedPoints)
 {
     // Compute SVD
     cv::Mat1d U, D, V_t;
@@ -207,25 +208,49 @@ bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f&
 
     bool ret = false;
 
-    // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
-    for (auto candidate : camProjectionMatCandidates)
-    {
-        cv::Point3f triangPoint;
-        PointTriangulationLinear(candidate.ConvertToImageProjectionMatrix(in_calibMat), camProjMatRight.ConvertToImageProjectionMatrix(in_calibMat),
-            in_imageCoordLeft, in_imageCoordRight, triangPoint);
-        cv::Point3f projPointLeft = candidate.Apply(triangPoint);
-        cv::Point3f projPointRight = camProjMatRight.Apply(triangPoint);
+    // Test for at least 10 coordinates which projection matrix to choose
+    const int numTestCandidates = std::min(10, static_cast<int>(inout_inlierIndices.size()));
+    int numVotes[4] = { 0, 0, 0, 0 };
 
-        if (projPointLeft.z > 0.0 && projPointRight.z > 0)
+    for (int it = 0; it < numTestCandidates; it++)
+    {
+        // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
+        for (int candidateId = 0; candidateId < 4; candidateId++)
         {
-            out_rotMatrix = candidate.GetRotationMat();
-            out_translation = candidate.GetTranslation();
-            ret = true;
+            cv::Point3f triangPoint;
+            PointTriangulationLinear(camProjectionMatCandidates[candidateId].ConvertToImageProjectionMatrix(in_calibMat), camProjMatRight.ConvertToImageProjectionMatrix(in_calibMat),
+                in_imageCoordLeft[inout_inlierIndices[it]], in_imageCoordRight[inout_inlierIndices[it]], triangPoint);
+            cv::Point3f projPointLeft = camProjectionMatCandidates[candidateId].Apply(triangPoint);
+            cv::Point3f projPointRight = camProjMatRight.Apply(triangPoint);
+
+            if (projPointLeft.z > 0.0 && projPointRight.z > 0)
+            {
+                numVotes[candidateId] += 1;
+            }
         }
     }
-  
 
-    return ret;
+    int bestId = std::distance(numVotes, std::max_element(numVotes, numVotes + 4));
+
+    std::vector<unsigned int> refinedInliers;
+    for (auto index : inout_inlierIndices)
+    {
+        cv::Point3f triangPoint;
+        PointTriangulationLinear(camProjectionMatCandidates[bestId].ConvertToImageProjectionMatrix(in_calibMat), camProjMatRight.ConvertToImageProjectionMatrix(in_calibMat),
+            in_imageCoordLeft[index], in_imageCoordRight[index], triangPoint);
+        
+        if (triangPoint.z > 0. && cv::norm(triangPoint) < 1000.)
+        {
+            out_triangulatedPoints.push_back(triangPoint);
+            refinedInliers.push_back(index);
+        }
+    }
+
+    out_rotMatrix = camProjectionMatCandidates[bestId].GetRotationMat();
+    out_translation = camProjectionMatCandidates[bestId].GetTranslation();
+    inout_inlierIndices = refinedInliers;
+
+    return inout_inlierIndices.size() > 0;
 }
 
 bool PointTriangulationLinear(const ImageProjectionMatrix& in_projMatLeft, const ImageProjectionMatrix& in_projMatRight, const cv::Point2f& in_imageCoordLeft,

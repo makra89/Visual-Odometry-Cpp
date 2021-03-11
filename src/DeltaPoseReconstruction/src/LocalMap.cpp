@@ -196,14 +196,23 @@ void LocalMap::ComputeRelativeScale(const unsigned int& in_currentFrameId)
         m_lastRelativeScale = scales[scales.size() / 2U];
         std::cout << "Tracked Landmarks: " << m_validTrackedLandmarks << std::endl;
 
+
+        int numIt = 0;
         for (auto it : validLandmarkIndices)
         {
             // Check whether the landmark can be tracked three frames into the past (including the current one)
             Landmark::FramePairKey keyCurrent{ in_currentFrameId, in_currentFrameId - 1U };
             LandmarkPosition posCurrent;
             m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
-            (void)m_landmarks[it].RescalePosition(keyCurrent, m_lastRelativeScale);
+            
+            // Remove landmarks from tracking that need scales that are far off
+            if (((scales[numIt] - m_lastRelativeScale) / m_lastRelativeScale) < 0.5)
+            {
+                (void)m_landmarks[it].RescalePosition(keyCurrent, m_lastRelativeScale);
+            }
+
             m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
+            numIt++;
         }
     }
 }
