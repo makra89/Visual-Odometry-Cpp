@@ -95,7 +95,7 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsShifted, matches));
 
-    EXPECT_TRUE(matches.size() > 2U);
+    EXPECT_TRUE(matches.size() >= 2U);
     for (unsigned int idx = 0U; idx < matches.size(); idx++)
     {
         double posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
