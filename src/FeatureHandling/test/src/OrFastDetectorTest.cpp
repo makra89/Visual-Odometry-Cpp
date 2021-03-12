@@ -19,11 +19,11 @@ TEST(OrFastDetectorTest, DetectTriangleEdges)
 {
     cv::Mat grayScaleImg;
     cv::cvtColor(cv::imread(testDirectory + "Triangle.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
-    grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
+    grayScaleImg.convertTo(grayScaleImg, CV_64F, 1.0 / 255.0);
 
     VOCPP::FeatureHandling::OrientedFastDetector detector(0.2F, 12, 3, 5);
 
-    VOCPP::Frame frameFirst(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+    VOCPP::Frame frameFirst(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
     std::vector<VOCPP::FeatureHandling::Feature> features;
     // The three edges should be the strongest features
     EXPECT_TRUE(detector.ExtractFeatures(frameFirst, 3, features));
@@ -53,8 +53,8 @@ TEST(OrFastDetectorTest, DetectTriangleEdges)
     // "surrounding pixels are lower in intensity"
     grayScaleImg.convertTo(grayScaleImg, CV_8U, 255.0);
     cv::bitwise_not(grayScaleImg, grayScaleImg);
-    grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
-    VOCPP::Frame frameSecond(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+    grayScaleImg.convertTo(grayScaleImg, CV_64F, 1.0 / 255.0);
+    VOCPP::Frame frameSecond(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
     features.clear();
     EXPECT_TRUE(detector.ExtractFeatures(frameSecond, 3, features));
 

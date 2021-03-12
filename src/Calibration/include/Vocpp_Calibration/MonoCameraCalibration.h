@@ -28,7 +28,7 @@ public:
     /**
       * /brief Default constructor for an invalid camera calibration
       */
-    MonoCameraCalibration() : m_calibrationMatrix(cv::Mat1f::eye(3,3)),
+    MonoCameraCalibration() : m_calibrationMatrix(cv::Mat1d::eye(3,3)),
         m_validCalib(false)
     {
     }
@@ -36,11 +36,11 @@ public:
     /**
       * /brief Constructor specifying parameters for calibration matrix
       */
-    MonoCameraCalibration(const float& in_focLength, const float& in_cameraCentX
+    MonoCameraCalibration(const double& in_focLength, const double& in_cameraCentX
         ,
-        const float& in_cameraCentY, const float& in_skew) : m_validCalib(false)
+        const double& in_cameraCentY, const double& in_skew) : m_validCalib(false)
     {
-        m_calibrationMatrix = cv::Mat1f::zeros(3, 3);
+        m_calibrationMatrix = cv::Mat1d::zeros(3, 3);
         m_calibrationMatrix(0, 0) = in_focLength;
         m_calibrationMatrix(0, 1) = in_skew;
         m_calibrationMatrix(1, 1) = in_focLength;
@@ -51,7 +51,7 @@ public:
         m_validCalib = true;
     }
 
-    cv::Mat1f GetCalibrationMatrix() const
+    cv::Mat1d GetCalibrationMatrix() const
     {
         return m_calibrationMatrix;
     }
@@ -66,7 +66,7 @@ public:
 
 private:
 
-    cv::Mat1f m_calibrationMatrix;
+    cv::Mat1d m_calibrationMatrix;
     bool m_validCalib;
 
 };

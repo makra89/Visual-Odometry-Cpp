@@ -14,7 +14,7 @@
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 
-using VOCPP::Utils::DrawFloatInRange;
+using VOCPP::Utils::DrawDoubleInRange;
 using VOCPP::Utils::GetFrameRotationX;
 using VOCPP::Utils::GetFrameRotationY;
 using VOCPP::Utils::GetFrameRotationZ;
@@ -26,23 +26,23 @@ TEST(RansacTest, TranslationAndRotation)
 {
     for (int testIt = 0; testIt < 10; testIt++)
     {
-        std::vector<cv::Point3f> realWorldPoints;
-        std::vector<cv::Point2f> imgPoints;
-        std::vector<cv::Point2f> scaledImgPoints;
+        std::vector<cv::Point3d> realWorldPoints;
+        std::vector<cv::Point2d> imgPoints;
+        std::vector<cv::Point2d> scaledImgPoints;
 
         const double centerX = 400.F;
         const double centerY = 600.F;
 
         // Construct set of 3D points in world coordinate system
         // Take 100 points
-        const float maxDist = 3.0;
+        const double maxDist = 3.0;
         for (int it = 0; it < 100; it++)
         {
-            realWorldPoints.push_back(cv::Point3f(DrawFloatInRange(-maxDist, maxDist), DrawFloatInRange(-maxDist, maxDist), DrawFloatInRange(4.0, 7.0)));
+            realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(4.0, 7.0)));
         }
 
         // Kalibration matrix with shifted image center
-        cv::Mat1f calMat = cv::Mat1f::zeros(3, 3);
+        cv::Mat1d calMat = cv::Mat1d::zeros(3, 3);
         calMat(0, 0) = 100.F;
         calMat(1, 1) = 100.F;
         calMat(2, 2) = 1.F;
@@ -50,7 +50,7 @@ TEST(RansacTest, TranslationAndRotation)
         calMat(1, 2) = centerY;
 
         // Projection matrix assuming we are at the center of the world coord. system
-        ImageProjectionMatrix trivialProjMat(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), calMat);
+        ImageProjectionMatrix trivialProjMat(cv::Mat1d::eye(3, 3), cv::Mat1d::zeros(3, 1), calMat);
 
         for (auto coord : realWorldPoints)
         {
@@ -58,9 +58,9 @@ TEST(RansacTest, TranslationAndRotation)
         }
 
         // Projection matrix with nonzero rotation and translation
-        const float angleRange = 0.2F;
-        cv::Mat1f rotTrue = GetFrameRotationX(DrawFloatInRange(-angleRange, angleRange)) * GetFrameRotationY(DrawFloatInRange(-angleRange, angleRange)) * GetFrameRotationZ(DrawFloatInRange(-angleRange, angleRange));
-        cv::Mat1f translationTrue = (cv::Mat1f(3, 1) << DrawFloatInRange(-2.0F, 2.0F), DrawFloatInRange(-2.0F, 2.0F), DrawFloatInRange(-2.0F, 2.0F));
+        const double angleRange = 0.2F;
+        cv::Mat1d rotTrue = GetFrameRotationX(DrawDoubleInRange(-angleRange, angleRange)) * GetFrameRotationY(DrawDoubleInRange(-angleRange, angleRange)) * GetFrameRotationZ(DrawDoubleInRange(-angleRange, angleRange));
+        cv::Mat1d translationTrue = (cv::Mat1d(3, 1) << DrawDoubleInRange(-2.0F, 2.0F), DrawDoubleInRange(-2.0F, 2.0F), DrawDoubleInRange(-2.0F, 2.0F));
         ImageProjectionMatrix projMat(rotTrue, translationTrue, calMat);
         // Actually we want to know the translation from scaled -> img 
         // in the scaled coordinate frame --> Apply transformation
@@ -72,9 +72,9 @@ TEST(RansacTest, TranslationAndRotation)
         }
 
         std::vector<unsigned int> inlierIndices;
-        cv::Mat1f translation;
-        cv::Mat1f rotation;
-        std::vector<cv::Point3f> triangulatedPoints;
+        cv::Mat1d translation;
+        cv::Mat1d rotation;
+        std::vector<cv::Point3d> triangulatedPoints;
         EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation, triangulatedPoints));        
         // Expect that all matches are flagged as inliers
         EXPECT_EQ(100, inlierIndices.size());
@@ -106,23 +106,23 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
 {
     for (int testIt = 0; testIt < 2; testIt++)
     {
-        std::vector<cv::Point3f> realWorldPoints;
-        std::vector<cv::Point2f> imgPoints;
-        std::vector<cv::Point2f> scaledImgPoints;
+        std::vector<cv::Point3d> realWorldPoints;
+        std::vector<cv::Point2d> imgPoints;
+        std::vector<cv::Point2d> scaledImgPoints;
 
         const double centerX = 400.F;
         const double centerY = 600.F;
 
         // Construct set of 3D points in world coordinate system
         // Take 100 points
-        const float maxDist = 3.0;
+        const double maxDist = 3.0;
         for (int it = 0; it < 100; it++)
         {
-            realWorldPoints.push_back(cv::Point3f(DrawFloatInRange(-maxDist, maxDist), DrawFloatInRange(-maxDist, maxDist), DrawFloatInRange(4.0, 7.0)));
+            realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(4.0, 7.0)));
         }
 
         // Kalibration matrix with shifted image center
-        cv::Mat1f calMat = cv::Mat1f::zeros(3, 3);
+        cv::Mat1d calMat = cv::Mat1d::zeros(3, 3);
         calMat(0, 0) = 100.F;
         calMat(1, 1) = 100.F;
         calMat(2, 2) = 1.F;
@@ -130,7 +130,7 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         calMat(1, 2) = centerY;
 
         // Projection matrix assuming we are at the center of the world coord. system
-        ImageProjectionMatrix trivialProjMat(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), calMat);
+        ImageProjectionMatrix trivialProjMat(cv::Mat1d::eye(3, 3), cv::Mat1d::zeros(3, 1), calMat);
 
         for (auto coord : realWorldPoints)
         {
@@ -138,9 +138,9 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         }
 
         // Projection matrix with nonzero rotation and translation
-        const float angleRange = 0.2F;
-        cv::Mat1f rotTrue = GetFrameRotationX(DrawFloatInRange(-angleRange, angleRange)) * GetFrameRotationY(DrawFloatInRange(-angleRange, angleRange)) * GetFrameRotationZ(DrawFloatInRange(-angleRange, angleRange));
-        cv::Mat1f translationTrue = (cv::Mat1f(3, 1) << DrawFloatInRange(-2.0F, 2.0F), DrawFloatInRange(-2.0F, 2.0F), DrawFloatInRange(-2.0F, 2.0F));
+        const double angleRange = 0.2F;
+        cv::Mat1d rotTrue = GetFrameRotationX(DrawDoubleInRange(-angleRange, angleRange)) * GetFrameRotationY(DrawDoubleInRange(-angleRange, angleRange)) * GetFrameRotationZ(DrawDoubleInRange(-angleRange, angleRange));
+        cv::Mat1d translationTrue = (cv::Mat1d(3, 1) << DrawDoubleInRange(-2.0F, 2.0F), DrawDoubleInRange(-2.0F, 2.0F), DrawDoubleInRange(-2.0F, 2.0F));
         ImageProjectionMatrix projMat(rotTrue, translationTrue, calMat);
         // Actually we want to know the translation from scaled -> img 
         // in the scaled coordinate frame --> Apply transformation
@@ -154,14 +154,14 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         // Add some outliers
         for (int outlierIt = 0; outlierIt < 10; outlierIt++)
         {
-            imgPoints.push_back(cv::Point2f(DrawFloatInRange(-100.F, 100.F), DrawFloatInRange(-100.F, 100.F)));
-            scaledImgPoints.push_back(cv::Point2f(DrawFloatInRange(-100.F, 100.F), DrawFloatInRange(-100.F, 100.F)));
+            imgPoints.push_back(cv::Point2d(DrawDoubleInRange(-100.F, 100.F), DrawDoubleInRange(-100.F, 100.F)));
+            scaledImgPoints.push_back(cv::Point2d(DrawDoubleInRange(-100.F, 100.F), DrawDoubleInRange(-100.F, 100.F)));
         }
 
         std::vector<unsigned int> inlierIndices;
-        cv::Mat1f translation;
-        cv::Mat1f rotation;
-        std::vector<cv::Point3f> triangulatedPoints;
+        cv::Mat1d translation;
+        cv::Mat1d rotation;
+        std::vector<cv::Point3d> triangulatedPoints;
         EXPECT_TRUE(VOCPP::DeltaPoseReconstruction::RecoverPoseRansac(scaledImgPoints, imgPoints, calMat, inlierIndices, translation, rotation, triangulatedPoints));
         EXPECT_GE(inlierIndices.size(), 95);
 

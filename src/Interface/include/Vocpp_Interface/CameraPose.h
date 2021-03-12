@@ -21,9 +21,9 @@ namespace VOCPP
 struct Translation
 {
 public:
-    float x;  ///< [arbitrary]
-    float y;  ///< [arbitrary]
-    float z;  ///< [arbitrary]
+    double x;  ///< [arbitrary]
+    double y;  ///< [arbitrary]
+    double z;  ///< [arbitrary]
 };
 
 /**
@@ -32,9 +32,9 @@ public:
 struct Orientation
 {
 public:
-    float roll; ///< [rad]
-    float pitch; ///< [rad]
-    float yaw; ///< [rad]
+    double roll; ///< [rad]
+    double pitch; ///< [rad]
+    double yaw; ///< [rad]
 };
 
 /**
@@ -59,8 +59,8 @@ public:
       */
     CameraPose()
     {
-        m_translation = { 0.0F, 0.0F, 0.0F };
-        m_orientation = { 0.0F, 0.0F, 0.0F };
+        m_translation = { 0.0, 0.0, 0.0 };
+        m_orientation = { 0.0, 0.0, 0.0 };
     }
 
     const Orientation& GetOrientation() const

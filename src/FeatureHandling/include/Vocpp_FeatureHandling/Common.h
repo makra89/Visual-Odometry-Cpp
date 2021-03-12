@@ -28,12 +28,12 @@ struct Feature
 {
     unsigned int id; ///< ID should assigned by the feature detector
     unsigned int frameId; ///< ID of frame this feature has been detected in
-    float imageCoordX; ///< image coordinates along image X axis [pixel]
-    float imageCoordY; ///< image coordinates along image Y axis [pixel]
-    float response; ///< "Goodness" of feature
-    float angle; ///< orientation of feature [rad]
-    float size; ///< diameter of the feature, i.e. size of patch that was taken into account during detection, always odd [pixels]
-    float scale; ///< scale of the image, the feature has been extracted from. 1.0 means original image
+    double imageCoordX; ///< image coordinates along image X axis [pixel]
+    double imageCoordY; ///< image coordinates along image Y axis [pixel]
+    double response; ///< "Goodness" of feature
+    double angle; ///< orientation of feature [rad]
+    double size; ///< diameter of the feature, i.e. size of patch that was taken into account during detection, always odd [pixels]
+    double scale; ///< scale of the image, the feature has been extracted from. 1.0 means original image
     /**
       * /brief Compare two features according to their response
       */
@@ -105,7 +105,7 @@ private:
 class BinaryDescriptionMatch
 {
 public:
-    BinaryDescriptionMatch(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second, const float& in_distance) :
+    BinaryDescriptionMatch(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second, const double& in_distance) :
         m_descriptionFirst(in_first),
         m_descriptionSecond(in_second),
         m_distance(in_distance)
@@ -135,7 +135,7 @@ public:
 private:
     BinaryFeatureDescription m_descriptionFirst;
     BinaryFeatureDescription m_descriptionSecond;
-    float m_distance; ///< distance measure for the two descriptions
+    double m_distance; ///< distance measure for the two descriptions
 };
 
 /**
@@ -146,13 +146,13 @@ private:
 * \param[out] out_firstPoints image coordinates of "first" features
 * \param[out] out_secondPoints image coordinates of "second" features
 */
-static void GetMatchingPoints(const std::vector<BinaryDescriptionMatch>& in_matches, std::vector<cv::Point2f>& out_firstPoints, 
-    std::vector<cv::Point2f>& out_secondPoints)
+static void GetMatchingPoints(const std::vector<BinaryDescriptionMatch>& in_matches, std::vector<cv::Point2d>& out_firstPoints, 
+    std::vector<cv::Point2d>& out_secondPoints)
 {
     for (auto match : in_matches)
     {
-        cv::Point2f pointFirst(match.GetFirstFeature().imageCoordX, match.GetFirstFeature().imageCoordY);
-        cv::Point2f pointSecond(match.GetSecondFeature().imageCoordX, match.GetSecondFeature().imageCoordY);
+        cv::Point2d pointFirst(match.GetFirstFeature().imageCoordX, match.GetFirstFeature().imageCoordY);
+        cv::Point2d pointSecond(match.GetSecondFeature().imageCoordX, match.GetSecondFeature().imageCoordY);
         out_firstPoints.push_back(pointFirst);
         out_secondPoints.push_back(pointSecond);
     }

@@ -23,9 +23,9 @@ namespace DeltaPoseReconstruction
   * The translation propagates the second camera center to the first one and the rotation
   * aligns the two coordinate system
   */
-bool RecoverPoseRansac(const std::vector<cv::Point2f>& in_correspondFirst, const std::vector<cv::Point2f>& in_correspondSecond,
-        const cv::Mat1f& in_calibMat, std::vector<unsigned int>& out_inlierMatchIndices, cv::Mat1f& out_translation, 
-        cv::Mat1f& out_rotation, std::vector<cv::Point3f>& out_triangulatedPoints);
+bool RecoverPoseRansac(const std::vector<cv::Point2d>& in_correspondFirst, const std::vector<cv::Point2d>& in_correspondSecond,
+        const cv::Mat1d& in_calibMat, std::vector<uint32_t>& out_inlierMatchIndices, cv::Mat1d& out_translation, 
+        cv::Mat1d& out_rotation, std::vector<cv::Point3d>& out_triangulatedPoints);
 
 
 } //namespace DeltaPoseReconstruction

@@ -102,7 +102,7 @@ if __name__ == "__main__":
         img = cv2.imread(frame, cv2.IMREAD_GRAYSCALE)
         # For some reason it can happen that empty images are read
         if(img.data is not None):
-            img = np.float32(img) * 1/255.0
+            img = np.double(img) * 1/255.0
             frame = Vocpp.Frame(np.transpose(img), frame_id)
                 
             # Feed image to master and get last absolute pose in WCS

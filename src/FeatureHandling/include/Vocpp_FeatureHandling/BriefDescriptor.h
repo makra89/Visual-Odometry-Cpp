@@ -65,10 +65,10 @@ public:
       */
     struct PointPair
     {
-        float x1;
-        float y1;
-        float x2;
-        float y2;
+        double x1;
+        double y1;
+        double x2;
+        double y2;
     };
 
 private:
@@ -84,7 +84,7 @@ private:
     /**
       * /brief Rotate a point pair using a (feature) angle
       */
-    PointPair RotatePair(const float& in_angle, const PointPair& in_pair);
+    PointPair RotatePair(const double& in_angle, const PointPair& in_pair);
 
     int m_randomPairDrawRadius; ///< radius around a feature that is used for drawing the random pairs
     int m_areaDetRadius; ///< radius around point in a pair used for area determination
@@ -124,25 +124,25 @@ private:
         /**
           * /brief Calculate Sample Mean (Expected Value: 0.5)
           */
-        float GetMean() const
+        double GetMean() const
         {
-            float sum = std::accumulate(m_testResults->begin(), m_testResults->end(), 0.0F);
-            return sum / static_cast<float>(m_testResults->size());
+            double sum = std::accumulate(m_testResults->begin(), m_testResults->end(), 0.0F);
+            return sum / static_cast<double>(m_testResults->size());
         }
 
         /**
           * /brief Calculate Sample Variance (Expected Value: 0.25)
           */
-        float GetVariance() const
+        double GetVariance() const
         {
-            float variance = 0.0;
-            float mean = GetMean();
+            double variance = 0.0;
+            double mean = GetMean();
             for (auto val : *m_testResults)
             {
                 variance += std::pow(val - mean, 2);
             }
 
-            return variance / (static_cast<float>(m_testResults->size()) - 1.0F);
+            return variance / (static_cast<double>(m_testResults->size()) - 1.0F);
         }
 
         /**
@@ -180,7 +180,7 @@ private:
       *
       * \return correlation score between [-1,1] if sucessful, otherwise -999.0
       */
-    float CalculatePearsonCorr(const TrainPosition& in_first, const TrainPosition& in_second);
+    double CalculatePearsonCorr(const TrainPosition& in_first, const TrainPosition& in_second);
 
     /**
       * \brief Find best pattern using stored train positions (test vectors must be filled) and writes them to a file

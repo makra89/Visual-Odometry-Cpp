@@ -48,7 +48,7 @@ bool BruteForceMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescript
         // Check if distance is smaller than threshold
         if (smallestDist <= m_maxDistance)
         {
-            out_matches.push_back(BinaryDescriptionMatch{ desc1,in_descSecond[smallestIdx2], static_cast<float>(smallestDist)});
+            out_matches.push_back(BinaryDescriptionMatch{ desc1,in_descSecond[smallestIdx2], static_cast<double>(smallestDist)});
         }
     }
     

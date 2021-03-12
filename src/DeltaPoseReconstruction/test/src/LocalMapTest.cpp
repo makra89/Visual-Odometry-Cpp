@@ -233,9 +233,9 @@ TEST(LocalMapTest, CalculateRelativeScale)
     map.InsertLandmarks(landmarks, matches, currentFrameId);
     ASSERT_TRUE(map.GetLandmarks().size() == 2);
 
-    float relativeScale = 0.0;
+    double relativeScale = 0.0;
     EXPECT_TRUE(map.GetLastRelativeScale(1U /*last frame*/, 2U /*current frame*/, relativeScale));
-    EXPECT_FLOAT_EQ(relativeScale, 0.5);
+    EXPECT_DOUBLE_EQ(relativeScale, 0.5);
     
     // Check that the positions in the last frame pair have been rescaled
     LandmarkPosition position;
@@ -271,10 +271,10 @@ TEST(LocalMapTest, CalculateRelativeScale)
     relativeScale = 0.0;
     // Try to get with outdated frame ids --> should fail
     EXPECT_FALSE(map.GetLastRelativeScale(1U /*last frame*/, 2U /*current frame*/, relativeScale));
-    EXPECT_FLOAT_EQ(relativeScale, 0.0);
+    EXPECT_DOUBLE_EQ(relativeScale, 0.0);
 
     // Now with correct ones --> success
     EXPECT_TRUE(map.GetLastRelativeScale(2U /*last frame*/, 3U /*current frame*/, relativeScale));
-    EXPECT_FLOAT_EQ(relativeScale, 2.0);
+    EXPECT_DOUBLE_EQ(relativeScale, 2.0);
 }
 

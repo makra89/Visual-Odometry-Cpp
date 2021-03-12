@@ -44,8 +44,8 @@ void DeltaPoseReconstructor::Reset()
     // Reset pose back to WCS coordinate center
     m_lastDeltaPose = DeltaCameraPose();
     m_lastPose = CameraPose();
-    m_lastOrientationWcs = cv::Mat1f::eye(3, 3);
-    m_lastPosWcs = cv::Mat1f::zeros(3, 1);
+    m_lastOrientationWcs = cv::Mat1d::eye(3, 3);
+    m_lastPosWcs = cv::Mat1d::zeros(3, 1);
 
     // Clear last descriptions and reset local map
     m_descriptionsLastFrame.clear();
@@ -57,7 +57,7 @@ DeltaPoseReconstructor::~DeltaPoseReconstructor()
     Reset();
 }
 
-bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat, bool in_debugOutputFlag)
+bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1d& in_calibMat, bool in_debugOutputFlag)
 {
     bool ret = true;
 
@@ -84,8 +84,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
             {
                 // Return valid delta pose for first processed frame, but indicate no movement
                 m_lastDeltaPose = DeltaCameraPose();
-                m_lastOrientationWcs = cv::Mat1f::eye(3, 3);
-                m_lastPosWcs = cv::Mat1f::zeros(3, 1);
+                m_lastOrientationWcs = cv::Mat1d::eye(3, 3);
+                m_lastPosWcs = cv::Mat1d::zeros(3, 1);
                 m_lastProjectionMat = Utils::ImageProjectionMatrix(m_lastOrientationWcs, m_lastPosWcs, in_calibMat);
             }
             else
@@ -93,15 +93,15 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 // Get matches and draw them
                 std::vector<FeatureHandling::BinaryDescriptionMatch> matches;
                 ret = m_matcher.MatchDesriptions(descriptions, m_descriptionsLastFrame, matches);
-                std::vector<cv::Point2f> pLastFrame;
-                std::vector<cv::Point2f> pCurrFrame;
+                std::vector<cv::Point2d> pLastFrame;
+                std::vector<cv::Point2d> pCurrFrame;
                 FeatureHandling::GetMatchingPoints(matches, pCurrFrame, pLastFrame);
 
                 // Calculate rotation and translation from the matches of the two frames
-                std::vector<unsigned int> inlierMatchIndices;
-                cv::Mat1f rotation;
-                cv::Mat1f translation;
-                std::vector<cv::Point3f> triangulatedPoints;
+                std::vector<uint32_t> inlierMatchIndices;
+                cv::Mat1d rotation;
+                cv::Mat1d translation;
+                std::vector<cv::Point3d> triangulatedPoints;
                 RecoverPoseRansac(pCurrFrame, pLastFrame, in_calibMat, inlierMatchIndices, translation, rotation, triangulatedPoints);
 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,15 +111,15 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 // Up to now the rotation and translation are in the camera coordinate system
                 // We want to transform it into the body system in which the x-Axis is aligned
                 // with the longitudinal body axis
-                cv::Mat1f rotBodyToCamera = Utils::GetFrameRotationZ(-Utils::PI / 2.0F) * Utils::GetFrameRotationY(Utils::PI / 2.0F);
-                cv::Mat1f rotationBodySyst = rotBodyToCamera.t() * (rotation * rotBodyToCamera);
+                cv::Mat1d rotBodyToCamera = Utils::GetFrameRotationZ(-Utils::PI / 2.0F) * Utils::GetFrameRotationY(Utils::PI / 2.0F);
+                cv::Mat1d rotationBodySyst = rotBodyToCamera.t() * (rotation * rotBodyToCamera);
                 translation = rotBodyToCamera.t() * translation;
 
                 // Concatenate delta poses to get absolute pose in world coordinate system
                 m_lastOrientationWcs = rotationBodySyst * m_lastOrientationWcs;
                 // The translation is given from last frame to current frame in the last frame coordinate system
                 // --> Transform the translation vector back to world coordinate system using the inverse rotation of the last frame
-                cv::Mat1f rawPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
+                cv::Mat1d rawPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
                 
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
                 ///////                            TRANSLATION REFINEMENT (with relative scale                //////
@@ -141,7 +141,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 // Add triangulated landmarks to local map
                 m_localMap.InsertLandmarks(landmarks, inlierMatches, in_frame.GetId());
                 // And calculate scale, apply it to translation vector
-                float scale = 0.0;
+                double scale = 0.0;
                 if (m_localMap.GetLastRelativeScale(m_lastFrameId, in_frame.GetId(), scale))
                 {
                     translation = translation * scale;
@@ -153,13 +153,13 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
                 // Calculate last delta pose
-                cv::Vec3f eulerAngles = Utils::ExtractRollPitchYaw(rotationBodySyst);
+                cv::Vec3d eulerAngles = Utils::ExtractRollPitchYaw(rotationBodySyst);
                 DeltaOrientation deltaOrientation = { eulerAngles[0], eulerAngles[1] , eulerAngles[2] };
                 DeltaTranslation deltaTranslation = { translation(0,0), translation(1,0) , translation(2,0) };
                 m_lastDeltaPose = DeltaCameraPose(deltaTranslation, deltaOrientation);
 
                 // And last absolute pose
-                cv::Vec3f eulerAnglesWcs = Utils::ExtractRollPitchYaw(m_lastOrientationWcs);
+                cv::Vec3d eulerAnglesWcs = Utils::ExtractRollPitchYaw(m_lastOrientationWcs);
                 m_lastPosWcs = m_lastOrientationWcs.t() * translation + m_lastPosWcs;
                 Orientation currentOrientWcs = { eulerAnglesWcs[0], eulerAnglesWcs[1] , eulerAnglesWcs[2] };
                 Translation currentPosWcs = { m_lastPosWcs(0,0), m_lastPosWcs(1,0) , m_lastPosWcs(2,0) };
@@ -170,7 +170,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 if (in_debugOutputFlag)
                 {
                     std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
-                    cv::Mat matchImage = in_frame.GetImageCopy();
+                    cv::Mat matchImage;
+                    in_frame.GetImageCopy().convertTo(matchImage, CV_32F);
                     cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
                     for (auto matchIdx : inlierMatchIndices)
                     {

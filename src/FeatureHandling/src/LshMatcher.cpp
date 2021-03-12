@@ -70,7 +70,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
             }
         }
 
-        unsigned int smallestDist = UINT_MAX;
+        unsigned int smallestDist = UINT32_MAX;
         unsigned int smallestIdx2 = 0U;
         for (unsigned int index2 = 0U; index2 < candidateIds.size(); index2++)
         {
@@ -86,7 +86,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         // Check if distance is smaller than threshold
         if (smallestDist <= m_maxDistance)
         {
-            out_matches.push_back(BinaryDescriptionMatch{ descFirst,in_descSecond[candidateIds[smallestIdx2]] , static_cast<float>(smallestDist) });
+            out_matches.push_back(BinaryDescriptionMatch{ descFirst,in_descSecond[candidateIds[smallestIdx2]] , static_cast<double>(smallestDist) });
         }
     }
     
@@ -101,7 +101,7 @@ void LshMatcher::GenerateHashFuncs()
         hashFunc.reserve(s_lengthHashFunc);
         for (unsigned int k = 0U; k < s_lengthHashFunc; k++)
         {
-            hashFunc.push_back(static_cast<unsigned int>(Utils::DrawIntInRange(0, BinaryFeatureDescription::GetSizeInBytes())));
+            hashFunc.push_back(static_cast<unsigned int>(Utils::DrawIntInRange(0, BinaryFeatureDescription::GetSizeInBytes() - 1)));
         }
 
         m_hashFuncs.push_back(hashFunc);

@@ -17,18 +17,18 @@ namespace DeltaPoseReconstruction
 //          LANDMARK           //
 /////////////////////////////////
 
-void Landmark::UpdateLandmark(const unsigned int& in_currentFrameId, const unsigned int& in_currentFeatureId,
-    const unsigned int& in_lastFrameId, const unsigned int& in_lastFeatureId, const LandmarkPosition& in_position)
+void Landmark::UpdateLandmark(const uint32_t& in_currentFrameId, const uint32_t& in_currentFeatureId,
+    const uint32_t& in_lastFrameId, const uint32_t& in_lastFeatureId, const LandmarkPosition& in_position)
 {
     // Only add occurence in current frame (should be present in last one already)
-    m_frameVsFeatureId.insert(std::pair<int, int>(in_currentFrameId, in_currentFeatureId));
+    m_frameVsFeatureId.insert(std::pair<uint32_t, uint32_t>(in_currentFrameId, in_currentFeatureId));
     // Add triangulated position
     FramePairKey keyPair{ in_currentFrameId, in_lastFrameId };
     m_framePairVsPosition.insert(std::pair<FramePairKey, LandmarkPosition>(keyPair, in_position));
     m_lastSeenFrameId = in_currentFrameId;
 }
 
-bool Landmark::IsPresentInFrameWithFeatureId(const unsigned int& in_frameId, const unsigned int& in_featureId) const
+bool Landmark::IsPresentInFrameWithFeatureId(const uint32_t& in_frameId, const uint32_t& in_featureId) const
 {
     bool ret = m_frameVsFeatureId.count(in_frameId) > 0 ? true : false;
 
@@ -40,7 +40,7 @@ bool Landmark::IsPresentInFrameWithFeatureId(const unsigned int& in_frameId, con
     return ret;
 }
 
-bool Landmark::IsPresentInFrame(const unsigned int& in_frameId) const
+bool Landmark::IsPresentInFrame(const uint32_t& in_frameId) const
 {
     return m_frameVsFeatureId.count(in_frameId) > 0 ? true : false;
 }
@@ -70,7 +70,7 @@ bool Landmark::HasBeenScaledForFramePair(const FramePairKey& in_key) const
     return ret;
 }
 
-bool Landmark::RescalePosition(const FramePairKey& in_pairKey, const float& in_scale)
+bool Landmark::RescalePosition(const FramePairKey& in_pairKey, const double& in_scale)
 {
     std::map<FramePairKey, LandmarkPosition>::iterator it = m_framePairVsPosition.find(in_pairKey);
     bool ret = it != m_framePairVsPosition.end();
@@ -97,9 +97,9 @@ LocalMap::~LocalMap()
     m_landmarks.clear();
 }
 
-void LocalMap::InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const unsigned int& in_currentFrameId)
+void LocalMap::InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const uint32_t& in_currentFrameId)
 {
-    for (unsigned int it = 0U; it < in_positions.size(); it++)
+    for (uint32_t it = 0U; it < in_positions.size(); it++)
     {
         // Check whether this landmark has been observed before
         bool found = false;
@@ -128,13 +128,13 @@ void LocalMap::InsertLandmarks(const std::vector<LandmarkPosition>& in_positions
     m_lastFrameId = in_currentFrameId;
 }
 
-void LocalMap::RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId)
+void LocalMap::RemoveUntrackedLandmarks(const uint32_t& in_currentFrameId)
 {
     auto newEnd = std::remove_if(m_landmarks.begin(), m_landmarks.end(), [&in_currentFrameId](const Landmark& i) {return i.GetLastSeenFrameId() < in_currentFrameId; });
     m_landmarks.erase(newEnd, m_landmarks.end());
 }
 
-bool LocalMap::GetLastRelativeScale(const unsigned int& in_lastFrameId, const unsigned int& in_currentFrameId, float& out_scale) const
+bool LocalMap::GetLastRelativeScale(const uint32_t& in_lastFrameId, const uint32_t& in_currentFrameId, double& out_scale) const
 {
     bool ret = false;
 
@@ -148,13 +148,13 @@ bool LocalMap::GetLastRelativeScale(const unsigned int& in_lastFrameId, const un
 }
 
 
-void LocalMap::ComputeRelativeScale(const unsigned int& in_currentFrameId)
+void LocalMap::ComputeRelativeScale(const uint32_t& in_currentFrameId)
 {
     std::vector<LandmarkPosition> currentPosVec;
     std::vector<LandmarkPosition> lastPosVec;
-    std::vector<int> validLandmarkIndices;
+    std::vector<uint32_t> validLandmarkIndices;
 
-    for (unsigned int it=0U; it < m_landmarks.size(); it++)
+    for (uint32_t it=0U; it < m_landmarks.size(); it++)
     {
         // Check whether the landmark can be tracked three frames into the past (including the current one)
         Landmark::FramePairKey keyCurrent{ in_currentFrameId, in_currentFrameId - 1U};
@@ -172,18 +172,18 @@ void LocalMap::ComputeRelativeScale(const unsigned int& in_currentFrameId)
     }
 
     // Update number of valid tracked landmarks
-    m_validTrackedLandmarks = static_cast<unsigned int>(currentPosVec.size());
+    m_validTrackedLandmarks = static_cast<uint32_t>(currentPosVec.size());
 
     if (currentPosVec.size() >= 2U)
     {
-        std::vector<float> scales;
-        for (unsigned int i = 0U; i < currentPosVec.size() - 1U; i++)
+        std::vector<double> scales;
+        for (uint32_t i = 0U; i < currentPosVec.size() - 1U; i++)
         {
-            unsigned int j = i + 1U;
-            const float lastFramePairDist = std::sqrt(std::pow(lastPosVec[i].x - lastPosVec[j].x, 2)
+            uint32_t j = i + 1U;
+            const double lastFramePairDist = std::sqrt(std::pow(lastPosVec[i].x - lastPosVec[j].x, 2)
                     + std::pow(lastPosVec[i].y - lastPosVec[j].y, 2)
                     + std::pow(lastPosVec[i].z - lastPosVec[j].z, 2));
-            const float currentFramePairDist = std::sqrt(std::pow(currentPosVec[i].x - currentPosVec[j].x, 2)
+            const double currentFramePairDist = std::sqrt(std::pow(currentPosVec[i].x - currentPosVec[j].x, 2)
                     + std::pow(currentPosVec[i].y - currentPosVec[j].y, 2)
                     + std::pow(currentPosVec[i].z - currentPosVec[j].z, 2));
 
@@ -196,23 +196,14 @@ void LocalMap::ComputeRelativeScale(const unsigned int& in_currentFrameId)
         m_lastRelativeScale = scales[scales.size() / 2U];
         std::cout << "Tracked Landmarks: " << m_validTrackedLandmarks << std::endl;
 
-
-        int numIt = 0;
         for (auto it : validLandmarkIndices)
         {
-            // Check whether the landmark can be tracked three frames into the past (including the current one)
+            // Rescale all landmarks
             Landmark::FramePairKey keyCurrent{ in_currentFrameId, in_currentFrameId - 1U };
             LandmarkPosition posCurrent;
             m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
-            
-            // Remove landmarks from tracking that need scales that are far off
-            if (((scales[numIt] - m_lastRelativeScale) / m_lastRelativeScale) < 0.5)
-            {
-                (void)m_landmarks[it].RescalePosition(keyCurrent, m_lastRelativeScale);
-            }
-
+            (void)m_landmarks[it].RescalePosition(keyCurrent, m_lastRelativeScale);
             m_landmarks[it].GetFramePairPosition(keyCurrent, posCurrent);
-            numIt++;
         }
     }
 }

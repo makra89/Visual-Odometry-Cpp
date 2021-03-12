@@ -15,20 +15,20 @@
 import_array();
 %}
 
-%apply (float* IN_FARRAY2, int DIM1, int DIM2) {(float* const in_grayImgData, int in_width, int in_height)};
+%apply (double* IN_FARRAY2, int DIM1, int DIM2) {(double* const in_grayImgData, int in_width, int in_height)};
 
 // Include all parts of Frame.h that do not use opencv types
 namespace VOCPP
 {
-static int s_invalidFrameId;
-static bool IsValidFrameId(const int in_frameId);
+static uint32_t s_invalidFrameId;
+static bool IsValidFrameId(const uint32_t in_frameId);
 
 class Frame
 {
 public:
     Frame();
-    Frame(float* const in_grayImgData, int in_width, int in_height, int in_frameId);
-    const int GetId();
+    Frame(double* const in_grayImgData, int in_width, int in_height, int in_frameId);
+    const uint32_t GetId();
     const bool IsValid();
 };
 } // namespace VOCPP
@@ -42,8 +42,8 @@ class MonoCameraCalibration
 {
 public:
     MonoCameraCalibration();
-    MonoCameraCalibration(const float& in_focLength, const float& in_cameraCentX,
-        const float& in_cameraCentY, const float& in_skew);
+    MonoCameraCalibration(const double& in_focLength, const double& in_cameraCentX,
+        const double& in_cameraCentY, const double& in_skew);
     bool IsValid() const;
 };
 } // namespace Calibration

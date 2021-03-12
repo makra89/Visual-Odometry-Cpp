@@ -21,10 +21,10 @@ TEST(OrFastChainTest, MatchTriangles_Shifted)
 {
     cv::Mat grayScaleImg;
     cv::cvtColor(cv::imread(testDirectory + "Triangle.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
-    grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
+    grayScaleImg.convertTo(grayScaleImg, CV_64FC1, 1.0 / 255.0);
     // Copy the image to a larger one to shift the image
-    cv::Mat img = cv::Mat::ones(1000, 700, CV_32FC1);
-    cv::Mat imgShifted = cv::Mat::ones(1000, 700, CV_32FC1);
+    cv::Mat img = cv::Mat::ones(1000, 700, CV_64FC1);
+    cv::Mat imgShifted = cv::Mat::ones(1000, 700, CV_64FC1);
     grayScaleImg.copyTo(img(cv::Rect(100, 120, grayScaleImg.cols, grayScaleImg.rows)));
     grayScaleImg.copyTo(imgShifted(cv::Rect(65, 55, grayScaleImg.cols, grayScaleImg.rows)));
 
@@ -32,8 +32,8 @@ TEST(OrFastChainTest, MatchTriangles_Shifted)
     VOCPP::FeatureHandling::BriefDescriptor descriptor;
     VOCPP::FeatureHandling::BruteForceMatcher matcher;
 
-    VOCPP::Frame frame(img.ptr<float>(0), img.cols, img.rows, 1);
-    VOCPP::Frame frameShifted(imgShifted.ptr<float>(0), imgShifted.cols, imgShifted.rows, 1);
+    VOCPP::Frame frame(img.ptr<double>(0), img.cols, img.rows, 1);
+    VOCPP::Frame frameShifted(imgShifted.ptr<double>(0), imgShifted.cols, imgShifted.rows, 1);
     std::vector<VOCPP::FeatureHandling::Feature> features;
     std::vector<VOCPP::FeatureHandling::Feature> featuresShifted;
     EXPECT_TRUE(detector.ExtractFeatures(frame, 3U, features));
@@ -50,14 +50,14 @@ TEST(OrFastChainTest, MatchTriangles_Shifted)
     EXPECT_EQ(3U, matches.size());
     for (unsigned int idx = 0U; idx < matches.size(); idx++)
     {
-        float posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
+        double posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
         EXPECT_EQ(posXdiff, 35);
-        float posYdiff = matches[idx].GetFirstFeature().imageCoordY - matches[idx].GetSecondFeature().imageCoordY;
+        double posYdiff = matches[idx].GetFirstFeature().imageCoordY - matches[idx].GetSecondFeature().imageCoordY;
         EXPECT_EQ(posYdiff, 65);
 
         // We expect that the feature angles do not differ
-        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
-        EXPECT_NEAR(angleDiff, 0.f, 0.001f);
+        double angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        EXPECT_NEAR(angleDiff, 0., 0.001);
     }
 }
 
@@ -67,10 +67,10 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
 {
     cv::Mat grayScaleImg;
     cv::cvtColor(cv::imread(testDirectory + "Triangle.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
-    grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
+    grayScaleImg.convertTo(grayScaleImg, CV_64FC1, 1.0 / 255.0);
     // Copy the image to a larger one to shift the image
-    cv::Mat img = cv::Mat::ones(1000, 700, CV_32FC1);
-    cv::Mat imgShifted = cv::Mat::ones(1000, 700, CV_32FC1);
+    cv::Mat img = cv::Mat::ones(1000, 700, CV_64FC1);
+    cv::Mat imgShifted = cv::Mat::ones(1000, 700, CV_64FC1);
     grayScaleImg.copyTo(img(cv::Rect(100, 120, grayScaleImg.cols, grayScaleImg.rows)));
     grayScaleImg.copyTo(imgShifted(cv::Rect(65, 55, grayScaleImg.cols, grayScaleImg.rows)));
 
@@ -78,10 +78,12 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
     VOCPP::FeatureHandling::BriefDescriptor descriptor;
     VOCPP::FeatureHandling::LshMatcher matcher;
 
-    VOCPP::Frame frame(img.ptr<float>(0), img.cols, img.rows, 1);
-    VOCPP::Frame frameShifted(imgShifted.ptr<float>(0), imgShifted.cols, imgShifted.rows, 1);
+    VOCPP::Frame frame(img.ptr<double>(0), img.cols, img.rows, 1);
+    VOCPP::Frame frameShifted(imgShifted.ptr<double>(0), imgShifted.cols, imgShifted.rows, 1);
+
     std::vector<VOCPP::FeatureHandling::Feature> features;
     std::vector<VOCPP::FeatureHandling::Feature> featuresShifted;
+
     EXPECT_TRUE(detector.ExtractFeatures(frame, 3U, features));
     EXPECT_TRUE(detector.ExtractFeatures(frameShifted, 3U, featuresShifted));
 
@@ -93,18 +95,17 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsShifted, matches));
 
-    // One edge is dropped by LSH
-    EXPECT_EQ(2U, matches.size());
+    EXPECT_TRUE(matches.size() >= 2U);
     for (unsigned int idx = 0U; idx < matches.size(); idx++)
     {
-        float posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
+        double posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
         EXPECT_EQ(posXdiff, 35);
-        float posYdiff = matches[idx].GetFirstFeature().imageCoordY - matches[idx].GetSecondFeature().imageCoordY;
+        double posYdiff = matches[idx].GetFirstFeature().imageCoordY - matches[idx].GetSecondFeature().imageCoordY;
         EXPECT_EQ(posYdiff, 65);
 
         // We expect that the feature angles do not differ
-        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
-        EXPECT_NEAR(angleDiff, 0.f, 0.001f);
+        double angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        EXPECT_NEAR(angleDiff, 0., 0.001);
     }
 }
 
@@ -115,15 +116,15 @@ TEST(OrFastChainTest, MatchTriangles_Rotated)
     cv::Mat grayScaleImg;
     cv::Mat grayScaleImgRotated;
     cv::cvtColor(cv::imread(testDirectory + "far-north.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
-    grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
+    grayScaleImg.convertTo(grayScaleImg, CV_64FC1, 1.0 / 255.0);
     cv::rotate(grayScaleImg, grayScaleImgRotated, cv::ROTATE_90_CLOCKWISE);
 
     VOCPP::FeatureHandling::OrientedFastDetector detector;
     VOCPP::FeatureHandling::BriefDescriptor descriptor;
     VOCPP::FeatureHandling::BruteForceMatcher matcher;
 
-    VOCPP::Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
-    VOCPP::Frame frameRotated(grayScaleImgRotated.ptr<float>(0), grayScaleImgRotated.cols, grayScaleImgRotated.rows, 1);
+    VOCPP::Frame frame(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+    VOCPP::Frame frameRotated(grayScaleImgRotated.ptr<double>(0), grayScaleImgRotated.cols, grayScaleImgRotated.rows, 1);
     std::vector<VOCPP::FeatureHandling::Feature> features;
     std::vector<VOCPP::FeatureHandling::Feature> featuresRotated;
     EXPECT_TRUE(detector.ExtractFeatures(frame, 500U, features));
@@ -147,8 +148,8 @@ TEST(OrFastChainTest, MatchTriangles_Rotated)
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
 
         // We expect that the feature angle differ by pi/2
-        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
-        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
+        double angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        if (angleDiff > CV_PI) angleDiff -= static_cast<double>(CV_PI);
         EXPECT_NEAR(angleDiff, CV_PI / 2., 0.2);
     }
 }
@@ -161,15 +162,15 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Rotated)
     cv::Mat grayScaleImg;
     cv::Mat grayScaleImgRotated;
     cv::cvtColor(cv::imread(testDirectory + "far-north.jpg", 1), grayScaleImg, cv::COLOR_BGR2GRAY);
-    grayScaleImg.convertTo(grayScaleImg, CV_32FC1, 1.0 / 255.0);
+    grayScaleImg.convertTo(grayScaleImg, CV_64FC1, 1.0 / 255.0);
     cv::rotate(grayScaleImg, grayScaleImgRotated, cv::ROTATE_90_CLOCKWISE);
 
     VOCPP::FeatureHandling::OrientedFastDetector detector;
     VOCPP::FeatureHandling::BriefDescriptor descriptor;
     VOCPP::FeatureHandling::LshMatcher matcher;
 
-    VOCPP::Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
-    VOCPP::Frame frameRotated(grayScaleImgRotated.ptr<float>(0), grayScaleImgRotated.cols, grayScaleImgRotated.rows, 1);
+    VOCPP::Frame frame(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
+    VOCPP::Frame frameRotated(grayScaleImgRotated.ptr<double>(0), grayScaleImgRotated.cols, grayScaleImgRotated.rows, 1);
     std::vector<VOCPP::FeatureHandling::Feature> features;
     std::vector<VOCPP::FeatureHandling::Feature> featuresRotated;
     EXPECT_TRUE(detector.ExtractFeatures(frame, 500U, features));
@@ -193,8 +194,8 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Rotated)
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
 
         // We expect that the feature angle differ by pi/2
-        float angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
-        if (angleDiff > CV_PI) angleDiff -= static_cast<float>(CV_PI);
+        double angleDiff = std::abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle);
+        if (angleDiff > CV_PI) angleDiff -= static_cast<double>(CV_PI);
         EXPECT_NEAR(angleDiff, CV_PI / 2., 0.2);
     }
 }

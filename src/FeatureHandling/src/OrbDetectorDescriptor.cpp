@@ -15,7 +15,7 @@ namespace FeatureHandling
 {
 
 
-OrbDetectorDescriptor::OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers, const float& in_layerScaleFactor) :
+OrbDetectorDescriptor::OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers, const double& in_layerScaleFactor) :
     m_numLayers(in_numPyramidLayers),
     m_layerScaleFactor(in_layerScaleFactor),
     m_fastDetector(),
@@ -36,10 +36,10 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
     else
     {
         // Calculate weighted norm (all scales summed up)
-        float scaleNorm = 0.0F;
+        double scaleNorm = 0.0F;
         for (unsigned int layer = 0U; layer < m_numLayers; layer++)
         {
-            scaleNorm += static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            scaleNorm += static_cast<double>(std::pow(m_layerScaleFactor, layer));
         }
 
         // Calculate number of features per layer
@@ -47,7 +47,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         int numRequestedFeatures = 0;
         for (unsigned int layer = 0U; layer < m_numLayers; layer++)
         {
-            const float scale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
+            const double scale = static_cast<double>(std::pow(m_layerScaleFactor, layer));
             const unsigned int numFeaturesForScale = static_cast<unsigned int>(ceil(scale / scaleNorm * in_maxNumFeatures));
             
             numFeaturesPerLevel[layer] = numFeaturesForScale;
@@ -79,11 +79,11 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         // Fill pyramid
         for (unsigned int layer = 1U; layer < m_numLayers; layer++)
         {
-            const float layerScale = static_cast<float>(std::pow(m_layerScaleFactor, layer));
-            cv::Size sz(static_cast<unsigned int>(std::round(layerScale * static_cast<float>(pyramid[0].image.cols))), 
-                static_cast<unsigned int>(std::round(layerScale * static_cast<float>(pyramid[0].image.rows))));
+            const double layerScale = static_cast<double>(std::pow(m_layerScaleFactor, layer));
+            cv::Size sz(static_cast<unsigned int>(std::round(layerScale * static_cast<double>(pyramid[0].image.cols))), 
+                static_cast<unsigned int>(std::round(layerScale * static_cast<double>(pyramid[0].image.rows))));
 
-            cv::Mat1f layerImage;
+            cv::Mat1d layerImage;
             cv::resize(pyramid[layer - 1].image, layerImage, sz, 0., 0., cv::INTER_LINEAR_EXACT);
             pyramid.push_back(PyramidLayer{layerScale, numFeaturesPerLevel[layer], layerImage });
         }
