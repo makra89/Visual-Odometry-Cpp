@@ -106,9 +106,9 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
             if (inRangeFirstX && inRangeFirstY && inRangeSecX && inRangeSecY)
             {
                 // Compare intensities and append bin to description
-                float areaFirst = 0.0;
+                double areaFirst = 0.0;
                 integImage.GetAreaAroundPixel(indFirstY, indFirstX, m_areaDetRadius, areaFirst);
-                float areaSecond = 0.0;
+                double areaSecond = 0.0;
                 integImage.GetAreaAroundPixel(indSecY, indSecX, m_areaDetRadius, areaSecond);
                 
                 bool bin = areaFirst > areaSecond ? true : false;
@@ -179,10 +179,10 @@ void BriefDescriptor::GetTestPositions()
     
     for (int i = 0; i < 4 * s_numRandomPairs; i += 4)
     {
-        m_pairs.push_back(PointPair{ static_cast<float>(s_testPattern[i]),
-                                     static_cast<float>(s_testPattern[i + 1]), 
-                                     static_cast<float>(s_testPattern[i + 2]),
-                                     static_cast<float>(s_testPattern[i + 3])});
+        m_pairs.push_back(PointPair{ static_cast<double>(s_testPattern[i]),
+                                     static_cast<double>(s_testPattern[i + 1]), 
+                                     static_cast<double>(s_testPattern[i + 2]),
+                                     static_cast<double>(s_testPattern[i + 3])});
     }
 }
 
@@ -215,14 +215,14 @@ void BriefDescriptor::DrawTrainPairs()
             }
             else
             {
-                m_pairs.push_back(PointPair{ static_cast<float>(possiblePoint[i].x), static_cast<float>(possiblePoint[i].y),
-                            static_cast<float>(possiblePoint[j].x), static_cast<float>(possiblePoint[j].y) });
+                m_pairs.push_back(PointPair{ static_cast<double>(possiblePoint[i].x), static_cast<double>(possiblePoint[i].y),
+                            static_cast<double>(possiblePoint[j].x), static_cast<double>(possiblePoint[j].y) });
             }
         }
     }
 }
 
-BriefDescriptor::PointPair BriefDescriptor::RotatePair(const float& in_angle, const PointPair& in_pair)
+BriefDescriptor::PointPair BriefDescriptor::RotatePair(const double& in_angle, const PointPair& in_pair)
 {
     PointPair rotPair;
     rotPair.x1 = std::cos(in_angle) * in_pair.x1 - std::sin(in_angle) * in_pair.y1;
@@ -233,20 +233,20 @@ BriefDescriptor::PointPair BriefDescriptor::RotatePair(const float& in_angle, co
     return rotPair;
 }
 
-float BriefDescriptor::CalculatePearsonCorr(const TrainPosition& in_first, const TrainPosition& in_second)
+double BriefDescriptor::CalculatePearsonCorr(const TrainPosition& in_first, const TrainPosition& in_second)
 {
-    float pearson = -999.0;
+    double pearson = -999.0;
 
     // Score computation is only possible for test vectors of equal length
     // Additionally make sure that the result vector is not empty
     if (in_first.m_testResults->size() == in_second.m_testResults->size()
         && in_first.m_testResults->size() >= 10)
     {
-        float nom = 0.0;
-        float denomFirst = 0.0;
-        float denomSec = 0.0;
-        float firstMean = in_first.GetMean();
-        float secMean = in_second.GetMean();
+        double nom = 0.0;
+        double denomFirst = 0.0;
+        double denomSec = 0.0;
+        double firstMean = in_first.GetMean();
+        double secMean = in_second.GetMean();
         for (unsigned int i = 0; i < in_first.m_testResults->size(); i++)
         {
             nom += (((*in_first.m_testResults)[i] - firstMean) * ((*in_second.m_testResults)[i] - secMean));
@@ -286,8 +286,8 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
     in_file << "/* mean: " << preselect[0].GetMean() << " var: " << preselect[0].GetVariance() << " maxCorr: " << 0.0 << " */ " <<
         preselect[0].m_pair.x1 << ", " << preselect[0].m_pair.y1 << ", " << preselect[0].m_pair.x2 << ", " << preselect[0].m_pair.y2 << ", " << std::endl;
 
-    float thresh = 0.1F;
-    std::map<std::pair<int, int>, float> corrMap;
+    double thresh = 0.1F;
+    std::map<std::pair<int, int>, double> corrMap;
     while (bestPatterns.size() < BriefDescriptor::s_numRandomPairs)
     {
         for (const auto pos : preselect)
@@ -298,10 +298,10 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
             }
             
             // Find test position with lowest correlation to existing "best positions"
-            float maximumCorr = 0.0;
+            double maximumCorr = 0.0;
             for (const auto bestPos : bestPatterns)
             {
-                float corr = 1.0;
+                double corr = 1.0;
                 
                 if (corrMap.count(std::make_pair(pos.m_Id, bestPos.m_Id)) > 0)
                 {

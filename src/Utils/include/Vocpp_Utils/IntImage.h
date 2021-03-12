@@ -28,28 +28,28 @@ public:
     /**
       * \brief Constructor
       */
-    IntImage(const cv::Mat1f& in_image);
+    IntImage(const cv::Mat1d& in_image);
 
     /**
       * \brief Intensity getter for a certain pixel
       * 
       * \return Area enclosed in the rectangle (0,0), (0,in_imgCol), (in_imgRow,0), and (in_imgRow,in_imgCol)
       */
-    float GetIntensity(const int& in_imgRow, const int& in_imgCol);
+    double GetIntensity(const uint32_t& in_imgRow, const uint32_t& in_imgCol);
 
     /**
       * \brief Get Intensity enclosed by the square defined by the center pixel and the radius (in_distance) around it
       * The edge pixel values are included! For example, when in_distance = 3 --> area of a 7x7 image patch is returned
       */
-    bool GetAreaAroundPixel(const int& in_centRow, const int& in_centCol, const int& in_distance, float& out_area);
+    bool GetAreaAroundPixel(const uint32_t& in_centRow, const uint32_t& in_centCol, const uint32_t& in_distance, double& out_area);
 
 private:
     /**
       * \brief Internally used to fill the integral image in the constructor
       */
-    void FillIntImage(const cv::Mat1f& in_image);
+    void FillIntImage(const cv::Mat1d& in_image);
 
-    cv::Mat1f m_intImage; ///< integral image values
+    cv::Mat1d m_intImage; ///< integral image values
 
 };
 

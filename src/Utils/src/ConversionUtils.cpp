@@ -12,16 +12,16 @@ namespace VOCPP
 namespace Utils
 {
     
-cv::Mat1f Point2fToMatHomCoordinates(const cv::Point2f& in_point)
+cv::Mat1d Point2dToMatHomCoordinates(const cv::Point2d& in_point)
 {
-    cv::Mat1f ret = (cv::Mat1f(3, 1) << in_point.x, in_point.y, 1.0);
+    cv::Mat1d ret = (cv::Mat1d(3, 1) << in_point.x, in_point.y, 1.0);
 
     return ret;
 }
 
-cv::Mat1f Point3fToMatHomCoordinates(const cv::Point3f& in_point)
+cv::Mat1d Point3dToMatHomCoordinates(const cv::Point3d& in_point)
 {
-    cv::Mat1f ret = (cv::Mat1f(4, 1) << in_point.x, in_point.y, in_point.z, 1.0);
+    cv::Mat1d ret = (cv::Mat1d(4, 1) << in_point.x, in_point.y, in_point.z, 1.0);
 
     return ret;
 }

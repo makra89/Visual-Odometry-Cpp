@@ -27,7 +27,7 @@ public:
     /**
       * \brief Constructor
       */
-    HarrisEdgeDetector(const unsigned int in_maxNumFeatures = 150U, const float in_k = 0.04, const std::string& in_kernelName = "window",
+    HarrisEdgeDetector(const unsigned int in_maxNumFeatures = 150U, const double in_k = 0.04, const std::string& in_kernelName = "window",
         const int in_localMaxDistance = 10U);
 
     /**
@@ -44,7 +44,7 @@ public:
       *
       * \return Harris score if successful, -1.0F if not (edge would have a score > 0)
       */
-    float ComputeScore(const cv::Mat1f& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize);
+    double ComputeScore(const cv::Mat1d& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize);
 
 private:
     // It is not allowed to copy the detector directly
@@ -52,10 +52,10 @@ private:
     HarrisEdgeDetector(const HarrisEdgeDetector&);
 
     unsigned int m_maxNumFeatures; ///< maximum number of returned features
-    float m_k; ///< k factor used for Harris response calculation, see literature
+    double m_k; ///< k factor used for Harris response calculation, see literature
     int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
     
-    cv::Mat1f m_smoothingKernel; ///< kernel used for smoothing the gradients
+    cv::Mat1d m_smoothingKernel; ///< kernel used for smoothing the gradients
 
 };
 

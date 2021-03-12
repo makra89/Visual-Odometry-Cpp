@@ -35,10 +35,10 @@ int main(int argc, char** argv)
 
     // Construct MonoCameraCalibration
     // Hardcoded for KITTI data set sequence 0, left image
-    const float focLength = 7.18856e+02F;
-    const float camCenterX = 6.071928000000e+02F;
-    const float camCenterY = 1.852157000000e+02F;
-    const float skew = 0.0F;
+    const double focLength = 7.18856e+02;
+    const double camCenterX = 6.071928000000e+02;
+    const double camCenterY = 1.852157000000e+02;
+    const double skew = 0.0;
     VOCPP::Calibration::MonoCameraCalibration monoCalib(focLength, camCenterX, camCenterY, skew);
 
     // Load calibration, we know it is valid
@@ -46,18 +46,18 @@ int main(int argc, char** argv)
 
     int frameId = 0U;
 
-    cv::Mat1f currentPose = cv::Mat1f::eye(3, 3);
-    cv::Mat1f currentCamCenter = cv::Mat1f::zeros(3, 1);
+    cv::Mat1d currentPose = cv::Mat1d::eye(3, 3);
+    cv::Mat1d currentCamCenter = cv::Mat1d::zeros(3, 1);
     
     for (auto imageName : imageNames)
     {
-        // Convert the image to grayscale CV_32F, here from CV_8U to CV_32F
+        // Convert the image to grayscale CV_64F, here from CV_8U to CV_64F
         cv::Mat grayScaleImg;
         cv::cvtColor(imread(imageName, 1), grayScaleImg, COLOR_BGR2GRAY);
-        grayScaleImg.convertTo(grayScaleImg, CV_32F, 1.0 / 255.0);
+        grayScaleImg.convertTo(grayScaleImg, CV_64F, 1.0 / 255.0);
         
         // Feed frame to Master
-        Frame frame(grayScaleImg.ptr<float>(0), grayScaleImg.cols, grayScaleImg.rows, frameId);
+        Frame frame(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, frameId);
         voMaster.FeedNextFrame(frame);
         
         DeltaCameraPose delta = voMaster.GetLastDeltaPose();

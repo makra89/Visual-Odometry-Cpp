@@ -11,7 +11,7 @@
 
 #include<opencv2/core/types.hpp>
 #include<opencv2/core/core.hpp>
-
+#include <iostream>
 namespace VOCPP
 {
 namespace Utils
@@ -22,24 +22,24 @@ namespace Utils
 *
 * \param[in] size of window kernel [pixels]
 */
-cv::Mat1f GetWindowKernel(const int size);
+cv::Mat1d GetWindowKernel(const int size);
 
 /**
 * /brief Convolve image with given kernel
 */
-void ApplyKernelToImage(const cv::Mat1f& in_image, const cv::Mat1f& in_kernel, cv::Mat1f& out_image);
+void ApplyKernelToImage(const cv::Mat1d& in_image, const cv::Mat1d& in_kernel, cv::Mat1d& out_image);
 
 /**
 * /brief Calculate intensity gradients of image in both x and y directions
 */
-void Compute2DGradients(const cv::Mat1f& in_image, cv::Mat1f& out_gradX, cv::Mat1f& out_gradY);
+void Compute2DGradients(const cv::Mat1d& in_image, cv::Mat1d& out_gradX, cv::Mat1d& out_gradY);
 
 
 struct LocalMaximum
 {
-    float posX;
-    float posY;
-    float value;
+    double posX;
+    double posY;
+    double value;
 
     bool operator > (const LocalMaximum& right) const
     {
@@ -54,7 +54,7 @@ struct LocalMaximum
     * \param[out] out_localMaxima vector of extracted local maxima
     * \param[in] in_subPixelCalculationDistance distance used for calculation of subPixel position of local maxima
 */
-void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::vector<LocalMaximum>& out_localMaxima);
+void ExtractLocalMaxima(const cv::Mat1d& in_image, const int in_distance, std::vector<LocalMaximum>& out_localMaxima);
 
 /**
 * /brief Extract patch of an image around a center position with a given distance
@@ -65,14 +65,14 @@ void ExtractLocalMaxima(const cv::Mat1f& in_image, const int in_distance, std::v
 * \param[in] in_pixelPosX center location in X
 * \param[in] in_pixelPosY center location in Y
 */
-bool ExtractImagePatchAroundPixelPos(const cv::Mat1f& in_image, cv::Mat1f& out_patch, const int in_distanceAroundCenter, const int in_pixelPosX, const int in_pixelPosY);
+bool ExtractImagePatchAroundPixelPos(const cv::Mat1d& in_image, cv::Mat1d& out_patch, const uint32_t in_distanceAroundCenter, const uint32_t in_pixelPosX, const uint32_t in_pixelPosY);
 
 /**
 * /brief Normalize set out points with respect to their distance to the origin. Resulting point set will be centered at (0, 0)
 and will have average distance of sqrt(2). Additionally the 3x3 transformation is provided which has been used to transform the
 point set.
 */
-void NormalizePointSet(const std::vector<cv::Point2f>& in_points, std::vector<cv::Point2f>& out_normPoints, cv::Mat1f& out_transform);
+void NormalizePointSet(const std::vector<cv::Point2d>& in_points, std::vector<cv::Point2d>& out_normPoints, cv::Mat1d& out_transform);
 
 /**
 * /brief Projection matrix using a rotation + translation + camera calibration matrix
@@ -83,34 +83,34 @@ class ImageProjectionMatrix
 public:
     ImageProjectionMatrix()
     {
-        cv::hconcat(cv::Mat1f::eye(3, 3), cv::Mat1f::zeros(3, 1), m_projectMat);
+        cv::hconcat(cv::Mat1d::eye(3, 3), cv::Mat1d::zeros(3, 1), m_projectMat);
     }
 
-    ImageProjectionMatrix(const cv::Mat1f& in_rotationMatrix, const cv::Mat1f& in_translation,
-        const cv::Mat1f& in_calibMatrix)
+    ImageProjectionMatrix(const cv::Mat1d& in_rotationMatrix, const cv::Mat1d& in_translation,
+        const cv::Mat1d& in_calibMatrix)
     {
         cv::hconcat(in_rotationMatrix, in_translation, m_projectMat);
         m_projectMat = in_calibMatrix * m_projectMat;
     }
 
-    cv::Point2f Apply(cv::Point3f in_worldCoord)
+    cv::Point2d Apply(cv::Point3d in_worldCoord)
     {
-        cv::Mat1f homWorldCoord = Point3fToMatHomCoordinates(in_worldCoord);
-        cv::Mat1f imageCoord = m_projectMat * homWorldCoord;
-        cv::Point2f imageCoordOut;
-        imageCoordOut.x = imageCoord(0, 0) / imageCoord(0, 2);
-        imageCoordOut.y = imageCoord(1, 0) / imageCoord(0, 2);
+        cv::Mat1d homWorldCoord = Point3dToMatHomCoordinates(in_worldCoord);
+        cv::Mat1d imageCoord = m_projectMat * homWorldCoord;
+        cv::Point2d imageCoordOut;
+        imageCoordOut.x = imageCoord(0, 0) / imageCoord(2, 0);
+        imageCoordOut.y = imageCoord(1, 0) / imageCoord(2, 0);
 
         return imageCoordOut;
     }
 
-    const cv::Mat1f& GetRawProjMat() const
+    const cv::Mat1d& GetRawProjMat() const
     {
         return m_projectMat;
     }
 
 private:
-    cv::Mat1f m_projectMat;
+    cv::Mat1d m_projectMat;
 };
 
 /**
@@ -120,18 +120,18 @@ private:
 class CameraProjectionMatrix
 {
 public:
-    CameraProjectionMatrix(const cv::Mat1f& in_rotationMatrix, const cv::Mat1f& in_translation)
+    CameraProjectionMatrix(const cv::Mat1d& in_rotationMatrix, const cv::Mat1d& in_translation)
     {
         cv::hconcat(in_rotationMatrix, in_translation, m_projectMat);
         m_rotation = in_rotationMatrix;
         m_translation = in_translation;
     }
 
-    cv::Point3f Apply(cv::Point3f in_worldCoord)
+    cv::Point3d Apply(cv::Point3d in_worldCoord)
     {
-        cv::Mat1f homWorldCoord = Point3fToMatHomCoordinates(in_worldCoord);
-        cv::Mat1f cameraCoord = m_projectMat * homWorldCoord;
-        cv::Point3f cameraCoordOut;
+        cv::Mat1d homWorldCoord = Point3dToMatHomCoordinates(in_worldCoord);
+        cv::Mat1d cameraCoord = m_projectMat * homWorldCoord;
+        cv::Point3d cameraCoordOut;
         cameraCoordOut.x = cameraCoord(0, 0);
         cameraCoordOut.y = cameraCoord(1, 0);
         cameraCoordOut.z = cameraCoord(2, 0);
@@ -139,31 +139,31 @@ public:
         return cameraCoordOut;
     }
 
-    ImageProjectionMatrix ConvertToImageProjectionMatrix(const cv::Mat1f& in_calibMatrix)
+    ImageProjectionMatrix ConvertToImageProjectionMatrix(const cv::Mat1d& in_calibMatrix)
     {
         return ImageProjectionMatrix(m_rotation, m_translation, in_calibMatrix);
     }
 
-    const cv::Mat1f& GetRotationMat() const
+    const cv::Mat1d& GetRotationMat() const
     {
         return m_rotation;
     }
 
-    const cv::Mat1f& GetTranslation() const
+    const cv::Mat1d& GetTranslation() const
     {
         return m_translation;
     }
 
 private:
-    cv::Mat1f m_projectMat;
-    cv::Mat1f m_translation;
-    cv::Mat1f m_rotation;
+    cv::Mat1d m_projectMat;
+    cv::Mat1d m_translation;
+    cv::Mat1d m_rotation;
 };
 
 /**
 * /brief Get cross product generating matrix from a vector
 */
-void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat);
+void GetCrossProductMatrix(const cv::Vec3d& in_vec, cv::Mat1d& out_crossMat);
 
 /**
 * /brief Decompose an essential matrix into a translation vector and a rotation
@@ -179,15 +179,15 @@ void GetCrossProductMatrix(const cv::Vec3f& in_vec, cv::Mat1f& out_crossMat);
 * \param[out] out_rotMatrix rotation matrix used to transfrom a point in right camera frame to left camera frame
 * \param[out] out_triangulatedPoints 3D triangulated points
 */
-bool DecomposeEssentialMatrix(const cv::Mat1f& in_essentialMat, const cv::Mat1f& in_calibMat, const std::vector<cv::Point2f>& in_imageCoordLeft,
-    const std::vector <cv::Point2f>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1f& out_translation, cv::Mat1f& out_rotMatrix, std::vector<cv::Point3f>& out_triangulatedPoints);
+bool DecomposeEssentialMatrix(const cv::Mat1d& in_essentialMat, const cv::Mat1d& in_calibMat, const std::vector<cv::Point2d>& in_imageCoordLeft,
+    const std::vector <cv::Point2d>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1d& out_translation, cv::Mat1d& out_rotMatrix, std::vector<cv::Point3d>& out_triangulatedPoints);
 
 /**
 * /brief Triangulates a point in 3D given two camera coordinates and two projection matrices
 *
 */
-bool PointTriangulationLinear(const ImageProjectionMatrix& projMatLeft, const ImageProjectionMatrix& in_projMatRight, const cv::Point2f& in_imageCoordLeft,
-    const cv::Point2f& in_imageCoordRight, cv::Point3f& out_triangulatedPoint);
+bool PointTriangulationLinear(const ImageProjectionMatrix& projMatLeft, const ImageProjectionMatrix& in_projMatRight, const cv::Point2d& in_imageCoordLeft,
+    const cv::Point2d& in_imageCoordRight, cv::Point3d& out_triangulatedPoint);
 
 } //namespace Utils
 } //namespace VOCPP

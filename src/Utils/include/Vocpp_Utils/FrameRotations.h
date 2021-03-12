@@ -22,7 +22,7 @@ Note: This is a rotation of a coordinate frame, not of a vector in a fixed coord
 * \param[in] in_angleRad rotation angle in radians
 * \returns rotation matrix
 */
-cv::Mat1f GetFrameRotationX(const float in_angleRad);
+cv::Mat1d GetFrameRotationX(const double in_angleRad);
 
 /**
 * /brief Get coordinate transformation matrix consisting out of a rotation around Y axis.
@@ -31,7 +31,7 @@ Note: This is a rotation of a coordinate frame, not of a vector in a fixed coord
 * \param[in] in_angleRad rotation angle in radians
 * \returns rotation matrix
 */
-cv::Mat1f GetFrameRotationY(const float in_angleRad);
+cv::Mat1d GetFrameRotationY(const double in_angleRad);
 
 /**
 * /brief Get coordinate transformation matrix consisting out of a rotation around Z axis.
@@ -40,7 +40,7 @@ Note: This is a rotation of a coordinate frame, not of a vector in a fixed coord
 * \param[in] in_angleRad rotation angle in radians
 * \returns rotation matrix
 */
-cv::Mat1f GetFrameRotationZ(const float in_angleRad);
+cv::Mat1d GetFrameRotationZ(const double in_angleRad);
 
 /**
 * /brief For a given 3D rotation matrix calculate yaw, roll and pitch angle in such way that
@@ -53,7 +53,7 @@ cv::Mat1f GetFrameRotationZ(const float in_angleRad);
 * \param[in] in_angleRad rotation angle in radians
 * \returns rotation matrix
 */
-cv::Vec3f ExtractRollPitchYaw(const cv::Mat1f& in_rotationMat);
+cv::Vec3d ExtractRollPitchYaw(const cv::Mat1d& in_rotationMat);
 
 } //namespace Utils
 } //namespace VOCPP

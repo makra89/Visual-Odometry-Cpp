@@ -30,7 +30,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=1U, const float& in_layerScaleFactor=0.8333);
+    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=1U, const double& in_layerScaleFactor=0.8333);
 
     /**
       * /brief Extract descriptions from a provided grayscale image frame.
@@ -49,13 +49,13 @@ private:
 
     struct PyramidLayer
     {
-        float scale;
+        double scale;
         int numFeatures;
-        cv::Mat1f image;
+        cv::Mat1d image;
     };
 
     const unsigned int m_numLayers; ///< number of pyramid layers generated for one frame
-    const float m_layerScaleFactor; ///< scale factor used to downsample the image for each octave
+    const double m_layerScaleFactor; ///< scale factor used to downsample the image for each octave
 
     FeatureHandling::OrientedFastDetector m_fastDetector;
     FeatureHandling::BriefDescriptor m_descriptor;

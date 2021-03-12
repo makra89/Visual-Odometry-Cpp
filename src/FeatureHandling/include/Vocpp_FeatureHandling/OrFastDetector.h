@@ -28,7 +28,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrientedFastDetector(const float& in_intRelTresh=0.2, const int& in_numPixelsAboveThresh=12,
+    OrientedFastDetector(const double& in_intRelTresh=0.2, const int& in_numPixelsAboveThresh=12,
         const int& in_harrisBlockSize=3, const int& in_distToEdges=31);
 
     /**
@@ -52,14 +52,14 @@ private:
       * Internally first 4 edge pixels are checked and then CheckAll() is called
       * \return score, can be compared against m_numPixelsAboveThresh
       */
-    int CheckIntensities(const cv::Mat1f& in_image, const int& in_coordX, const int& in_coordY, const int& in_imgWidth, const int& in_imgHeight);
+    int CheckIntensities(const cv::Mat1d& in_image, const int& in_coordX, const int& in_coordY, const int& in_imgWidth, const int& in_imgHeight);
     
     /**
       * /brief Called by CheckIntensities()
       */
-    int CheckAll(const cv::Mat1f& in_image, const int& in_coordX, const int& in_coordY, const int& in_passLower, const int& in_passHigher);
+    int CheckAll(const cv::Mat1d& in_image, const int& in_coordX, const int& in_coordY, const int& in_passLower, const int& in_passHigher);
 
-    const float m_relDiffTresh; ///< relative treshold for pixel intensity comparison
+    const double m_relDiffTresh; ///< relative treshold for pixel intensity comparison
     const int m_numPixelsAboveThresh; ///< necessary number of pixels above or below threshold for a detection
     const int m_harrisBlockSize; ///< size of patch over which harris detector averages gradients (has to be odd number)
     const int m_distToEdges; /// minimum distance to edges of reported features [pixels]

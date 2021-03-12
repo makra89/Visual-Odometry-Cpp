@@ -26,9 +26,9 @@ namespace DeltaPoseReconstruction
 */
 struct LandmarkPosition
 {
-    float x;
-    float y;
-    float z;
+    double x;
+    double y;
+    double z;
 };
 
 /**
@@ -43,15 +43,15 @@ public:
     /**
       * \brief Constructor of a new landmark
       */
-    Landmark(const unsigned int& in_currentFrameId, const unsigned int& in_currentFeatureId, 
-        const unsigned int& in_lastFrameId, const unsigned int& in_lastFeatureId, const LandmarkPosition& in_position) :
+    Landmark(const uint32_t& in_currentFrameId, const uint32_t& in_currentFeatureId, 
+        const uint32_t& in_lastFrameId, const uint32_t& in_lastFeatureId, const LandmarkPosition& in_position) :
         m_lastSeenFrameId(in_currentFrameId),
         m_frameVsFeatureId(),
         m_framePairVsScaled(),
         m_framePairVsPosition()
     {
-        m_frameVsFeatureId.insert(std::pair<int, int>(in_lastFrameId, in_lastFeatureId));
-        m_frameVsFeatureId.insert(std::pair<int, int>(in_currentFrameId, in_currentFeatureId));
+        m_frameVsFeatureId.insert(std::pair<uint32_t, uint32_t>(in_lastFrameId, in_lastFeatureId));
+        m_frameVsFeatureId.insert(std::pair<uint32_t, uint32_t>(in_currentFrameId, in_currentFeatureId));
 
         // Add triangulated position
         FramePairKey keyPair{ in_currentFrameId, in_lastFrameId};
@@ -64,20 +64,20 @@ public:
     /**
       * \brief Update the landmark with a new occurence in a frame
       */
-    void UpdateLandmark(const unsigned int& in_currentFrameId, const unsigned int& in_currentFeatureId,
-        const unsigned int& in_lastFrameId, const unsigned int& in_lastFeatureId, const LandmarkPosition& in_position);
+    void UpdateLandmark(const uint32_t& in_currentFrameId, const uint32_t& in_currentFeatureId,
+        const uint32_t& in_lastFrameId, const uint32_t& in_lastFeatureId, const LandmarkPosition& in_position);
 
     /**
       * \brief Queries whether a landmark is visible in a certain frame as a feature with a specific Id
       */
-    bool IsPresentInFrameWithFeatureId(const unsigned int& in_frameId, const unsigned int& in_featureId) const;
+    bool IsPresentInFrameWithFeatureId(const uint32_t& in_frameId, const uint32_t& in_featureId) const;
 
     /**
       * \brief Queries whether a landmark is visible in a certain frame
       */
-    bool IsPresentInFrame(const unsigned int& in_frameId) const;
+    bool IsPresentInFrame(const uint32_t& in_frameId) const;
 
-    const unsigned int GetLastSeenFrameId() const
+    const uint32_t GetLastSeenFrameId() const
     {
         return m_lastSeenFrameId;
     }
@@ -87,8 +87,8 @@ public:
       */
     struct FramePairKey
     {
-        unsigned int currentFrameId;
-        unsigned int lastFrameId;
+        uint32_t currentFrameId;
+        uint32_t lastFrameId;
     };
 
     /**
@@ -106,11 +106,11 @@ public:
 
     bool HasBeenScaledForFramePair(const FramePairKey& in_key) const;
 
-    bool RescalePosition(const FramePairKey& in_pairKey, const float& in_scale);
+    bool RescalePosition(const FramePairKey& in_pairKey, const double& in_scale);
 
 private:
-    int m_lastSeenFrameId; ///< frame Id for which this landmark has been seen last 
-    std::map<int, int> m_frameVsFeatureId; ///< feature Ids of this landmark for all frames
+    uint32_t m_lastSeenFrameId; ///< frame Id for which this landmark has been seen last 
+    std::map<uint32_t, uint32_t> m_frameVsFeatureId; ///< feature Ids of this landmark for all frames
     std::map<FramePairKey, bool, CompFramePairKey> m_framePairVsScaled; ///< indicates whether a landmark has already been scaled for certain frame pair
     std::map<FramePairKey, LandmarkPosition, CompFramePairKey> m_framePairVsPosition; ///< frame Id pair vs triangulated position
 };
@@ -125,7 +125,7 @@ public:
     /**
       * \brief Constructor of an empty local map
       */
-    LocalMap(const unsigned int in_minNumberOfTrackedLandmarks) : 
+    LocalMap(const uint32_t in_minNumberOfTrackedLandmarks) : 
         m_landmarks(), 
         m_minNumberOfTrackedLandmarks(in_minNumberOfTrackedLandmarks),
         m_lastFrameId(s_invalidFrameId),
@@ -157,9 +157,9 @@ public:
       * \param[in] in_matches matching object, it is assumed that the frame ID of the "first" description in this match equals in_currentFrameId
       * \param[in] in_currentFrameId current frame Id
       */
-    void InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const unsigned int& in_currentFrameId);
+    void InsertLandmarks(const std::vector<LandmarkPosition>& in_positions, const std::vector<FeatureHandling::BinaryDescriptionMatch>& in_matches, const uint32_t& in_currentFrameId);
 
-    bool GetLastRelativeScale(const unsigned int& in_lastFrameId, const unsigned int& in_currentFrameId, float& out_scale) const;
+    bool GetLastRelativeScale(const uint32_t& in_lastFrameId, const uint32_t& in_currentFrameId, double& out_scale) const;
     
     /**
       * \brief Get all stored landmarks
@@ -171,15 +171,15 @@ public:
 
 private:
 
-    void RemoveUntrackedLandmarks(const unsigned int& in_currentFrameId);
+    void RemoveUntrackedLandmarks(const uint32_t& in_currentFrameId);
 
-    void ComputeRelativeScale(const unsigned int& in_currentFrameId);
+    void ComputeRelativeScale(const uint32_t& in_currentFrameId);
 
     std::vector<Landmark> m_landmarks; ///< stored landmarks
-    const unsigned int m_minNumberOfTrackedLandmarks; ///< Minimum number of tracked landmarks needed for setting the tracking status to active
-    unsigned int m_lastFrameId;
-    unsigned int m_validTrackedLandmarks;
-    float m_lastRelativeScale;
+    const uint32_t m_minNumberOfTrackedLandmarks; ///< Minimum number of tracked landmarks needed for setting the tracking status to active
+    uint32_t m_lastFrameId;
+    uint32_t m_validTrackedLandmarks;
+    double m_lastRelativeScale;
 };
 
 } //namespace DeltaPoseReconstruction

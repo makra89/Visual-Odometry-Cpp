@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 
 using VOCPP::Utils::DrawIntInRange;
-using VOCPP::Utils::DrawFloatInRange;
+using VOCPP::Utils::DrawDoubleInRange;
 
 // Check that DrawIntInRange provides int in the expected range
 TEST(DrawIntInRange, RangeCheck)
@@ -52,15 +52,15 @@ TEST(DrawIntInRange, ProbabilityCheck)
     }
 }
 
-// Check that DrawFloatInRange provides float in the expected range
-TEST(DrawFloatInRange, RangeCheck)
+// Check that DrawDoubleInRange provides double in the expected range
+TEST(DrawDoubleInRange, RangeCheck)
 {
-    float lowerEdge = -10.0;
-    float upperEdge = 10.0;
+    double lowerEdge = -10.0;
+    double upperEdge = 10.0;
 
     for (uint it = 0U; it < 10000U; it++)
     {
-        float rand = DrawFloatInRange(lowerEdge, upperEdge);
+        double rand = DrawDoubleInRange(lowerEdge, upperEdge);
 
         EXPECT_GE(rand, lowerEdge);
         EXPECT_LE(rand, upperEdge);

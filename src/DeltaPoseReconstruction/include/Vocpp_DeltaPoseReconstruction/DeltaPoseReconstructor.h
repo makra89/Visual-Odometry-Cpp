@@ -50,7 +50,7 @@ public:
     /**
       * /brief Provide next image frame to reconstructor together with a calibration matrix
       */
-    bool FeedNextFrame(const Frame& in_frame, const cv::Mat1f& in_calibMat, bool in_debugOutputFlag);
+    bool FeedNextFrame(const Frame& in_frame, const cv::Mat1d& in_calibMat, bool in_debugOutputFlag);
 
     /**
       * /brief Get computed delta pose of last frame to the frame before
@@ -81,12 +81,12 @@ private:
     LocalMap m_localMap;
 
     std::vector<FeatureHandling::BinaryFeatureDescription> m_descriptionsLastFrame;  ///< descriptions computed for last frame
-    unsigned int m_lastFrameId;
+    uint32_t m_lastFrameId;
 
     DeltaCameraPose m_lastDeltaPose; ///< Delta Pose calculated for last frame to the frame before
     CameraPose m_lastPose; ///< Current Pose in world coordinate system calculated for last frame
-    cv::Mat1f m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
-    cv::Mat1f m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
+    cv::Mat1d m_lastOrientationWcs; ///< Current orientation in wcs (just stored for convenience)
+    cv::Mat1d m_lastPosWcs; ///< Current position in wcs (just stored for convenience)
     Utils::ImageProjectionMatrix m_lastProjectionMat; ///< projection matrix of last frame defined as x_image = K * (Rx_wcs - T)
 };
 

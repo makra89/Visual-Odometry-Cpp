@@ -15,7 +15,7 @@ namespace FeatureHandling
 {
 
 
-HarrisEdgeDetector::HarrisEdgeDetector(const unsigned int in_maxNumFeatures, const float in_k, const std::string& in_kernelName,
+HarrisEdgeDetector::HarrisEdgeDetector(const unsigned int in_maxNumFeatures, const double in_k, const std::string& in_kernelName,
     const int in_localMaxDistance)
 {
     m_maxNumFeatures = in_maxNumFeatures;
@@ -35,10 +35,10 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
         std::cout << "[HarrisEdgeDetector]: Non-grayscale image has been provided" << std::endl;
     }
     
-    cv::Mat1f gradX, gradY;
+    cv::Mat1d gradX, gradY;
     Utils::Compute2DGradients(in_frame.GetImage(), gradX, gradY);
     
-    cv::Mat1f response = cv::Mat1f::zeros(in_frame.GetImage().rows, in_frame.GetImage().cols);
+    cv::Mat1d response = cv::Mat1d::zeros(in_frame.GetImage().rows, in_frame.GetImage().cols);
     for (int i = 1; i < in_frame.GetImage().cols - 1; i++)
     {
         for (int j = 1; j < in_frame.GetImage().rows - 1; j++)
@@ -68,7 +68,7 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
     return ret;
 }
 
-float HarrisEdgeDetector::ComputeScore(const cv::Mat1f& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize)
+double HarrisEdgeDetector::ComputeScore(const cv::Mat1d& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize)
 {
     // block size has to be an odd number
     int distanceFromCenter = (in_blockSize - 1) / 2;
@@ -76,24 +76,24 @@ float HarrisEdgeDetector::ComputeScore(const cv::Mat1f& in_img, const int& in_ce
     bool inRangeX = in_centerX - distanceFromCenter - 1 >= 0 && in_centerX + distanceFromCenter + 1 < in_img.cols;
     bool inRangeY = in_centerY - distanceFromCenter - 1 >= 0 && in_centerY + distanceFromCenter + 1 < in_img.rows;
 
-    float response = -1.0F;
+    double response = -1.0F;
     
     if (inRangeX && inRangeY)
     {
-        float gradXx = 0;
-        float gradYy = 0;
-        float gradXy = 0;
+        double gradXx = 0;
+        double gradYy = 0;
+        double gradXy = 0;
         
         for (int j = in_centerY - distanceFromCenter; j < in_centerY + distanceFromCenter + 1; j++)
         {
-            const float* currRowPtr = in_img.ptr<float>(j);
-            const float* upRowPtr = in_img.ptr<float>(j - 1);
-            const float* lowRowPtr = in_img.ptr<float>(j + 1);
+            const double* currRowPtr = in_img.ptr<double>(j);
+            const double* upRowPtr = in_img.ptr<double>(j - 1);
+            const double* lowRowPtr = in_img.ptr<double>(j + 1);
 
             for (int i = in_centerX - distanceFromCenter; i < in_centerX + distanceFromCenter + 1; i++)
             {
-                float gradX = upRowPtr[i + 1] - upRowPtr[i - 1] + 2.0F * (currRowPtr[i + 1] - currRowPtr[i - 1]) + lowRowPtr[i + 1] - lowRowPtr[i - 1];
-                float gradY = lowRowPtr[i - 1] - upRowPtr[i - 1] + 2.0F * (lowRowPtr[i] - upRowPtr[i]) + lowRowPtr[i + 1] - upRowPtr[i + 1];
+                double gradX = upRowPtr[i + 1] - upRowPtr[i - 1] + 2.0F * (currRowPtr[i + 1] - currRowPtr[i - 1]) + lowRowPtr[i + 1] - lowRowPtr[i - 1];
+                double gradY = lowRowPtr[i - 1] - upRowPtr[i - 1] + 2.0F * (lowRowPtr[i] - upRowPtr[i]) + lowRowPtr[i + 1] - upRowPtr[i + 1];
                 
                 gradXx += gradX * gradX;
                 gradYy += gradY * gradY;
@@ -101,7 +101,7 @@ float HarrisEdgeDetector::ComputeScore(const cv::Mat1f& in_img, const int& in_ce
             }
         }
 
-        const float trace = gradXx + gradYy;
+        const double trace = gradXx + gradYy;
         response = gradXx * gradYy - std::pow(gradXy, 2) - m_k * std::pow(trace, 2);
     }
 
