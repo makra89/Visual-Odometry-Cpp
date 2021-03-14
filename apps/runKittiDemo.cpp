@@ -10,12 +10,22 @@
 
 #include<Vocpp_Master/Master.h>
 #include<Vocpp_Interface/Frame.h>
+#include<Vocpp_Interface/Tracing.h>
 #include<Vocpp_Interface/DeltaCameraPose.h>
 #include<Vocpp_Interface/CameraPose.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
 
 using namespace cv;
 using namespace VOCPP;
+
+class StdOutTracer : public Tracer
+{
+public:
+    virtual void receiveTrace(const TraceLevel& in_traceLevel, const char* const in_msg)
+    {
+        std::cout << in_msg << std::endl;
+    }
+};
 
 int main(int argc, char** argv)
 {
@@ -30,8 +40,14 @@ int main(int argc, char** argv)
     std::vector<String> imageNames;
     glob(path, imageNames);
 
+    // Activate tracing on Debug level
+    SetTraceLevel(TraceLevel::DEBUG);
+    StdOutTracer tracer;
+    RegisterTracer(&tracer);
+
     // Instantiate master
     Master::Master voMaster;
+    voMaster.ActivateDebugOutput();
 
     // Construct MonoCameraCalibration
     // Hardcoded for KITTI data set sequence 0, left image

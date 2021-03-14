@@ -7,7 +7,7 @@
 
 #include<Vocpp_FeatureHandling/LshMatcher.h>
 #include<Vocpp_Utils/NumericalUtilities.h>
-#include <iostream>
+#include<Vocpp_Utils/TracingImpl.h>
 
 namespace VOCPP
 {
@@ -29,7 +29,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
 
     if (in_descFirst.size() == 0 || in_descSecond.size() == 0)
     {
-        std::cout << "[LshMatcher]: No descriptions found in one or both of the provided frames" << std::endl;
+        VOCPP_TRACE_WARNING("[LshMatcher]: No descriptions found in one or both of the provided frames")
         return false;
     }
 

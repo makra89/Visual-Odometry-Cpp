@@ -11,11 +11,10 @@
 #include <Vocpp_Utils/ConversionUtils.h>
 #include <Vocpp_Utils/FrameRotations.h>
 #include <Vocpp_Utils/NumericalUtilities.h>
+#include <Vocpp_Utils/TracingImpl.h>
 
 #include <cmath>
 #include <opencv2/opencv.hpp>
-
-#include <iostream>
 
 namespace VOCPP
 {
@@ -63,7 +62,7 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
 
     if (!in_frame.IsValid())
     {
-        std::cout << "[DeltaPoseReconstructor]: Invalid frame provided" << std::endl;
+        VOCPP_TRACE_ERROR("[DeltaPoseReconstructor]: Invalid frame provided");
         ret = false;
     }
     else
@@ -168,8 +167,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 tick.stop();
                 // Only show debug output if requested
                 if (in_debugOutputFlag)
-                {
-                    std::cout << "[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli() << std::endl;
+                {                   
+                    VOCPP_TRACE_DEBUG("[DeltaPoseReconstruction]: Frame processing time: " << tick.getTimeMilli())
                     cv::Mat matchImage;
                     in_frame.GetImageCopy().convertTo(matchImage, CV_32F);
                     cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);

@@ -23,7 +23,7 @@ TEST(FrameTest, Constructor_NoImageData)
 {
     // Construct empty frame
     cv::Mat1d emptyImage;
-    Frame f(NULL, 3, 3, 1);
+    Frame f(nullptr, 3, 3, 1);
 
     // Since no image has been provided it should be marked as invalid
     EXPECT_FALSE(f.IsValid());

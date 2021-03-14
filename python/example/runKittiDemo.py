@@ -16,6 +16,14 @@ def usage():
     print("\npython runKittiDemo.py -i [<kitti_seq0_dir>] -ref [<ref_file>]")
     print("\nRun comparison of position estimation from Vocpp to ground truth ")
     print("for KITTI sequence 0.")
+
+
+class StdOutTracer(Vocpp.Tracer):
+    def __init__(self):
+        Vocpp.Tracer.__init__(self)
+
+    def receiveTrace(self, level, msg):
+        print(msg)
  
 
 if __name__ == "__main__":
@@ -51,6 +59,11 @@ if __name__ == "__main__":
     # Ground truth poses given with respect to camera system of first frame
     # Therefore, WCS and ground truth coordinate system are rotated with respect to each other               
     ground_truth_positions = np.array(ground_truth_positions)
+
+    # Activate tracing on Debug level
+    Vocpp.SetTraceLevel(Vocpp.TraceLevel_DEBUG)
+    tracer = StdOutTracer()
+    Vocpp.RegisterTracer(tracer)
 
     master = Vocpp.Master()
 

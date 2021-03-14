@@ -8,8 +8,8 @@
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
 #include<Vocpp_Utils/NumericalUtilities.h>
 #include<Vocpp_Utils/IntImage.h>
+#include<Vocpp_Utils/TracingImpl.h>
 
-#include <iostream>
 #include<random>
 #include<fstream>
 #include <map>
@@ -47,13 +47,13 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
 
     if (in_features.size() == 0)
     {    
-        std::cout << "[BriefDescriptor]: No keypoints found in provided frame" << std::endl;
+        VOCPP_TRACE_WARNING("[BriefDescriptor]: No keypoints found in provided frame")
         return false;
     }
 
     if (out_descriptions.size() != 0)
     {
-        std::cout << "[BriefDescriptor]: Frame with non-empty description vector provided, will be erased" << std::endl;
+        VOCPP_TRACE_WARNING("[BriefDescriptor]: Frame with non-empty description vector provided, will be erased")
         return false;
     }
 
@@ -72,11 +72,11 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
         }
         else if (m_trainingMode && in_frame.GetId() > m_numFramesForTraining)
         {
-            std::cout << "[BriefDescriptor - TrainingMode]: Finished detection, now finding best pattern " << std::endl;
+            VOCPP_TRACE_INFO("[BriefDescriptor - TrainingMode]: Finished detection, now finding best pattern")
             FindBestPattern(m_trainPositions, m_patternOutFile);
             m_patternOutFile.close();
             m_trainingMode = false;
-            std::cout << "[BriefDescriptor - TrainingMode]: Finished training " << std::endl;
+            VOCPP_TRACE_INFO("[BriefDescriptor - TrainingMode]: Finished training")
             break;
         }
         else
@@ -135,7 +135,7 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
             // This should really never happen
             else if(m_trainingMode)
             {
-                std::cout << "[BriefDescriptor - TrainingMode]: Found a single test pattern that got rejected, training not possible anymore " << feature.id << std::endl;
+                VOCPP_TRACE_ERROR("[BriefDescriptor - TrainingMode]: Found a single test pattern that got rejected, training not possible anymore ");
                 m_trainingMode = false;
                 break;
             }
@@ -258,7 +258,7 @@ double BriefDescriptor::CalculatePearsonCorr(const TrainPosition& in_first, cons
     }
     else
     {
-        std::cout << "[BriefDescriptor - TrainingMode]: Error in pearson correlation calculation, vectors not of same length or too few elements" << std::endl;
+        VOCPP_TRACE_ERROR("[BriefDescriptor - TrainingMode]: Error in pearson correlation calculation, vectors not of same length or too few elements");
     }
 
     return pearson;
@@ -328,9 +328,9 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
             if (maximumCorr < thresh)
             {
                 bestPatterns.push_back(pos);
-                std::cout << "[BriefDescriptor - TrainingMode]: Found test position, looking for " << BriefDescriptor::s_numRandomPairs  - bestPatterns.size() <<" more." << std::endl;
+                VOCPP_TRACE_INFO("[BriefDescriptor - TrainingMode]: Found test position, looking for " << BriefDescriptor::s_numRandomPairs  - bestPatterns.size() <<" more." << std::endl;
                 in_file << "/* mean: " << pos.GetMean() << " var: " << pos.GetVariance() << " maxCorr: " << maximumCorr<<" */ " <<
-                    pos.m_pair.x1 << ", " << pos.m_pair.y1 << ", " << pos.m_pair.x2 << ", " << pos.m_pair.y2 << ", " << std::endl;
+                    pos.m_pair.x1 << ", " << pos.m_pair.y1 << ", " << pos.m_pair.x2 << ", " << pos.m_pair.y2 << ", ")
             }
         }
 

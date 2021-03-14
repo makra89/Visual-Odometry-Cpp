@@ -6,6 +6,8 @@
 */
 
 #include <Vocpp_DeltaPoseReconstruction/LocalMap.h>
+#include <Vocpp_Utils/TracingImpl.h>
+
 #include <algorithm>
 
 namespace VOCPP
@@ -194,7 +196,7 @@ void LocalMap::ComputeRelativeScale(const uint32_t& in_currentFrameId)
         std::nth_element(scales.begin(), scales.begin() + scales.size() / 2, scales.end());
         // Update current scale
         m_lastRelativeScale = scales[scales.size() / 2U];
-        std::cout << "Tracked Landmarks: " << m_validTrackedLandmarks << std::endl;
+        VOCPP_TRACE_DEBUG("[LocalMap]: Tracked Landmarks: " << m_validTrackedLandmarks)
 
         for (auto it : validLandmarkIndices)
         {

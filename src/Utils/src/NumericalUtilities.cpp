@@ -2,13 +2,11 @@
 * It is subject to the license terms in the LICENSE file
 * found in the top-level directory of this distribution.
 *
-* Copyright (C) 2020 Manuel Kraus
+* Copyright (C) 2020 - 2021 Manuel Kraus
 */
 
 #include <Vocpp_Utils/NumericalUtilities.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
-#include<opencv2/imgproc.hpp>
-#include<iostream>
 #include<random>
 
 namespace
@@ -26,7 +24,7 @@ int32_t DrawIntInRange(const int32_t in_lowerEdge, const int32_t in_upperEdge, c
     static bool firstDrawn = true;
     if (firstDrawn && !in_fixedSeed)
     {
-        srand(static_cast<uint32_t>(time(NULL))); //seed
+        srand(static_cast<uint32_t>(time(nullptr))); //seed
         firstDrawn = false;
     }
     else if (firstDrawn && in_fixedSeed)
@@ -43,7 +41,7 @@ double DrawDoubleInRange(const double in_lowerEdge, const double in_upperEdge, c
     static bool firstDrawn = true;
     if (firstDrawn && !in_fixedSeed)
     {
-        srand(static_cast<uint>(time(NULL))); //seed
+        srand(static_cast<uint>(time(nullptr))); //seed
         firstDrawn = false;
     }
     else if(firstDrawn && in_fixedSeed)

@@ -11,8 +11,6 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 
-#include <iostream>
-
 namespace VOCPP
 {
 
@@ -55,9 +53,8 @@ public:
     Frame(double* const in_grayImgData, uint32_t in_width, uint32_t in_height, uint32_t in_frameId) : m_Id(s_invalidFrameId)
     {
         // No image data
-        if (in_grayImgData == NULL)
+        if (in_grayImgData == nullptr)
         {
-            std::cout << "[Frame]: No image data provided" << std::endl;
             m_validFrame = false;
         }
         // Valid image data
@@ -74,12 +71,7 @@ public:
       */
     Frame(const cv::Mat1d& in_image , uint32_t in_frameId) : m_Id(s_invalidFrameId)
     {
-        if (in_image.dims != 2)
-        {
-            std::cout << "[Frame]: Non-grayscale image has been provided" << std::endl;
-        }
-        // Valid image data
-        else
+        if (in_image.dims == 2)
         {
             m_grayImage = in_image;
             m_Id = in_frameId;
