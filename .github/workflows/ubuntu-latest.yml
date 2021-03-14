@@ -11,7 +11,7 @@ on:
 jobs:
   ubuntu-macos-build:
 
-    runs-on: [Ubuntu-latest, Macos-latest]
+    runs-on: [Ubuntu-latest, macos-latest]
     
     steps:
     - uses: actions/checkout@v2
