@@ -1,4 +1,4 @@
-name: CI Ubuntu
+name: CI Ubuntu/MacOs
 
 on:
   push:
@@ -9,9 +9,9 @@ on:
     - master
 
 jobs:
-  ubuntu-build:
+  ubuntu-macos-build:
 
-    runs-on: ubuntu-latest
+    runs-on: [Ubuntu-latest, Macos-latest]
     
     steps:
     - uses: actions/checkout@v2
