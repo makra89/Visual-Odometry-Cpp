@@ -6,7 +6,6 @@
 */
 
 #include <Vocpp_Calibration/CalibrationModule.h>
-#include<iostream>
 
 namespace VOCPP
 {

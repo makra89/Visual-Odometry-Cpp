@@ -10,8 +10,6 @@
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <opencv2/calib3d.hpp>
 
-#include <iostream>
-
 namespace VOCPP
 {
 namespace DeltaPoseReconstruction

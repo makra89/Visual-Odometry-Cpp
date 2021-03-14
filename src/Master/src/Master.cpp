@@ -2,14 +2,11 @@
 * It is subject to the license terms in the LICENSE file
 * found in the top-level directory of this distribution.
 *
-* Copyright (C) 2020 Manuel Kraus
+* Copyright (C) 2020 - 2021 Manuel Kraus
 */
 
 #include <Vocpp_Master/Master.h>
-#include<iostream>
 #include <opencv2/opencv.hpp>
-
-
 
 namespace VOCPP
 {

@@ -1,9 +1,10 @@
 
-%module Vocpp
+%module(directors="1") Vocpp
 
 %{
 #define SWIG_FILE_WITH_INIT
 #include<Vocpp_Interface/Frame.h>
+#include<Vocpp_Interface/Tracing.h>
 #include<Vocpp_Interface/DeltaCameraPose.h>
 #include<Vocpp_Interface/CameraPose.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
@@ -49,6 +50,9 @@ public:
 } // namespace Calibration
 } // namespace VOCPP
 
+// Activate polymorphism for this class
+%feature("director") VOCPP::Tracer;
+%include<Vocpp_Interface/Tracing.h>
 %include<Vocpp_Interface/DeltaCameraPose.h>
 %include<Vocpp_Interface/CameraPose.h>
 %include<Vocpp_Master/Master.h>

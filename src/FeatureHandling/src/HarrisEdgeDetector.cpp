@@ -2,12 +2,12 @@
 * It is subject to the license terms in the LICENSE file
 * found in the top-level directory of this distribution.
 *
-* Copyright (C) 2020 Manuel Kraus
+* Copyright (C) 2021 Manuel Kraus
 */
 
 #include <Vocpp_FeatureHandling/HarrisEdgeDetector.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
-#include <iostream>
+#include <Vocpp_Utils/TracingImpl.h>
 
 namespace VOCPP
 {
@@ -32,7 +32,7 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
     if (in_frame.GetImage().dims != 2)
     {
         ret = false;
-        std::cout << "[HarrisEdgeDetector]: Non-grayscale image has been provided" << std::endl;
+        VOCPP_TRACE_ERROR("[HarrisEdgeDetector]: Non-grayscale image has been provided")
     }
     
     cv::Mat1d gradX, gradY;

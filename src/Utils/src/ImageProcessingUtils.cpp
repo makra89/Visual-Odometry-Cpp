@@ -7,8 +7,8 @@
 
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <Vocpp_Utils/ConversionUtils.h>
+#include <Vocpp_Utils/TracingImpl.h>
 #include<opencv2/imgproc.hpp>
-#include<iostream>
 
 namespace VOCPP
 {
@@ -93,7 +93,7 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat1d& in_image, cv::Mat1d& out_p
     else if (!correctPatchDimX || !correctPatchDimY)
     {
         ret = false;
-        std::cout << "[ExtractImagePatchAroundPixelPos]: The dimension of the patch matrix are wrong" << std::endl;
+        VOCPP_TRACE_WARNING("[ExtractImagePatchAroundPixelPos]: The dimension of the patch matrix are wrong")
     }
     else
     {

@@ -13,7 +13,7 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 #include <unordered_map>
-#include <iostream>
+
 #include <map>
 
 namespace VOCPP

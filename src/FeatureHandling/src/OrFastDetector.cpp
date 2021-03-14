@@ -7,6 +7,8 @@
 
 #include <Vocpp_FeatureHandling/OrFastDetector.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
+#include <Vocpp_Utils/TracingImpl.h>
+
 #include<opencv2/imgproc.hpp>
 
 namespace VOCPP
@@ -37,7 +39,7 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned
     if (in_frame.GetImage().dims != 2)
     {
         ret = false;
-        std::cout << "[OrientedFastDetector]: Non-grayscale image has been provided" << std::endl;
+        VOCPP_TRACE_ERROR("[OrientedFastDetector]: Non-grayscale image has been provided")
     }
     else
     {
