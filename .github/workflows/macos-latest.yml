@@ -1,0 +1,37 @@
+name: CI MacOS
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  macos-build:
+
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache OpenCV
+      id: cache-opencv
+      uses: actions/cache@v1
+      with:
+        path: ./opencv-install
+        key: ${{ runner.os }}-opencvUb
+        restore-keys: |
+          ${{ runner.os }}-opencv
+
+    - name: cmake configure without opencv
+      if: steps.cache-opencv.outputs.cache-hit != 'true'
+      run: cmake . -DCMAKE_BUILD_TYPE=Release -DBUILD_OPENCV=ON
+    - name: cmake configure with opencv
+      if: steps.cache-opencv.outputs.cache-hit == 'true'
+      run: cmake . -DOpenCV_DIR=opencv-install/lib/cmake/opencv4/ -DBUILD_OPENCV=OFF
+    - name: build
+      run: cmake --build . 
+    - name: run tests
+      run: ctest --verbose
