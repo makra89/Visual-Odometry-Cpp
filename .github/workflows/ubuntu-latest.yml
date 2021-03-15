@@ -1,4 +1,4 @@
-name: CI Ubuntu
+name: ci_ubuntu
 
 on:
   push:

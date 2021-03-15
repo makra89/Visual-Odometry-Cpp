@@ -1,7 +1,7 @@
 
-![CI Windows](https://github.com/makra89/Visual-Odometry-Cpp/workflows/windows-latest.yml/badge.svg?branch=master)
-![CI Ubuntu](https://github.com/makra89/Visual-Odometry-Cpp/workflows/ubuntu-latest.yml/badge.svg?branch=master)
-![CI MacOS](https://github.com/makra89/Visual-Odometry-Cpp/workflows/macos-latest.yml/badge.svg?branch=master)
+![CI Windows](https://github.com/makra89/Visual-Odometry-Cpp/workflows/ci_windows/badge.svg?branch=master)
+![CI Ubuntu](https://github.com/makra89/Visual-Odometry-Cpp/workflows/ci_ubuntu/badge.svg?branch=master)
+![CI MacOS](https://github.com/makra89/Visual-Odometry-Cpp/workflows/ci_macos/badge.svg?branch=master)
 
 <a href="https://codeclimate.com/github/makra89/Visual-Odometry-Cpp/maintainability"><img src="https://api.codeclimate.com/v1/badges/ae131ed274ff7c6a7b7f/maintainability" /></a>
 
