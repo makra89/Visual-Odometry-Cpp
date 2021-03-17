@@ -6,6 +6,7 @@
 */
 
 #include <Vocpp_Utils/FrameRotations.h>
+
 #include <gtest/gtest.h>
 
 TEST(ExtractRollPitchYawTest, ExtractAngles)

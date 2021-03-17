@@ -14,7 +14,7 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
-LshMatcher::LshMatcher(const unsigned int& in_maxDistance, const unsigned int& in_numHashFuncs) :
+LshMatcher::LshMatcher(const uint32_t& in_maxDistance, const uint32_t& in_numHashFuncs) :
     m_maxDistance(in_maxDistance),
     m_numHashFuncs(in_numHashFuncs),
     m_hashFuncs()
@@ -33,33 +33,34 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         return false;
     }
 
-    std::unordered_map<std::bitset<s_lengthHashFunc * 8U>, std::vector<unsigned int>> bucketTable;
+    std::unordered_map<std::bitset<s_lengthHashFunc * 8U>, std::vector<uint32_t>> bucketTable;
     IndexDescriptions(in_descSecond, bucketTable);
     
-    for (auto descFirst : in_descFirst)
+    for (uint32_t descIdx = 0U; descIdx < in_descFirst.size(); descIdx++)
     {
         // Search for match candidates
-        std::vector<int> candidateIds;
+        std::vector<uint32_t> candidateIds;
         candidateIds.reserve(m_numHashFuncs);
-        for (auto hashFunc : m_hashFuncs)
+        
+        for (uint32_t hashIdx = 0U; hashIdx < m_hashFuncs.size(); hashIdx++)
         {
            std::bitset<s_lengthHashFunc * 8U> bucketId;
-            for (unsigned int k = 0U; k < s_lengthHashFunc; k++)
+            for (uint32_t k = 0U; k < s_lengthHashFunc; k++)
             {
-                std::bitset<8U> bits(descFirst.GetDescription()[hashFunc[k]]);
-                for (unsigned int l = 0U; l < 8U; l++)
+                std::bitset<8U> bits(in_descFirst[descIdx].GetDescription()[m_hashFuncs[hashIdx][k]]);
+                for (uint32_t l = 0U; l < 8U; l++)
                 {
                     bucketId[k * 8U + l] = bits[l];
                 }
             }
             if (bucketTable.count(bucketId) > 0)
             {
-                for (auto candidate : bucketTable[bucketId])
+                for (uint32_t bucketIdx = 0U; bucketIdx < bucketTable[bucketId].size(); bucketIdx++)
                 {
-                    std::vector<int>::iterator it = std::find(candidateIds.begin(), candidateIds.end(), candidate);
+                    std::vector<uint32_t>::iterator it = std::find(candidateIds.begin(), candidateIds.end(), bucketTable[bucketId][bucketIdx]);
                     if (it == candidateIds.end())
                     {
-                        candidateIds.push_back(candidate);
+                        candidateIds.push_back(bucketTable[bucketId][bucketIdx]);
                     }
                 }
             }
@@ -70,11 +71,11 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
             }
         }
 
-        unsigned int smallestDist = UINT32_MAX;
-        unsigned int smallestIdx2 = 0U;
-        for (unsigned int index2 = 0U; index2 < candidateIds.size(); index2++)
+        uint32_t smallestDist = UINT32_MAX;
+        uint32_t smallestIdx2 = 0U;
+        for (uint32_t index2 = 0U; index2 < candidateIds.size(); index2++)
         {
-            unsigned int distance = BinaryFeatureDescription::ComputeHammingDistance(descFirst, in_descSecond[candidateIds[index2]], m_maxDistance + 1U);
+            uint32_t distance = BinaryFeatureDescription::ComputeHammingDistance(in_descFirst[descIdx], in_descSecond[candidateIds[index2]], m_maxDistance + 1U);
             
             if (distance < smallestDist)
             {
@@ -86,7 +87,8 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         // Check if distance is smaller than threshold
         if (smallestDist <= m_maxDistance)
         {
-            out_matches.push_back(BinaryDescriptionMatch{ descFirst,in_descSecond[candidateIds[smallestIdx2]] , static_cast<double>(smallestDist) });
+            BinaryDescriptionMatch match(in_descFirst[descIdx], in_descSecond[candidateIds[smallestIdx2]] , static_cast<double>(smallestDist));
+            out_matches.push_back(match);
         }
     }
     
@@ -95,31 +97,31 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
 
 void LshMatcher::GenerateHashFuncs()
 {
-    for (unsigned int l = 0U; l < m_numHashFuncs; l++)
+    for (uint32_t l = 0U; l < m_numHashFuncs; l++)
     {
-        std::vector<unsigned int> hashFunc;
+        std::vector<uint32_t> hashFunc;
         hashFunc.reserve(s_lengthHashFunc);
-        for (unsigned int k = 0U; k < s_lengthHashFunc; k++)
+        for (uint32_t k = 0U; k < s_lengthHashFunc; k++)
         {
-            hashFunc.push_back(static_cast<unsigned int>(Utils::DrawIntInRange(0, BinaryFeatureDescription::GetSizeInBytes() - 1)));
+            hashFunc.push_back(static_cast<uint32_t>(Utils::DrawIntInRange(0, 32U - 1)));
         }
 
         m_hashFuncs.push_back(hashFunc);
     }
 }
 
-void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<std::bitset<s_lengthHashFunc * 8U>, std::vector<unsigned int>>& out_bucketTable)
+void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<std::bitset<s_lengthHashFunc * 8U>, std::vector<uint32_t>>& out_bucketTable)
 {
-    unsigned int descId = 0U;
-    for (auto description : in_desc)
+    uint32_t descId = 0U;
+    for (uint32_t descIdx = 0U; descIdx < in_desc.size(); descIdx++)
     {
-        for (auto hashFunc : m_hashFuncs)
+        for (uint32_t hashIdx = 0U; hashIdx < m_hashFuncs.size(); hashIdx++)
         {
             std::bitset<s_lengthHashFunc * 8U> bucketId;
-            for (unsigned int k = 0U; k < s_lengthHashFunc; k++)
+            for (uint32_t k = 0U; k < s_lengthHashFunc; k++)
             {
-                std::bitset<8U> bits(description.GetDescription()[hashFunc[k]]);
-                for (unsigned int l = 0U; l < 8U; l++)
+                std::bitset<8U> bits(in_desc[descIdx].GetDescription()[m_hashFuncs[hashIdx][k]]);
+                for (uint32_t l = 0U; l < 8U; l++)
                 {
                     bucketId[k * 8U + l] = bits[l];
                 }
@@ -131,7 +133,7 @@ void LshMatcher::IndexDescriptions(const std::vector<BinaryFeatureDescription>& 
             }
             else
             {
-                std::vector<unsigned int> table;
+                std::vector<uint32_t> table;
                 table.push_back(descId);
                 out_bucketTable[bucketId] = table;
             }

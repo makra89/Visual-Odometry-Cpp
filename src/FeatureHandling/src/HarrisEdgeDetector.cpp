@@ -15,8 +15,8 @@ namespace FeatureHandling
 {
 
 
-HarrisEdgeDetector::HarrisEdgeDetector(const unsigned int in_maxNumFeatures, const double in_k, const std::string& in_kernelName,
-    const int in_localMaxDistance)
+HarrisEdgeDetector::HarrisEdgeDetector(const uint32_t in_maxNumFeatures, const double in_k, const std::string& in_kernelName,
+    const uint32_t in_localMaxDistance)
 {
     m_maxNumFeatures = in_maxNumFeatures;
     m_k = in_k;
@@ -39,9 +39,9 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
     Utils::Compute2DGradients(in_frame.GetImage(), gradX, gradY);
     
     cv::Mat1d response = cv::Mat1d::zeros(in_frame.GetImage().rows, in_frame.GetImage().cols);
-    for (int i = 1; i < in_frame.GetImage().cols - 1; i++)
+    for (int32_t i = 1; i < in_frame.GetImage().cols - 1; i++)
     {
-        for (int j = 1; j < in_frame.GetImage().rows - 1; j++)
+        for (int32_t j = 1; j < in_frame.GetImage().rows - 1; j++)
         {
             response(j,i) = ComputeScore(in_frame.GetImage(), i, j, 3);
         }
@@ -51,10 +51,11 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
     std::vector<Utils::LocalMaximum> localMax;
     Utils::ExtractLocalMaxima(response, m_localMaxDistance, localMax);
 
-    unsigned int featureId = 0U;
-    for (auto max : localMax)
+    uint32_t featureId = 0U;
+    for (uint32_t idx = 0U; idx < localMax.size(); idx++)
     {
-        out_features.push_back(Feature{ featureId, in_frame.GetId(), max.posX, max.posY, max.value});
+        Feature feat = { featureId, in_frame.GetId(), localMax[idx].posX, localMax[idx].posY, localMax[idx].value };
+        out_features.push_back(feat);
         featureId++;
     }
 
@@ -68,10 +69,10 @@ bool HarrisEdgeDetector::ExtractFeatures(const Frame& in_frame, std::vector<Feat
     return ret;
 }
 
-double HarrisEdgeDetector::ComputeScore(const cv::Mat1d& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize)
+double HarrisEdgeDetector::ComputeScore(const cv::Mat1d& in_img, const int32_t& in_centerX, const int32_t& in_centerY, const int32_t& in_blockSize)
 {
     // block size has to be an odd number
-    int distanceFromCenter = (in_blockSize - 1) / 2;
+    int32_t distanceFromCenter = (in_blockSize - 1) / 2;
     // Check range, +1 is necessary since the Sobel Kernel is 3x3
     bool inRangeX = in_centerX - distanceFromCenter - 1 >= 0 && in_centerX + distanceFromCenter + 1 < in_img.cols;
     bool inRangeY = in_centerY - distanceFromCenter - 1 >= 0 && in_centerY + distanceFromCenter + 1 < in_img.rows;
@@ -84,13 +85,13 @@ double HarrisEdgeDetector::ComputeScore(const cv::Mat1d& in_img, const int& in_c
         double gradYy = 0;
         double gradXy = 0;
         
-        for (int j = in_centerY - distanceFromCenter; j < in_centerY + distanceFromCenter + 1; j++)
+        for (int32_t j = in_centerY - distanceFromCenter; j < in_centerY + distanceFromCenter + 1; j++)
         {
             const double* currRowPtr = in_img.ptr<double>(j);
             const double* upRowPtr = in_img.ptr<double>(j - 1);
             const double* lowRowPtr = in_img.ptr<double>(j + 1);
 
-            for (int i = in_centerX - distanceFromCenter; i < in_centerX + distanceFromCenter + 1; i++)
+            for (int32_t i = in_centerX - distanceFromCenter; i < in_centerX + distanceFromCenter + 1; i++)
             {
                 double gradX = upRowPtr[i + 1] - upRowPtr[i - 1] + 2.0F * (currRowPtr[i + 1] - currRowPtr[i - 1]) + lowRowPtr[i + 1] - lowRowPtr[i - 1];
                 double gradY = lowRowPtr[i - 1] - upRowPtr[i - 1] + 2.0F * (lowRowPtr[i] - upRowPtr[i]) + lowRowPtr[i + 1] - upRowPtr[i + 1];

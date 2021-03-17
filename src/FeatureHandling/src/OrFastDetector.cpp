@@ -9,7 +9,7 @@
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <Vocpp_Utils/TracingImpl.h>
 
-#include<opencv2/imgproc.hpp>
+#include<opencv2/imgproc/imgproc.hpp>
 
 namespace VOCPP
 {
@@ -17,10 +17,10 @@ namespace FeatureHandling
 {
 
 // The version of the FAST feature detector used here uses a ring of 16 pixels around the center pixel (radius = 3 --> diameter 7)
-const int OrientedFastDetector::s_featureSize = 7;
+const uint32_t OrientedFastDetector::s_featureSize = 7U;
 
-OrientedFastDetector::OrientedFastDetector(const double& in_intDiffTresh, const int& in_numPixelsAboveThresh,
-    const int& in_harrisBlockSize, const int& in_distToEdges) :
+OrientedFastDetector::OrientedFastDetector(const double& in_intDiffTresh, const uint32_t& in_numPixelsAboveThresh,
+    const uint32_t& in_harrisBlockSize, const uint32_t& in_distToEdges) :
     m_relDiffTresh(in_intDiffTresh),
     m_numPixelsAboveThresh(in_numPixelsAboveThresh),
     m_harrisBlockSize(in_harrisBlockSize),
@@ -30,7 +30,7 @@ OrientedFastDetector::OrientedFastDetector(const double& in_intDiffTresh, const 
 }
 
 
-bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned int& in_maxNumFeatures, std::vector<Feature>& out_features)
+bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const uint32_t& in_maxNumFeatures, std::vector<Feature>& out_features)
 {
     bool ret = true;
     // Reserve memory for maximum number of features
@@ -44,13 +44,13 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned
     else
     {
         cv::Mat1d harrisScore = cv::Mat1d::zeros(in_frame.GetImage().rows, in_frame.GetImage().cols);
-        for (int i = m_distToEdges; i < in_frame.GetImage().rows - m_distToEdges; i++)
+        for (int32_t i = m_distToEdges; i < in_frame.GetImage().rows - static_cast<int32_t>(m_distToEdges); i++)
         {
             double* rowPtr = harrisScore.ptr<double>(i);
-            for (int j = m_distToEdges; j < in_frame.GetImage().cols - m_distToEdges; j++)
+            for (int32_t j = m_distToEdges; j < in_frame.GetImage().cols - static_cast<int32_t>(m_distToEdges); j++)
             {
-                const int score = CheckIntensities(in_frame.GetImage(), j, i, in_frame.GetImage().cols, in_frame.GetImage().rows);
-                if (score >= m_numPixelsAboveThresh)
+                const int32_t score = CheckIntensities(in_frame.GetImage(), j, i, in_frame.GetImage().cols, in_frame.GetImage().rows);
+                if (score >= static_cast<int32_t>(m_numPixelsAboveThresh))
                 {
                     rowPtr[j] = m_harrisDetector.ComputeScore(in_frame.GetImage(), j, i, m_harrisBlockSize);
                 }
@@ -70,13 +70,13 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned
         }
         
         // Calculate Harris response for all surviving features
-        unsigned int featureId = 0U;
-        unsigned int maxId = 0U;
-        for (auto max : localMax)
+        uint32_t featureId = 0U;
+        uint32_t maxId = 0U;
+        for (uint32_t idx = 0U; idx < localMax.size(); idx++)
         {
             cv::Mat1d patch = cv::Mat1d::zeros(s_featureSize, s_featureSize);
             bool patchExtractSuccess = Utils::ExtractImagePatchAroundPixelPos(in_frame.GetImage(), patch,  (s_featureSize - 1) / 2,
-                static_cast<int>(max.posX), static_cast<int>(max.posY));
+                static_cast<int32_t>(localMax[idx].posX), static_cast<int32_t>(localMax[idx].posY));
             
             // Calculate angle if successful and create feature
             if (patchExtractSuccess)
@@ -87,7 +87,8 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned
                 const double vecX = centroidX - (s_featureSize - 1) / 2;
                 const double vecY = centroidY - (s_featureSize - 1) / 2;
                 double angle = static_cast<double>(std::atan2(vecY, vecX));
-                out_features.push_back(Feature{ featureId, in_frame.GetId(), max.posX, max.posY, max.value, angle, static_cast<double>(s_featureSize)});
+                Feature feat = { featureId, in_frame.GetId(), localMax[idx].posX, localMax[idx].posY, localMax[idx].value, angle, static_cast<double>(s_featureSize) };
+                out_features.push_back(feat);
                 featureId++;
             }
             maxId++;
@@ -97,10 +98,10 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const unsigned
     return ret;
 }
 
-int OrientedFastDetector::CheckIntensities(const cv::Mat1d& in_image, const int& in_coordX, const int& in_coordY, 
-    const int& in_imgWidth, const int& in_imgHeight)
+int32_t OrientedFastDetector::CheckIntensities(const cv::Mat1d& in_image, const int32_t& in_coordX, const int32_t& in_coordY, 
+    const int32_t& in_imgWidth, const int32_t& in_imgHeight)
 {
-    int ret = 0;
+    int32_t ret = 0;
     
     const double nucleusInt = in_image(in_coordY, in_coordX);
     // Remove pixels with very small intensity
@@ -110,7 +111,7 @@ int OrientedFastDetector::CheckIntensities(const cv::Mat1d& in_image, const int&
     }
 
     // Pixel 1
-    int passLower = (in_image(in_coordY - 3, in_coordX) + (m_relDiffTresh * nucleusInt)) < nucleusInt ? 1 : 0;
+    int32_t passLower = (in_image(in_coordY - 3, in_coordX) + (m_relDiffTresh * nucleusInt)) < nucleusInt ? 1 : 0;
     // Pixel 5
     if ((in_image(in_coordY, in_coordX + 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) passLower++;
     // Pixel 9
@@ -120,7 +121,7 @@ int OrientedFastDetector::CheckIntensities(const cv::Mat1d& in_image, const int&
     
     if (passLower < 3)
     {
-        int passHigher = (in_image(in_coordY - 3, in_coordX) - (m_relDiffTresh * nucleusInt)) > nucleusInt ? 1 : 0;
+        int32_t passHigher = (in_image(in_coordY - 3, in_coordX) - (m_relDiffTresh * nucleusInt)) > nucleusInt ? 1 : 0;
         // Pixel 5
         if ((in_image(in_coordY, in_coordX + 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) passHigher++;
         // Pixel 9
@@ -141,10 +142,10 @@ int OrientedFastDetector::CheckIntensities(const cv::Mat1d& in_image, const int&
     return ret;
 }
 
-int OrientedFastDetector::CheckAll(const cv::Mat1d& in_image, const int& in_coordX, const int& in_coordY, const int& in_passLower, const int& in_passHigher)
+int32_t OrientedFastDetector::CheckAll(const cv::Mat1d& in_image, const int32_t& in_coordX, const int32_t& in_coordY, const int32_t& in_passLower, const int32_t& in_passHigher)
 {
     const double nucleusInt = in_image(in_coordY, in_coordX);
-    int score = 0;
+    int32_t score = 0;
     
     if (in_passLower > 0)
     {

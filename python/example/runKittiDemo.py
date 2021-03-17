@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ground_truth_positions = np.array(ground_truth_positions)
 
     # Activate tracing on Debug level
-    Vocpp.SetTraceLevel(Vocpp.TraceLevel_DEBUG)
+    Vocpp.SetTraceLevel(Vocpp.DEBUG)
     tracer = StdOutTracer()
     Vocpp.RegisterTracer(tracer)
 

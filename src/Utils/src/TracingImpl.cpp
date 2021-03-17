@@ -10,10 +10,10 @@
 namespace VOCPP
 {
 
-static TraceLevel s_traceLevel = TraceLevel::INFO;
+static TraceLevel::Enum s_traceLevel = TraceLevel::INFO;
 static Tracer* s_tracer = nullptr;
 
-void SetTraceLevel(const TraceLevel& in_traceLevel)
+void SetTraceLevel(const TraceLevel::Enum& in_traceLevel)
 {
     s_traceLevel = in_traceLevel;
 }
@@ -38,7 +38,7 @@ Tracer* GetTracerImpl()
     return s_tracer;
 }
 
-bool TraceLevelActive(const TraceLevel& in_traceLevel)
+bool TraceLevelActive(const TraceLevel::Enum& in_traceLevel)
 {
     return in_traceLevel >= s_traceLevel;
 }

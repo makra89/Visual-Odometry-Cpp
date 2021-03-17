@@ -17,6 +17,8 @@ target_include_directories(Vocpp_Calibration
 )
 
 target_link_libraries(Vocpp_Calibration
+    PUBLIC
+        Vocpp_Interface
     PRIVATE
         Vocpp_Utils
         ${OpenCV_LIBS} 

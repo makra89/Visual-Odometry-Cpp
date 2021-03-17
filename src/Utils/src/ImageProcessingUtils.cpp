@@ -8,14 +8,15 @@
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <Vocpp_Utils/ConversionUtils.h>
 #include <Vocpp_Utils/TracingImpl.h>
-#include<opencv2/imgproc.hpp>
+
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace VOCPP
 {
 namespace Utils
 {
 
-cv::Mat1d GetWindowKernel(const int size)
+cv::Mat1d GetWindowKernel(const int32_t size)
 {
     return cv::Mat1d::ones(size, size);
 }
@@ -42,7 +43,7 @@ void Compute2DGradients(const cv::Mat1d& in_image, cv::Mat1d& out_gradX, cv::Mat
     cv::sepFilter2D(in_image, out_gradY, CV_64F, sobelRowY, sobelColY);
 }
 
-void ExtractLocalMaxima(const cv::Mat1d& in_image, const int in_distance, std::vector<LocalMaximum>& out_localMaxima)
+void ExtractLocalMaxima(const cv::Mat1d& in_image, const int32_t in_distance, std::vector<LocalMaximum>& out_localMaxima)
 {
     cv::Mat1d dilatedImage;
     cv::Mat1d kernel = GetWindowKernel(2 * in_distance + 1);
@@ -59,7 +60,8 @@ void ExtractLocalMaxima(const cv::Mat1d& in_image, const int in_distance, std::v
             // this pixel has the maximum value
             if (greaterZero && rowImage[j] == rowDilImage[j])
             {
-                out_localMaxima.push_back(LocalMaximum{ static_cast<double>(j), static_cast<double>(i), rowImage[j]});
+                LocalMaximum localMax = { static_cast<double>(j), static_cast<double>(i), rowImage[j] };
+                out_localMaxima.push_back(localMax);
             }
         }
     }
@@ -85,7 +87,7 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat1d& in_image, cv::Mat1d& out_p
             double* rowPtrPatch = out_patch.ptr<double>(j);
             for (int32_t i = 0; i < out_patch.size[1]; i++)
             {
-                int imagePosX = in_pixelPosX - in_distanceAroundCenter + i;
+                int32_t imagePosX = in_pixelPosX - in_distanceAroundCenter + i;
                 rowPtrPatch[i] = rowPtr[imagePosX];
             }
         }
@@ -107,27 +109,27 @@ bool ExtractImagePatchAroundPixelPos(const cv::Mat1d& in_image, cv::Mat1d& out_p
 void NormalizePointSet(const std::vector<cv::Point2d>& in_points, std::vector<cv::Point2d>& out_normPoints, cv::Mat1d& out_transform)
 {
     double meanX = 0, meanY = 0;
-    for (auto element : in_points)
+    for (uint32_t idx = 0U; idx < in_points.size(); idx++)
     {
-        meanX += static_cast<double>(element.x / in_points.size());
-        meanY += static_cast<double>(element.y / in_points.size());
+        meanX += (in_points[idx].x / static_cast<double>(in_points.size()));
+        meanY += (in_points[idx].y / static_cast<double>(in_points.size()));
     }
 
     double meanDist = 0;
-    for (auto element : in_points)
+    for (uint32_t idx = 0U; idx < in_points.size(); idx++)
     {
-        const double shiftedX = static_cast<double>(element.x) - meanX;
-        const double shiftedY = static_cast<double>(element.y) - meanY;
+        const double shiftedX = in_points[idx].x - meanX;
+        const double shiftedY = in_points[idx].y - meanY;
 
         meanDist += ((std::pow(shiftedX, 2) + std::pow(shiftedY, 2)) / in_points.size());
     }
 
     const double scale = std::sqrt(2.0F) / std::sqrt(meanDist);
 
-    for (auto element : in_points)
+    for (uint32_t idx = 0U; idx < in_points.size(); idx++)
     {
-        const double normX = scale * (static_cast<double>(element.x) - meanX);
-        const double normY = scale * (static_cast<double>(element.y) - meanY);
+        const double normX = scale * (in_points[idx].x - meanX);
+        const double normY = scale * (in_points[idx].y - meanY);
 
         out_normPoints.push_back(cv::Point2d(normX, normY));
     }
@@ -200,7 +202,7 @@ bool DecomposeEssentialMatrix(const cv::Mat1d& in_essentialMat, const cv::Mat1d&
     // Test for at least 10 coordinates which projection matrix to choose
     const uint32_t numTestCandidates = std::min(10U, static_cast<uint32_t>(inout_inlierIndices.size()));
     uint32_t numVotes[4] = { 0U, 0U, 0U, 0U };
-
+    
     for (uint32_t it = 0U; it < numTestCandidates; it++)
     {
         // Check which of the solutions is the correct one by demanding that the triangulated point is in front of both cameras
@@ -222,16 +224,17 @@ bool DecomposeEssentialMatrix(const cv::Mat1d& in_essentialMat, const cv::Mat1d&
     int64_t bestId = std::distance(numVotes, std::max_element(numVotes, numVotes + 4U));
 
     std::vector<uint32_t> refinedInliers;
-    for (auto index : inout_inlierIndices)
+    
+    for (uint32_t idx = 0U; idx < inout_inlierIndices.size(); idx++)
     {
         cv::Point3d triangPoint;
         PointTriangulationLinear(camProjectionMatCandidates[bestId].ConvertToImageProjectionMatrix(in_calibMat), camProjMatRight.ConvertToImageProjectionMatrix(in_calibMat),
-            in_imageCoordLeft[index], in_imageCoordRight[index], triangPoint);
+            in_imageCoordLeft[inout_inlierIndices[idx]], in_imageCoordRight[inout_inlierIndices[idx]], triangPoint);
         
         if (triangPoint.z > 0. && cv::norm(triangPoint) < 1000.)
         {
             out_triangulatedPoints.push_back(triangPoint);
-            refinedInliers.push_back(index);
+            refinedInliers.push_back(inout_inlierIndices[idx]);
         }
     }
 

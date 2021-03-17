@@ -30,7 +30,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrbDetectorDescriptor(const unsigned int& in_numPyramidLayers=1U, const double& in_layerScaleFactor=0.8333);
+    OrbDetectorDescriptor(const uint32_t& in_numPyramidLayers=1U, const double& in_layerScaleFactor=0.8333);
 
     /**
       * /brief Extract descriptions from a provided grayscale image frame.
@@ -40,7 +40,7 @@ public:
       * \param[out] out_descriptions feature descriptions extracted from the frame
       * \return True if at least one description has been detected, false otherwise
       */
-    bool ExtractFeatureDescriptions(const Frame& in_frame, const int& in_maxNumFeatures, std::vector<BinaryFeatureDescription>& out_descriptions);
+    bool ExtractFeatureDescriptions(const Frame& in_frame, const uint32_t& in_maxNumFeatures, std::vector<BinaryFeatureDescription>& out_descriptions);
 
 private:
     // It is not allowed to copy the detector directly
@@ -50,11 +50,11 @@ private:
     struct PyramidLayer
     {
         double scale;
-        int numFeatures;
+        uint32_t numFeatures;
         cv::Mat1d image;
     };
 
-    const unsigned int m_numLayers; ///< number of pyramid layers generated for one frame
+    const uint32_t m_numLayers; ///< number of pyramid layers generated for one frame
     const double m_layerScaleFactor; ///< scale factor used to downsample the image for each octave
 
     FeatureHandling::OrientedFastDetector m_fastDetector;

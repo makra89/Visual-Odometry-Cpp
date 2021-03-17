@@ -21,13 +21,13 @@ using namespace VOCPP;
 class StdOutTracer : public Tracer
 {
 public:
-    virtual void receiveTrace(const TraceLevel& in_traceLevel, const char* const in_msg)
+    virtual void receiveTrace(const TraceLevel::Enum& in_traceLevel, const char* const in_msg)
     {
         std::cout << in_msg << std::endl;
     }
 };
 
-int main(int argc, char** argv)
+int32_t main(int32_t argc, char** argv)
 {
     if (argc != 2)
    {
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     // Load calibration, we know it is valid
     (void)voMaster.LoadCalibration(monoCalib);
 
-    int frameId = 0U;
+    int32_t frameId = 0U;
 
     cv::Mat1d currentPose = cv::Mat1d::eye(3, 3);
     cv::Mat1d currentCamCenter = cv::Mat1d::zeros(3, 1);

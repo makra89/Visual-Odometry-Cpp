@@ -28,8 +28,8 @@ public:
     /**
       * /brief Constructor
       */
-    OrientedFastDetector(const double& in_intRelTresh=0.2, const int& in_numPixelsAboveThresh=12,
-        const int& in_harrisBlockSize=3, const int& in_distToEdges=31);
+    OrientedFastDetector(const double& in_intRelTresh=0.2, const uint32_t& in_numPixelsAboveThresh=12U,
+        const uint32_t& in_harrisBlockSize=3U, const uint32_t& in_distToEdges=31U);
 
     /**
       * /brief Extract features from a provided grayscale image frame.
@@ -39,7 +39,7 @@ public:
       * \param[out] out_features features extracted from the frame
       * \return True if at least one feature has been detected, false otherwise
       */
-    bool ExtractFeatures(const Frame& in_frame, const unsigned int& in_maxNumFeatures, std::vector<Feature>& out_features);
+    bool ExtractFeatures(const Frame& in_frame, const uint32_t& in_maxNumFeatures, std::vector<Feature>& out_features);
 
 private:
     // It is not allowed to copy the detector directly
@@ -52,20 +52,20 @@ private:
       * Internally first 4 edge pixels are checked and then CheckAll() is called
       * \return score, can be compared against m_numPixelsAboveThresh
       */
-    int CheckIntensities(const cv::Mat1d& in_image, const int& in_coordX, const int& in_coordY, const int& in_imgWidth, const int& in_imgHeight);
+    int32_t CheckIntensities(const cv::Mat1d& in_image, const int32_t& in_coordX, const int32_t& in_coordY, const int32_t& in_imgWidth, const int32_t& in_imgHeight);
     
     /**
       * /brief Called by CheckIntensities()
       */
-    int CheckAll(const cv::Mat1d& in_image, const int& in_coordX, const int& in_coordY, const int& in_passLower, const int& in_passHigher);
+    int32_t CheckAll(const cv::Mat1d& in_image, const int32_t& in_coordX, const int32_t& in_coordY, const int32_t& in_passLower, const int32_t& in_passHigher);
 
     const double m_relDiffTresh; ///< relative treshold for pixel intensity comparison
-    const int m_numPixelsAboveThresh; ///< necessary number of pixels above or below threshold for a detection
-    const int m_harrisBlockSize; ///< size of patch over which harris detector averages gradients (has to be odd number)
-    const int m_distToEdges; /// minimum distance to edges of reported features [pixels]
+    const uint32_t m_numPixelsAboveThresh; ///< necessary number of pixels above or below threshold for a detection
+    const uint32_t m_harrisBlockSize; ///< size of patch over which harris detector averages gradients (has to be odd number)
+    const uint32_t m_distToEdges; /// minimum distance to edges of reported features [pixels]
     HarrisEdgeDetector m_harrisDetector; ///< Harris Edge detector, used to compute feature scores
 
-    static const int s_featureSize; ///< path size which is taken into account during feature detection and orientation determination
+    static const uint32_t s_featureSize; ///< path size which is taken into account during feature detection and orientation determination
 };
 
 } //namespace FeatureHandling

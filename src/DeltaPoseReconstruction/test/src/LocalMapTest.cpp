@@ -27,8 +27,8 @@ TEST(LocalMapTest, CreateNewLandmarks)
     std::vector<LandmarkPosition> landmarks;
     std::vector<BinaryDescriptionMatch> matches;
     LandmarkPosition dummyLandmark = { 1.0, 2.0, 3.0 };
-    unsigned int currentFrameId = 1U;
-    unsigned int lastFrameId = 0U;
+    uint32_t currentFrameId = 1U;
+    uint32_t lastFrameId = 0U;
     
     // Create a landmark with current frame ID = 1 and feature Id = 5
     // and last frame ID = 0 and feature Id = 7
@@ -73,8 +73,8 @@ TEST(LocalMapTest, UpdateExistingLandmarks)
     std::vector<LandmarkPosition> landmarks;
     std::vector<BinaryDescriptionMatch> matches;
     LandmarkPosition dummyLandmark = { 1.0, 2.0, 3.0 };
-    unsigned int currentFrameId = 1U;
-    unsigned int lastFrameId = 0U;
+    uint32_t currentFrameId = 1U;
+    uint32_t lastFrameId = 0U;
 
     // Create a landmark with current frame ID = 1 and feature Id = 5
     // and last frame ID = 0 and feature Id = 7
@@ -138,8 +138,8 @@ TEST(LocalMapTest, RemoveUntrackedLandmarks)
     std::vector<LandmarkPosition> landmarks;
     std::vector<BinaryDescriptionMatch> matches;
     LandmarkPosition dummyLandmark = { 1.0, 2.0, 3.0 };
-    unsigned int currentFrameId = 1U;
-    unsigned int lastFrameId = 0U;
+    uint32_t currentFrameId = 1U;
+    uint32_t lastFrameId = 0U;
 
     // Create a landmark with current frame ID = 1 and feature Id = 5
     // and last frame ID = 0 and feature Id = 7
@@ -198,8 +198,8 @@ TEST(LocalMapTest, CalculateRelativeScale)
     std::vector<BinaryDescriptionMatch> matches;
     LandmarkPosition landmarkPos0Frame1Frame0 = { 1.0, 2.0, 3.0 };
     LandmarkPosition landmarkPos1Frame1Frame0 = { 1.5, 2.5, 3.5 };
-    unsigned int currentFrameId = 1U;
-    unsigned int lastFrameId = 0U;
+    uint32_t currentFrameId = 1U;
+    uint32_t lastFrameId = 0U;
     // Insert two landmarks
     std::vector<uint8_t> dummyDesc;
     BinaryFeatureDescription frame0feat0(Feature{ 0U, 0U }, dummyDesc);

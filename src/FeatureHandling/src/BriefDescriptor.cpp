@@ -6,22 +6,22 @@
 */
 
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
-#include<Vocpp_Utils/NumericalUtilities.h>
-#include<Vocpp_Utils/IntImage.h>
-#include<Vocpp_Utils/TracingImpl.h>
+#include <Vocpp_Utils/NumericalUtilities.h>
+#include <Vocpp_Utils/IntImage.h>
+#include <Vocpp_Utils/TracingImpl.h>
 
-#include<random>
-#include<fstream>
+#include <random>
+#include <fstream>
 #include <map>
+#include <cmath>
 
 namespace VOCPP
 {
 namespace FeatureHandling
 {
 
-
-BriefDescriptor::BriefDescriptor(const int& in_randomPairDrawRadius, const int& in_areaDetRadius,
-    const bool& in_trainingMode, std::string in_filePath, const unsigned int& in_numFramesForTraining) :
+BriefDescriptor::BriefDescriptor(const uint32_t& in_randomPairDrawRadius, const uint32_t& in_areaDetRadius,
+    const bool& in_trainingMode, std::string in_filePath, const uint32_t& in_numFramesForTraining) :
     m_randomPairDrawRadius(in_randomPairDrawRadius),
     m_areaDetRadius(in_areaDetRadius),
     m_pairs(),
@@ -60,13 +60,13 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
     Utils::IntImage integImage(in_frame.GetImage());
 
     // Loop over keypoints
-    for (auto feature : in_features)
+    for (uint32_t keyIdx = 0U; keyIdx < in_features.size(); keyIdx++)
     {
         std::vector<bool> description;
         description.reserve(s_numRandomPairs);
         
-        if (m_trainingMode && ( (feature.imageCoordX < 3 * m_randomPairDrawRadius || (feature.imageCoordX + 3 * m_randomPairDrawRadius) > in_frame.GetImage().cols)
-            || (feature.imageCoordY < 3 * m_randomPairDrawRadius || (feature.imageCoordY + 3 * m_randomPairDrawRadius) > in_frame.GetImage().rows)))
+        if (m_trainingMode && ( (in_features[keyIdx].imageCoordX < 3 * m_randomPairDrawRadius || (in_features[keyIdx].imageCoordX + 3 * m_randomPairDrawRadius) > in_frame.GetImage().cols)
+            || (in_features[keyIdx].imageCoordY < 3 * m_randomPairDrawRadius || (in_features[keyIdx].imageCoordY + 3 * m_randomPairDrawRadius) > in_frame.GetImage().rows)))
         {
             continue;
         }
@@ -86,16 +86,16 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
 
 
         // Loop over pairs
-        unsigned int pairId = 0U;
-        unsigned int numSucessfulPairs = 0U;
-        for (auto pair : m_pairs)
+        uint32_t pairId = 0U;
+        uint32_t numSucessfulPairs = 0U;
+        for (uint32_t pairIdx = 0U; pairIdx < m_pairs.size(); pairIdx++)
         {
-            PointPair rotPair = RotatePair(feature.angle, pair);
+            PointPair rotPair = RotatePair(in_features[keyIdx].angle, m_pairs[pairIdx]);
             
-            int indFirstX = static_cast<int>(rotPair.x1 + feature.imageCoordX);
-            int indFirstY = static_cast<int>(rotPair.y1 + feature.imageCoordY);
-            int indSecX = static_cast<int>(rotPair.x2 + feature.imageCoordX);
-            int indSecY = static_cast<int>(rotPair.y2 + feature.imageCoordY);
+            uint32_t indFirstX = static_cast<uint32_t>(rotPair.x1 + in_features[keyIdx].imageCoordX);
+            uint32_t indFirstY = static_cast<uint32_t>(rotPair.y1 + in_features[keyIdx].imageCoordY);
+            uint32_t indSecX = static_cast<uint32_t>(rotPair.x2 + in_features[keyIdx].imageCoordX);
+            uint32_t indSecY = static_cast<uint32_t>(rotPair.y2 + in_features[keyIdx].imageCoordY);
 
             // Check whether all indices are within range
             const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < in_frame.GetImage().size[1]);
@@ -117,7 +117,7 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
 
                 if (m_trainingMode && m_trainPositions.size() <= pairId)
                 {
-                    m_trainPositions.push_back(TrainPosition(pairId, pair));
+                    m_trainPositions.push_back(TrainPosition(pairId, m_pairs[pairIdx]));
                     m_trainPositions[pairId].AddVal(bin);
 
                 }
@@ -150,22 +150,22 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
         if (numSucessfulPairs == s_numRandomPairs)
         {
             std::vector<uint8_t> descriptionUint;
-            descriptionUint.reserve(BinaryFeatureDescription::GetSizeInBytes());
+            descriptionUint.reserve(32U);
 
-            for (unsigned int i = 0U; i < description.size(); i=i+8U)
+            for (uint32_t i = 0U; i < description.size(); i=i+8U)
             {
                 uint8_t val = static_cast<uint8_t>(description[i]);
-                val += static_cast<uint8_t>(pow(2, 1) * description[i + 1U]);
-                val += static_cast<uint8_t>(pow(2, 2) * description[i + 2U]);
-                val += static_cast<uint8_t>(pow(2, 3) * description[i + 3U]);
-                val += static_cast<uint8_t>(pow(2, 4) * description[i + 4U]);
-                val += static_cast<uint8_t>(pow(2, 5) * description[i + 5U]);
-                val += static_cast<uint8_t>(pow(2, 6) * description[i + 6U]);
-                val += static_cast<uint8_t>(pow(2, 7) * description[i + 7U]);
+                val += static_cast<uint8_t>(2U * description[i + 1U]);
+                val += static_cast<uint8_t>(4U * description[i + 2U]);
+                val += static_cast<uint8_t>(8U * description[i + 3U]);
+                val += static_cast<uint8_t>(16U * description[i + 4U]);
+                val += static_cast<uint8_t>(32U * description[i + 5U]);
+                val += static_cast<uint8_t>(64U * description[i + 6U]);
+                val += static_cast<uint8_t>(128U * description[i + 7U]);
                 descriptionUint.push_back(val);
             }
 
-            out_descriptions.push_back(BinaryFeatureDescription(feature, descriptionUint));
+            out_descriptions.push_back(BinaryFeatureDescription(in_features[keyIdx], descriptionUint));
             ret = true;
         }
     }
@@ -177,12 +177,13 @@ void BriefDescriptor::GetTestPositions()
 {
     m_pairs.clear();
     
-    for (int i = 0; i < 4 * s_numRandomPairs; i += 4)
+    for (int32_t i = 0; i < 4 * s_numRandomPairs; i += 4)
     {
-        m_pairs.push_back(PointPair{ static_cast<double>(s_testPattern[i]),
-                                     static_cast<double>(s_testPattern[i + 1]), 
-                                     static_cast<double>(s_testPattern[i + 2]),
-                                     static_cast<double>(s_testPattern[i + 3])});
+        PointPair pair = { static_cast<double>(s_testPattern[i]),
+            static_cast<double>(s_testPattern[i + 1]),
+            static_cast<double>(s_testPattern[i + 2]),
+            static_cast<double>(s_testPattern[i + 3]) };
+        m_pairs.push_back(pair);
     }
 }
 
@@ -191,22 +192,22 @@ void BriefDescriptor::DrawTrainPairs()
 {
     m_pairs.clear();
     
-    const int drawRadius = m_randomPairDrawRadius - m_areaDetRadius;
+    const int32_t drawRadius = m_randomPairDrawRadius - m_areaDetRadius;
 
     // Get set of possible test patch locations
     std::vector<cv::Point2i> possiblePoint;
-    for (int i = -drawRadius; i <= drawRadius; i++)
+    for (int32_t i = -drawRadius; i <= drawRadius; i++)
     {
-        for (int j = -drawRadius; j <= drawRadius; j++)
+        for (int32_t j = -drawRadius; j <= drawRadius; j++)
         {
             possiblePoint.push_back(cv::Point2i(i, j));
         }
     }
 
     // And build all possible combinations (without replacement)
-    for (unsigned int i = 0U; i < possiblePoint.size(); i++)
+    for (int32_t i = 0; i < possiblePoint.size(); i++)
     {
-        for (unsigned int j = i + 1; j < possiblePoint.size(); j++)
+        for (int32_t j = i + 1; j < possiblePoint.size(); j++)
         {
             // Only choose test locations without overlap
             if (std::abs(possiblePoint[i].x - possiblePoint[j].x) <= (2 * m_areaDetRadius)
@@ -215,8 +216,9 @@ void BriefDescriptor::DrawTrainPairs()
             }
             else
             {
-                m_pairs.push_back(PointPair{ static_cast<double>(possiblePoint[i].x), static_cast<double>(possiblePoint[i].y),
-                            static_cast<double>(possiblePoint[j].x), static_cast<double>(possiblePoint[j].y) });
+                PointPair pair = { static_cast<double>(possiblePoint[i].x), static_cast<double>(possiblePoint[i].y),
+                    static_cast<double>(possiblePoint[j].x), static_cast<double>(possiblePoint[j].y) };
+                m_pairs.push_back(pair);
             }
         }
     }
@@ -239,19 +241,19 @@ double BriefDescriptor::CalculatePearsonCorr(const TrainPosition& in_first, cons
 
     // Score computation is only possible for test vectors of equal length
     // Additionally make sure that the result vector is not empty
-    if (in_first.m_testResults->size() == in_second.m_testResults->size()
-        && in_first.m_testResults->size() >= 10)
+    if (in_first.m_testResults.size() == in_second.m_testResults.size()
+        && in_first.m_testResults.size() >= 10)
     {
         double nom = 0.0;
         double denomFirst = 0.0;
         double denomSec = 0.0;
         double firstMean = in_first.GetMean();
         double secMean = in_second.GetMean();
-        for (unsigned int i = 0; i < in_first.m_testResults->size(); i++)
+        for (uint32_t i = 0; i < in_first.m_testResults.size(); i++)
         {
-            nom += (((*in_first.m_testResults)[i] - firstMean) * ((*in_second.m_testResults)[i] - secMean));
-            denomFirst += std::pow((*in_first.m_testResults)[i] - firstMean, 2);
-            denomSec += std::pow((*in_second.m_testResults)[i] - secMean, 2);
+            nom += (((in_first.m_testResults)[i] - firstMean) * ((in_second.m_testResults)[i] - secMean));
+            denomFirst += std::pow((in_first.m_testResults)[i] - firstMean, 2);
+            denomSec += std::pow((in_second.m_testResults)[i] - secMean, 2);
         }
 
         pearson = nom / (std::sqrt(denomFirst) * std::sqrt(denomSec));
@@ -272,11 +274,11 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
     
     // Do some preselection based on distance of mean to 0.5
     std::vector<TrainPosition> preselect;
-    for (auto pos : copy)
+    for (uint32_t idx = 0U; idx < copy.size(); idx++)
     {
-        if (std::abs(pos.GetMean() - 0.5) < 0.1)
+        if (std::abs(copy[idx].GetMean() - 0.5) < 0.1)
         {
-            preselect.push_back(pos);
+            preselect.push_back(copy[idx]);
         }
     }
 
@@ -287,10 +289,10 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
         preselect[0].m_pair.x1 << ", " << preselect[0].m_pair.y1 << ", " << preselect[0].m_pair.x2 << ", " << preselect[0].m_pair.y2 << ", " << std::endl;
 
     double thresh = 0.1F;
-    std::map<std::pair<int, int>, double> corrMap;
+    std::map<std::pair<int32_t, int32_t>, double> corrMap;
     while (bestPatterns.size() < BriefDescriptor::s_numRandomPairs)
     {
-        for (const auto pos : preselect)
+        for (uint32_t preIdx = 0U; preIdx < preselect.size(); preIdx++)
         {
             if (bestPatterns.size() >= BriefDescriptor::s_numRandomPairs)
             {
@@ -299,23 +301,24 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
             
             // Find test position with lowest correlation to existing "best positions"
             double maximumCorr = 0.0;
-            for (const auto bestPos : bestPatterns)
+            
+            for (uint32_t bestIdx = 0U; bestIdx < bestPatterns.size(); bestIdx++)
             {
                 double corr = 1.0;
                 
-                if (corrMap.count(std::make_pair(pos.m_Id, bestPos.m_Id)) > 0)
+                if (corrMap.count(std::make_pair(preselect[preIdx].m_Id, bestPatterns[bestIdx].m_Id)) > 0)
                 {
-                    corr = corrMap[std::make_pair(pos.m_Id, bestPos.m_Id)];
+                    corr = corrMap[std::make_pair(preselect[preIdx].m_Id, bestPatterns[bestIdx].m_Id)];
                 }
-                else if(corrMap.count(std::make_pair(bestPos.m_Id, pos.m_Id)) > 0)
+                else if(corrMap.count(std::make_pair(bestPatterns[bestIdx].m_Id, preselect[preIdx].m_Id)) > 0)
                 {
-                    corr = corrMap[std::make_pair(bestPos.m_Id, pos.m_Id)];
+                    corr = corrMap[std::make_pair(bestPatterns[bestIdx].m_Id, preselect[preIdx].m_Id)];
                 }
                 else
                 {
-                    corr = CalculatePearsonCorr(pos, bestPos);
-                    corrMap[std::make_pair(bestPos.m_Id, pos.m_Id)] = corr;
-                    corrMap[std::make_pair(pos.m_Id, bestPos.m_Id)] = corr;
+                    corr = CalculatePearsonCorr(preselect[preIdx], bestPatterns[bestIdx]);
+                    corrMap[std::make_pair(bestPatterns[bestIdx].m_Id, preselect[preIdx].m_Id)] = corr;
+                    corrMap[std::make_pair(preselect[preIdx].m_Id, bestPatterns[bestIdx].m_Id)] = corr;
                 }
 
                 if (std::abs(corr) > maximumCorr)
@@ -327,10 +330,10 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
             // We found one --> add it to "best positions"
             if (maximumCorr < thresh)
             {
-                bestPatterns.push_back(pos);
+                bestPatterns.push_back(preselect[preIdx]);
                 VOCPP_TRACE_INFO("[BriefDescriptor - TrainingMode]: Found test position, looking for " << BriefDescriptor::s_numRandomPairs  - bestPatterns.size() <<" more." << std::endl;
-                in_file << "/* mean: " << pos.GetMean() << " var: " << pos.GetVariance() << " maxCorr: " << maximumCorr<<" */ " <<
-                    pos.m_pair.x1 << ", " << pos.m_pair.y1 << ", " << pos.m_pair.x2 << ", " << pos.m_pair.y2 << ", ")
+                in_file << "/* mean: " << preselect[preIdx].GetMean() << " var: " << preselect[preIdx].GetVariance() << " maxCorr: " << maximumCorr<<" */ " <<
+                    preselect[preIdx].m_pair.x1 << ", " << preselect[preIdx].m_pair.y1 << ", " << preselect[preIdx].m_pair.x2 << ", " << preselect[preIdx].m_pair.y2 << ", ")
             }
         }
 
@@ -341,7 +344,7 @@ void BriefDescriptor::FindBestPattern(const std::vector<TrainPosition>& in_train
 
 /* Test positions used for intensity comparison
 Trained with PASCAL 2006 image set (like in the original ORB paper) using 300k features */
-const int BriefDescriptor::s_testPattern[256 * 4] =
+const int32_t BriefDescriptor::s_testPattern[256 * 4] =
 {
     /* mean: 0.500001 var: 0.250001 maxCorr: 0.0000000 */ 10, 9, -5, 1,
     /* mean: 0.500002 var: 0.250001 maxCorr: 0.0863017 */ 10, 9, 11, -9,

@@ -8,7 +8,6 @@
 #ifndef VOCPP_BRUTE_FORCE_BINARY_MATCHER_H
 #define VOCPP_BRUTE_FORCE_BINARY_MATCHER_H
 
-#include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 #include <Vocpp_FeatureHandling/Common.h>
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
@@ -28,7 +27,7 @@ public:
     /**
       * \brief Constructor
       */
-    BruteForceMatcher(const unsigned int& in_maxDistance = 50U);
+    BruteForceMatcher(const uint32_t& in_maxDistance = 50U);
 
     /**
       * \brief Compares binary feature descriptions and return matches.
@@ -46,7 +45,7 @@ private:
     BruteForceMatcher& operator=(const BruteForceMatcher&);
     BruteForceMatcher(const BruteForceMatcher&);
 
-    unsigned int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
+    uint32_t m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
 };
 
 } //namespace FeatureHandling

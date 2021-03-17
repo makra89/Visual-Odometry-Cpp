@@ -14,7 +14,7 @@
 namespace VOCPP
 {
 
-extern void SetTraceLevel(const TraceLevel& in_traceLevel);
+extern void SetTraceLevel(const TraceLevel::Enum& in_traceLevel);
 bool RegisterTracer(Tracer* in_tracerImpl);
 
 namespace Utils
@@ -22,7 +22,7 @@ namespace Utils
 
 Tracer* GetTracerImpl();
 
-bool TraceLevelActive(const TraceLevel& in_traceLevel);
+bool TraceLevelActive(const TraceLevel::Enum& in_traceLevel);
 
 #define VOCPP_TRACE(in_level, in_msg) \
     if(VOCPP::Utils::TraceLevelActive(in_level) && VOCPP::Utils::GetTracerImpl() != nullptr) \

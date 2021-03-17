@@ -49,7 +49,7 @@ void IntImage::FillIntImage(const cv::Mat1d& in_image)
     {
         double* currRowPtrIntImage = m_intImage.ptr<double>(j);
         const double* currRowPtrImage = in_image.ptr<double>(j);
-        for (int i = 0; i < in_image.cols; i++)
+        for (int32_t i = 0; i < in_image.cols; i++)
         {
             double area = 0;
 

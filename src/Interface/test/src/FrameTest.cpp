@@ -6,6 +6,7 @@
 */
 
 #include <Vocpp_Interface/Frame.h>
+
 #include <gtest/gtest.h>
 
 using VOCPP::Frame;
