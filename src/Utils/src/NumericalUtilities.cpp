@@ -7,8 +7,9 @@
 
 #include <Vocpp_Utils/NumericalUtilities.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
-#include<random>
 
+#include <random>
+#include <ctime>
 namespace
 {
     const unsigned int seed = 12U;
@@ -24,7 +25,7 @@ int32_t DrawIntInRange(const int32_t in_lowerEdge, const int32_t in_upperEdge, c
     static bool firstDrawn = true;
     if (firstDrawn && !in_fixedSeed)
     {
-        srand(static_cast<uint32_t>(time(nullptr))); //seed
+        srand(static_cast<uint32_t>(std::time(nullptr))); //seed
         firstDrawn = false;
     }
     else if (firstDrawn && in_fixedSeed)
@@ -41,7 +42,7 @@ double DrawDoubleInRange(const double in_lowerEdge, const double in_upperEdge, c
     static bool firstDrawn = true;
     if (firstDrawn && !in_fixedSeed)
     {
-        srand(static_cast<uint>(time(nullptr))); //seed
+        srand(static_cast<uint32_t>(std::time(nullptr))); //seed
         firstDrawn = false;
     }
     else if(firstDrawn && in_fixedSeed)

@@ -8,7 +8,8 @@
 #include <Vocpp_Utils/ImageProcessingUtils.h>
 #include <Vocpp_Utils/ConversionUtils.h>
 #include <Vocpp_Utils/TracingImpl.h>
-#include<opencv2/imgproc.hpp>
+
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace VOCPP
 {

@@ -8,8 +8,8 @@
 #ifndef VOCPP_INTEGRAL_IMAGE_H
 #define VOCPP_INTEGRAL_IMAGE_H
 
-#include <opencv2/core/types.hpp>
-#include <opencv2/core/core.hpp>
+#include <Vocpp_Interface/Types.h>
+
 #include <map>
 
 namespace VOCPP

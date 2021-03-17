@@ -8,9 +8,8 @@
 #ifndef VOCPP_FEATURE_HANDLING_COMMON_H
 #define VOCPP_FEATURE_HANDLING_COMMON_H
 
-#include<bitset>
-#include<opencv2/core/types.hpp>
-#include<opencv2/core/core.hpp>
+#include <bitset>
+#include <Vocpp_Interface/Types.h>
 
 namespace VOCPP
 {

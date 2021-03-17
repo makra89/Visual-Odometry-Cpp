@@ -6,8 +6,8 @@
 */
 
 #include <Vocpp_FeatureHandling/OrbDetectorDescriptor.h>
-#include<opencv2/imgproc.hpp>
-#include <opencv2/opencv.hpp>
+#include <Vocpp_Utils/TracingImpl.h>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace VOCPP
 {
@@ -31,7 +31,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
     if (in_frame.GetImage().dims != 2)
     {
         ret = false;
-        std::cout << "[OrientedFastDetector]: Non-grayscale image has been provided" << std::endl;
+        VOCPP_TRACE_ERROR("[OrientedFastDetector]: Non-grayscale image has been provided");
     }
     else
     {

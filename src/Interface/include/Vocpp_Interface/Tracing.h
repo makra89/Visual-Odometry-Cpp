@@ -11,15 +11,18 @@
 namespace VOCPP
 {
 
-enum class TraceLevel
+namespace TraceLevel
 {
-    DEBUG = 0,
-    INFO = 1,
-    WARNING = 2,
-    ERROR = 3
-};
+    enum Enum
+    {
+        DEBUG = 0,
+        INFO = 1,
+        WARNING = 2,
+        ERROR = 3
+    };
+}
 
-void SetTraceLevel(const TraceLevel& in_traceLevel);
+void SetTraceLevel(const TraceLevel::Enum& in_traceLevel);
 
 /**
   * /brief Tracer class
@@ -28,7 +31,7 @@ class Tracer
 {
 public:
     virtual ~Tracer() {}
-    virtual void receiveTrace(const TraceLevel& in_traceLevel, const char* const in_msg) = 0;
+    virtual void receiveTrace(const TraceLevel::Enum& in_traceLevel, const char* const in_msg) = 0;
 };
 
 /**

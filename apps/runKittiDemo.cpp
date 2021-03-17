@@ -21,7 +21,7 @@ using namespace VOCPP;
 class StdOutTracer : public Tracer
 {
 public:
-    virtual void receiveTrace(const TraceLevel& in_traceLevel, const char* const in_msg)
+    virtual void receiveTrace(const TraceLevel::Enum& in_traceLevel, const char* const in_msg)
     {
         std::cout << in_msg << std::endl;
     }

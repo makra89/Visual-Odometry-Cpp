@@ -8,8 +8,6 @@
 #ifndef VOCPP_CALIBRATION_MODULE_H
 #define VOCPP_CALIBRATION_MODULE_H
 
-#include<opencv2/core/types.hpp>
-#include<opencv2/core/core.hpp>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
 
 namespace VOCPP

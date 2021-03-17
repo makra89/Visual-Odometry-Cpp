@@ -8,7 +8,6 @@
 #ifndef VOCPP_LSH_BINARY_MATCHER_H
 #define VOCPP_LSH_BINARY_MATCHER_H
 
-#include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 #include <Vocpp_FeatureHandling/Common.h>
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>

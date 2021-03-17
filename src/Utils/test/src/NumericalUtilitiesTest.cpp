@@ -17,7 +17,7 @@ TEST(DrawIntInRange, RangeCheck)
     int lowerEdge = -10;
     int upperEdge = 10;
 
-    for (uint it = 0U; it < 10000U; it++)
+    for (uint32_t it = 0U; it < 10000U; it++)
     {
         int rand = DrawIntInRange(lowerEdge, upperEdge);
 
@@ -34,7 +34,7 @@ TEST(DrawIntInRange, ProbabilityCheck)
 
     int elCount[21] = { 0 };
 
-    for (uint it = 0U; it < 100000U; it++)
+    for (uint32_t it = 0U; it < 100000U; it++)
     {
         int rand = DrawIntInRange(lowerEdge, upperEdge);
 
@@ -46,7 +46,7 @@ TEST(DrawIntInRange, ProbabilityCheck)
     }
 
     // Check element counts, expected is 100k / 21 = 4761
-    for (uint it = 0U; it < 21U; it++)
+    for (uint32_t it = 0U; it < 21U; it++)
     {
         EXPECT_NEAR(elCount[it], 4761, 300);
     }
@@ -58,7 +58,7 @@ TEST(DrawDoubleInRange, RangeCheck)
     double lowerEdge = -10.0;
     double upperEdge = 10.0;
 
-    for (uint it = 0U; it < 10000U; it++)
+    for (uint32_t it = 0U; it < 10000U; it++)
     {
         double rand = DrawDoubleInRange(lowerEdge, upperEdge);
 

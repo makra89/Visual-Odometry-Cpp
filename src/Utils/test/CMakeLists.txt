@@ -16,6 +16,7 @@ target_include_directories(Vocpp_UtilsTest
 target_link_libraries(Vocpp_UtilsTest
     PRIVATE
         Vocpp_Utils    
+        Vocpp_Interface    
         gtest
         ${OpenCV_LIBS} 
 )

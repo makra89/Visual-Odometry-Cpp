@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include<opencv2/core/types.hpp>
-#include<opencv2/core/core.hpp>
+#include <Vocpp_Interface/Types.h>
 
 namespace VOCPP
 {

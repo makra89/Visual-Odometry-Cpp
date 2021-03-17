@@ -3,6 +3,7 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
+#include<Vocpp_Interface/Types.h>
 #include<Vocpp_Interface/Frame.h>
 #include<Vocpp_Interface/Tracing.h>
 #include<Vocpp_Interface/DeltaCameraPose.h>

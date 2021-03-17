@@ -8,7 +8,7 @@
 #ifndef VOCPP_FRAME_H
 #define VOCPP_FRAME_H
 
-#include <opencv2/core/types.hpp>
+#include <stdint.h>
 #include <opencv2/core/core.hpp>
 
 namespace VOCPP

@@ -6,12 +6,12 @@
 */
 
 #include <Vocpp_FeatureHandling/BriefDescriptor.h>
-#include<Vocpp_Utils/NumericalUtilities.h>
-#include<Vocpp_Utils/IntImage.h>
-#include<Vocpp_Utils/TracingImpl.h>
+#include <Vocpp_Utils/NumericalUtilities.h>
+#include <Vocpp_Utils/IntImage.h>
+#include <Vocpp_Utils/TracingImpl.h>
 
-#include<random>
-#include<fstream>
+#include <random>
+#include <fstream>
 #include <map>
 
 namespace VOCPP

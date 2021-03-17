@@ -8,7 +8,7 @@
 #ifndef VOCPP_EPIPOLAR_SOLVER_H
 #define VOCPP_EPIPOLAR_SOLVER_H
 
-#include <opencv2/core/types.hpp>
+#include <Vocpp_Interface/Types.h>
 #include <opencv2/core/core.hpp>
 
 namespace VOCPP

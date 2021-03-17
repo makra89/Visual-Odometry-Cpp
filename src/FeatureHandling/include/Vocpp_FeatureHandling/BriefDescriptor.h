@@ -9,8 +9,8 @@
 #define VOCPP_BRIEF_DESCRIPTOR_H
 
 #include <Vocpp_Interface/Frame.h>
-#include<Vocpp_FeatureHandling/Common.h>
-#include<fstream>
+#include <Vocpp_FeatureHandling/Common.h>
+#include <fstream>
 #include <numeric>
 
 namespace VOCPP
@@ -34,7 +34,7 @@ public:
     /**
       * /brief Number of pairs drawn, also specifies number of bits in the returned binary description
       */
-    constexpr static uint s_numRandomPairs = BinaryFeatureDescription::GetSizeInBytes() * 8U;
+    constexpr static uint32_t s_numRandomPairs = BinaryFeatureDescription::GetSizeInBytes() * 8U;
 
     /**
       * \brief Constructor

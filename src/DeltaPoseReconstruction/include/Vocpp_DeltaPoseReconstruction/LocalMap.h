@@ -10,7 +10,6 @@
 
 #include <Vocpp_Interface/Frame.h>
 #include <Vocpp_FeatureHandling/Common.h>
-#include <opencv2/core/types.hpp>
 #include <opencv2/core/core.hpp>
 #include <unordered_map>
 

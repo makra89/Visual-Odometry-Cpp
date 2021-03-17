@@ -6,7 +6,7 @@
 */
 
 #include <Vocpp_Utils/FrameRotations.h>
-#include<opencv2/imgproc.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace VOCPP
 {
