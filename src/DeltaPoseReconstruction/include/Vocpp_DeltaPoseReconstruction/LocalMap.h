@@ -53,7 +53,7 @@ public:
         m_frameVsFeatureId.insert(std::pair<uint32_t, uint32_t>(in_currentFrameId, in_currentFeatureId));
 
         // Add triangulated position
-        FramePairKey keyPair{ in_currentFrameId, in_lastFrameId};
+        FramePairKey keyPair = { in_currentFrameId, in_lastFrameId};
         m_framePairVsPosition.insert(std::pair<FramePairKey, LandmarkPosition>(keyPair, in_position));
 
         // For the first frame pair we cannot apply any relative scale --> always indicate that it has been scaled
@@ -110,8 +110,8 @@ public:
 private:
     uint32_t m_lastSeenFrameId; ///< frame Id for which this landmark has been seen last 
     std::map<uint32_t, uint32_t> m_frameVsFeatureId; ///< feature Ids of this landmark for all frames
-    std::map<FramePairKey, bool, CompFramePairKey> m_framePairVsScaled; ///< indicates whether a landmark has already been scaled for certain frame pair
-    std::map<FramePairKey, LandmarkPosition, CompFramePairKey> m_framePairVsPosition; ///< frame Id pair vs triangulated position
+    std::map<FramePairKey,bool,CompFramePairKey> m_framePairVsScaled; ///< indicates whether a landmark has already been scaled for certain frame pair
+    std::map<FramePairKey,LandmarkPosition,CompFramePairKey> m_framePairVsPosition; ///< frame Id pair vs triangulated position
 };
 
 /**

@@ -24,7 +24,7 @@ using VOCPP::Utils::ImageProjectionMatrix;
 
 TEST(RansacTest, TranslationAndRotation)
 {
-    for (int testIt = 0; testIt < 10; testIt++)
+    for (uint32_t testIt = 0U; testIt < 10U; testIt++)
     {
         std::vector<cv::Point3d> realWorldPoints;
         std::vector<cv::Point2d> imgPoints;
@@ -36,7 +36,7 @@ TEST(RansacTest, TranslationAndRotation)
         // Construct set of 3D points in world coordinate system
         // Take 100 points
         const double maxDist = 3.0;
-        for (int it = 0; it < 100; it++)
+        for (uint32_t it = 0U; it < 100U; it++)
         {
             realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(4.0, 7.0)));
         }
@@ -71,7 +71,7 @@ TEST(RansacTest, TranslationAndRotation)
             scaledImgPoints.push_back(projMat.Apply(coord));
         }
 
-        std::vector<unsigned int> inlierIndices;
+        std::vector<uint32_t> inlierIndices;
         cv::Mat1d translation;
         cv::Mat1d rotation;
         std::vector<cv::Point3d> triangulatedPoints;
@@ -104,7 +104,7 @@ TEST(RansacTest, TranslationAndRotation)
 
 TEST(RansacTest, TranslationAndRotation_WithOutliers)
 {
-    for (int testIt = 0; testIt < 2; testIt++)
+    for (uint32_t testIt = 0U; testIt < 10U; testIt++)
     {
         std::vector<cv::Point3d> realWorldPoints;
         std::vector<cv::Point2d> imgPoints;
@@ -116,7 +116,7 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         // Construct set of 3D points in world coordinate system
         // Take 100 points
         const double maxDist = 3.0;
-        for (int it = 0; it < 100; it++)
+        for (uint32_t it = 0; it < 100U; it++)
         {
             realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(-maxDist, maxDist), DrawDoubleInRange(4.0, 7.0)));
         }
@@ -152,13 +152,13 @@ TEST(RansacTest, TranslationAndRotation_WithOutliers)
         }
 
         // Add some outliers
-        for (int outlierIt = 0; outlierIt < 10; outlierIt++)
+        for (uint32_t outlierIt = 0U; outlierIt < 10U; outlierIt++)
         {
             imgPoints.push_back(cv::Point2d(DrawDoubleInRange(-100.F, 100.F), DrawDoubleInRange(-100.F, 100.F)));
             scaledImgPoints.push_back(cv::Point2d(DrawDoubleInRange(-100.F, 100.F), DrawDoubleInRange(-100.F, 100.F)));
         }
 
-        std::vector<unsigned int> inlierIndices;
+        std::vector<uint32_t> inlierIndices;
         cv::Mat1d translation;
         cv::Mat1d rotation;
         std::vector<cv::Point3d> triangulatedPoints;

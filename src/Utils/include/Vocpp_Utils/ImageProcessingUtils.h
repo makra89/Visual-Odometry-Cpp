@@ -19,7 +19,7 @@ namespace Utils
 *
 * \param[in] size of window kernel [pixels]
 */
-cv::Mat1d GetWindowKernel(const int size);
+cv::Mat1d GetWindowKernel(const int32_t size);
 
 /**
 * /brief Convolve image with given kernel
@@ -51,7 +51,7 @@ struct LocalMaximum
     * \param[out] out_localMaxima vector of extracted local maxima
     * \param[in] in_subPixelCalculationDistance distance used for calculation of subPixel position of local maxima
 */
-void ExtractLocalMaxima(const cv::Mat1d& in_image, const int in_distance, std::vector<LocalMaximum>& out_localMaxima);
+void ExtractLocalMaxima(const cv::Mat1d& in_image, const int32_t in_distance, std::vector<LocalMaximum>& out_localMaxima);
 
 /**
 * /brief Extract patch of an image around a center position with a given distance
@@ -177,7 +177,7 @@ void GetCrossProductMatrix(const cv::Vec3d& in_vec, cv::Mat1d& out_crossMat);
 * \param[out] out_triangulatedPoints 3D triangulated points
 */
 bool DecomposeEssentialMatrix(const cv::Mat1d& in_essentialMat, const cv::Mat1d& in_calibMat, const std::vector<cv::Point2d>& in_imageCoordLeft,
-    const std::vector <cv::Point2d>& in_imageCoordRight, std::vector<unsigned int>& inout_inlierIndices, cv::Mat1d& out_translation, cv::Mat1d& out_rotMatrix, std::vector<cv::Point3d>& out_triangulatedPoints);
+    const std::vector <cv::Point2d>& in_imageCoordRight, std::vector<uint32_t>& inout_inlierIndices, cv::Mat1d& out_translation, cv::Mat1d& out_rotMatrix, std::vector<cv::Point3d>& out_triangulatedPoints);
 
 /**
 * /brief Triangulates a point in 3D given two camera coordinates and two projection matrices

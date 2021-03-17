@@ -12,7 +12,7 @@
 #include <ctime>
 namespace
 {
-    const unsigned int seed = 12U;
+    const uint32_t seed = 12U;
 }
 
 namespace VOCPP

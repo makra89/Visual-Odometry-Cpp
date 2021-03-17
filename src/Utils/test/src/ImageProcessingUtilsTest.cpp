@@ -88,7 +88,7 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
     // Construct set of 3D points in world coordinate system
     std::vector<cv::Point3d> realWorldPoints;
     const double minDist = 150.0;
-    for (int it = 0; it < 2; it++)
+    for (int32_t it = 0; it < 2; it++)
     {
         realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-minDist, minDist), DrawDoubleInRange(-minDist, minDist), DrawDoubleInRange(50.0, 150.0)));
     }
@@ -116,7 +116,7 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
         imgPointLeft.push_back(projMatLeft.Apply(coord));
         imgPointRight.push_back(projMatRight.Apply(coord));
 
-        std::vector<unsigned int> inlierIndices;
+        std::vector<uint32_t> inlierIndices;
         inlierIndices.push_back(0);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
@@ -134,10 +134,10 @@ TEST(DecomposeEssentialMatrixTest, PureTranslationTest)
 
         // And check both extracted translation and rotation
         cv::Mat1d eye = cv::Mat1d::eye(3, 3);
-        for (int rowIt = 0; rowIt < 3; rowIt++)
+        for (int32_t rowIt = 0; rowIt < 3; rowIt++)
         {
             EXPECT_NEAR(decompTranslat.at<double>(rowIt, 0), translationLeft(rowIt, 0), 1e-2);
-            for (int colIt = 0; colIt < 3; colIt++)
+            for (int32_t colIt = 0; colIt < 3; colIt++)
             {
                 EXPECT_NEAR(decompRotMat.at<double>(rowIt, colIt), eye(rowIt, colIt), 1e-2);
             }
@@ -156,7 +156,7 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
     // Construct set of 3D points in world coordinate system
     std::vector<cv::Point3d> realWorldPoints;
     const double minDist = 150.0;
-    for (int it = 0; it < 150; it++)
+    for (int32_t it = 0; it < 150; it++)
     {
         realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-minDist, minDist), DrawDoubleInRange(-minDist, minDist), DrawDoubleInRange(50.0, 150.0)));
     }
@@ -185,7 +185,7 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
         imgPointLeft.push_back(projMatLeft.Apply(coord));
         imgPointRight.push_back(projMatRight.Apply(coord));
 
-        std::vector<unsigned int> inlierIndices;
+        std::vector<uint32_t> inlierIndices;
         inlierIndices.push_back(0);
 
         // Compute true essential matrix (which is only given by the crossproduct matrix of the translation
@@ -203,10 +203,10 @@ TEST(DecomposeEssentialMatrixTest, TranslationAndRotationTest)
 
         // And check both extracted translation and rotation
         cv::Mat1d eye = cv::Mat1d::eye(3, 3);
-        for (int rowIt = 0; rowIt < 3; rowIt++)
+        for (int32_t rowIt = 0; rowIt < 3; rowIt++)
         {
             EXPECT_NEAR(decompTranslat(rowIt, 0), translationLeft(rowIt, 0), std::abs(1e-2 * translationLeft(rowIt, 0)));
-            for (int colIt = 0; colIt < 3; colIt++)
+            for (int32_t colIt = 0; colIt < 3; colIt++)
             {
                 EXPECT_NEAR(decompRotMat(rowIt, colIt), rotMat(rowIt, colIt), 1e-4);
             }
@@ -220,7 +220,7 @@ TEST(PointTriangulationLinearTest, TwoCamerasRotationAndTranslation)
     // Construct set of 3D points in world coordinate system
     std::vector<cv::Point3d> realWorldPoints;
     const double minDist = 150.0;
-    for (int it = 0; it < 100; it++)
+    for (int32_t it = 0; it < 100; it++)
     {
         realWorldPoints.push_back(cv::Point3d(DrawDoubleInRange(-minDist, minDist), DrawDoubleInRange(-minDist, minDist), DrawDoubleInRange(50.0, 150.0)));
     }
@@ -255,7 +255,7 @@ TEST(PointTriangulationLinearTest, TwoCamerasRotationAndTranslation)
     }
 
     // Triangulate points and check
-    for (int it = 0; it < static_cast<int>(imgPointsLeft.size()); it++)
+    for (int32_t it = 0; it < static_cast<int32_t>(imgPointsLeft.size()); it++)
     {
         cv::Point3d triangPoint;
         PointTriangulationLinear(projMatLeft, projMatRight, imgPointsLeft[it], imgPointsRight[it], triangPoint);

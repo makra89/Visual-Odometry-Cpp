@@ -7,11 +7,11 @@
 
 #include <gtest/gtest.h>
 
-int main(int argc, char** argv)
+int32_t main(int32_t argc, char** argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
 
-    int testResult = RUN_ALL_TESTS();
+    int32_t testResult = RUN_ALL_TESTS();
 
     return testResult;
 }

@@ -48,7 +48,7 @@ TEST(OrFastChainTest, MatchTriangles_Shifted)
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsShifted, matches));
     
     EXPECT_EQ(3U, matches.size());
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         double posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
         EXPECT_EQ(posXdiff, 35);
@@ -96,7 +96,7 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
     EXPECT_TRUE(matcher.MatchDesriptions(descriptions, descriptionsShifted, matches));
 
     EXPECT_TRUE(matches.size() >= 2U);
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         double posXdiff = matches[idx].GetFirstFeature().imageCoordX - matches[idx].GetSecondFeature().imageCoordX;
         EXPECT_EQ(posXdiff, 35);
@@ -142,7 +142,7 @@ TEST(OrFastChainTest, MatchTriangles_Rotated)
     EXPECT_GE(matches.size(), 495U);
     
     // Since we rotated by 90 degrees, we know the exact matching pixel locations
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
@@ -188,7 +188,7 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Rotated)
     EXPECT_GE(matches.size(), 400U);
 
     // Since we rotated by 90 degrees, we know the exact matching pixel locations
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);

@@ -11,34 +11,34 @@
 using VOCPP::Utils::DrawIntInRange;
 using VOCPP::Utils::DrawDoubleInRange;
 
-// Check that DrawIntInRange provides int in the expected range
+// Check that DrawIntInRange provides int32_t in the expected range
 TEST(DrawIntInRange, RangeCheck)
 {
-    int lowerEdge = -10;
-    int upperEdge = 10;
+    int32_t lowerEdge = -10;
+    int32_t upperEdge = 10;
 
     for (uint32_t it = 0U; it < 10000U; it++)
     {
-        int rand = DrawIntInRange(lowerEdge, upperEdge);
+        int32_t rand = DrawIntInRange(lowerEdge, upperEdge);
 
         EXPECT_GE(rand, lowerEdge);
         EXPECT_LE(rand, upperEdge);
     }
 }
 
-// Check that DrawIntInRange provides int with the expect uniform probability distribution
+// Check that DrawIntInRange provides int32_t with the expect uniform probability distribution
 TEST(DrawIntInRange, ProbabilityCheck)
 {
-    int lowerEdge = -10;
-    int upperEdge = 10;
+    int32_t lowerEdge = -10;
+    int32_t upperEdge = 10;
 
-    int elCount[21] = { 0 };
+    int32_t elCount[21] = { 0 };
 
     for (uint32_t it = 0U; it < 100000U; it++)
     {
-        int rand = DrawIntInRange(lowerEdge, upperEdge);
+        int32_t rand = DrawIntInRange(lowerEdge, upperEdge);
 
-        int elIndex = 10 + rand;
+        int32_t elIndex = 10 + rand;
         ASSERT_TRUE(elIndex >= 0);
         ASSERT_TRUE(elIndex < 21);
 

@@ -126,15 +126,16 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 
                 // Create a vector with all inlier matches
                 std::vector<FeatureHandling::BinaryDescriptionMatch> inlierMatches;
-                for (auto matchIdx : inlierMatchIndices)
+                for (uint32_t idx = 0U; idx < inlierMatchIndices.size(); idx++)
                 {
-                    inlierMatches.push_back(matches[matchIdx]);
+                    inlierMatches.push_back(matches[inlierMatchIndices[idx]]);
                 }
 
                 std::vector<LandmarkPosition> landmarks;
-                for (auto point : triangulatedPoints)
+                for (uint32_t idx = 0U; idx < triangulatedPoints.size(); idx++)
                 {
-                    landmarks.push_back(LandmarkPosition{ point.x, point.y, point.z });
+                    LandmarkPosition pos = { triangulatedPoints[idx].x, triangulatedPoints[idx].y, triangulatedPoints[idx].z };
+                    landmarks.push_back(pos);
                 }
 
                 // Add triangulated landmarks to local map
@@ -172,14 +173,14 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                     cv::Mat matchImage;
                     in_frame.GetImageCopy().convertTo(matchImage, CV_32F);
                     cv::cvtColor(matchImage, matchImage, cv::COLOR_GRAY2BGR);
-                    for (auto matchIdx : inlierMatchIndices)
+                    for (uint32_t idx = 0U; idx < inlierMatchIndices.size(); idx++)
                     {
                         // Draw keypoints from current frame
-                        cv::circle(matchImage, pCurrFrame[matchIdx], 5, cv::Scalar(0, 0.0, 255.0), 2);
+                        cv::circle(matchImage, pCurrFrame[inlierMatchIndices[idx]], 5, cv::Scalar(0, 0.0, 255.0), 2);
                         // Draw keypoints from last frame
-                        cv::circle(matchImage, pLastFrame[matchIdx], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
+                        cv::circle(matchImage, pLastFrame[inlierMatchIndices[idx]], 5, cv::Scalar(0.0, 255.0, 0.0), 2);
                         // Draw connecting line
-                        cv::line(matchImage, pCurrFrame[matchIdx], pLastFrame[matchIdx], cv::Scalar(0.0, 0.0, 255.0), 2);
+                        cv::line(matchImage, pCurrFrame[inlierMatchIndices[idx]], pLastFrame[inlierMatchIndices[idx]], cv::Scalar(0.0, 0.0, 255.0), 2);
                     }
 
                     cv::imshow("Optical Flow", matchImage);

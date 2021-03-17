@@ -34,7 +34,7 @@ public:
     /**
       * /brief Number of pairs drawn, also specifies number of bits in the returned binary description
       */
-    constexpr static uint32_t s_numRandomPairs = BinaryFeatureDescription::GetSizeInBytes() * 8U;
+    static const uint32_t s_numRandomPairs = 32U * 8U;
 
     /**
       * \brief Constructor
@@ -43,8 +43,8 @@ public:
       * \param[in] in_areaDetRadius radius around each individual position in a pair used for determining the area (for intensity comparison)
       * \param[in] in_trainingMode specifies whether training mode shall be activated (see class description for explanation)
       */
-    BriefDescriptor(const int& in_randomPairDrawRadius = 15, const int& in_areaDetRadius = 2, 
-        const bool& in_trainingMode = false, std::string in_filePath = "Brief_TrainedPattern.txt", const unsigned int& in_numFramesForTraining = 1000U);
+    BriefDescriptor(const uint32_t& in_randomPairDrawRadius = 15U, const uint32_t& in_areaDetRadius = 2U,
+        const bool& in_trainingMode = false, std::string in_filePath = "Brief_TrainedPattern.txt", const uint32_t& in_numFramesForTraining = 1000U);
 
     /**
       * /brief Compute binary feature descriptions for provided frame. The returned description IDs will
@@ -86,16 +86,16 @@ private:
       */
     PointPair RotatePair(const double& in_angle, const PointPair& in_pair);
 
-    int m_randomPairDrawRadius; ///< radius around a feature that is used for drawing the random pairs
-    int m_areaDetRadius; ///< radius around point in a pair used for area determination
+    uint32_t m_randomPairDrawRadius; ///< radius around a feature that is used for drawing the random pairs
+    int32_t m_areaDetRadius; ///< radius around point in a pair used for area determination
     std::vector<PointPair> m_pairs; ///< Point pairs used for intensity comparison
-    static const int s_testPattern[256*4];
+    static const int32_t s_testPattern[256*4];
     /// ============================================================================
     ///             The following members belong to the training mode                
     /// ============================================================================
     bool m_trainingMode; ///< specifies whether training is switched on or off
     std::ofstream m_patternOutFile; ///< file the trained pattern is written to
-    unsigned int m_numFramesForTraining; ///< number of processed frames after which the best pattern will be written
+    uint32_t m_numFramesForTraining; ///< number of processed frames after which the best pattern will be written
 
      /**
       * /brief training position class, each position specify a possible test pattern
@@ -106,9 +106,9 @@ private:
         /**
           * /brief Constructor
           */
-        TrainPosition(const unsigned int& in_Id, const BriefDescriptor::PointPair& in_pair) :
+        TrainPosition(const uint32_t& in_Id, const BriefDescriptor::PointPair& in_pair) :
             m_Id(in_Id),
-            m_testResults(new std::vector<bool>()),
+            m_testResults(),
             m_pair(in_pair)
         {
         }
@@ -118,7 +118,7 @@ private:
           */
         void AddVal(const bool& in_result)
         {
-            m_testResults->push_back(static_cast<int>(in_result));
+            m_testResults.push_back(in_result);
         }
 
         /**
@@ -126,8 +126,8 @@ private:
           */
         double GetMean() const
         {
-            double sum = std::accumulate(m_testResults->begin(), m_testResults->end(), 0.0F);
-            return sum / static_cast<double>(m_testResults->size());
+            double sum = std::accumulate(m_testResults.begin(), m_testResults.end(), 0.0F);
+            return sum / static_cast<double>(m_testResults.size());
         }
 
         /**
@@ -137,12 +137,12 @@ private:
         {
             double variance = 0.0;
             double mean = GetMean();
-            for (auto val : *m_testResults)
+            for (uint32_t idx = 0U; idx < m_testResults.size(); idx++)
             {
-                variance += std::pow(val - mean, 2);
+                variance += std::pow(m_testResults[idx] - mean, 2);
             }
 
-            return variance / (static_cast<double>(m_testResults->size()) - 1.0F);
+            return variance / (static_cast<double>(m_testResults.size()) - 1.0F);
         }
 
         /**
@@ -165,8 +165,8 @@ private:
             return *this;
         }
 
-        unsigned int m_Id; ///< Id of TrainPosition
-        std::shared_ptr<std::vector<bool>> m_testResults; ///< vector of boolean test results (result of intensity comparison)
+        uint32_t m_Id; ///< Id of TrainPosition
+        std::vector<bool> m_testResults; ///< vector of boolean test results (result of intensity comparison)
         BriefDescriptor::PointPair m_pair; ///< Test pattern used
     };
 

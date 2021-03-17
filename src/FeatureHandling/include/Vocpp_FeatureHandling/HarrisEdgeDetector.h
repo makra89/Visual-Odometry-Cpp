@@ -27,8 +27,8 @@ public:
     /**
       * \brief Constructor
       */
-    HarrisEdgeDetector(const unsigned int in_maxNumFeatures = 150U, const double in_k = 0.04, const std::string& in_kernelName = "window",
-        const int in_localMaxDistance = 10U);
+    HarrisEdgeDetector(const uint32_t in_maxNumFeatures = 150U, const double in_k = 0.04, const std::string& in_kernelName = "window",
+        const uint32_t in_localMaxDistance = 10U);
 
     /**
       * \brief Extract features from a provided grayscale image frame.
@@ -44,16 +44,16 @@ public:
       *
       * \return Harris score if successful, -1.0F if not (edge would have a score > 0)
       */
-    double ComputeScore(const cv::Mat1d& in_img, const int& in_centerX, const int& in_centerY, const int& in_blockSize);
+    double ComputeScore(const cv::Mat1d& in_img, const int32_t& in_centerX, const int32_t& in_centerY, const int32_t& in_blockSize);
 
 private:
     // It is not allowed to copy the detector directly
     HarrisEdgeDetector& operator=(const HarrisEdgeDetector&);
     HarrisEdgeDetector(const HarrisEdgeDetector&);
 
-    unsigned int m_maxNumFeatures; ///< maximum number of returned features
+    uint32_t m_maxNumFeatures; ///< maximum number of returned features
     double m_k; ///< k factor used for Harris response calculation, see literature
-    int m_localMaxDistance; ///< minimum distance of reported features [pixel] 
+    int32_t m_localMaxDistance; ///< minimum distance of reported features [pixel] 
     
     cv::Mat1d m_smoothingKernel; ///< kernel used for smoothing the gradients
 

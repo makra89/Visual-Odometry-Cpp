@@ -8,7 +8,7 @@
 #include <EpipolarSolution.h>
 #include <Vocpp_Utils/NumericalUtilities.h>
 #include <Vocpp_Utils/ImageProcessingUtils.h>
-#include <opencv2/calib3d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 
 namespace VOCPP
 {
@@ -44,13 +44,13 @@ bool RecoverPoseRansac(const std::vector<cv::Point2d>& in_correspondFirst, const
             cv::Rodrigues(out_rotation, rod);
 
             std::vector<cv::Point2d> inlierFirst;
-            for (auto idx : out_inlierMatchIndices)
+            for (uint32_t idx = 0U; idx < out_inlierMatchIndices.size(); idx++)
             {
-                inlierFirst.push_back(in_correspondFirst[idx]);
+                inlierFirst.push_back(in_correspondFirst[out_inlierMatchIndices[idx]]);
             }
 
             // Try to refine the current pose by PnP
-            cv::solvePnPRefineLM(out_triangulatedPoints, inlierFirst, in_calibMat, cv::Mat(), rod, out_translation);
+            cv::solvePnP(out_triangulatedPoints, inlierFirst, in_calibMat, cv::Mat(), rod, out_translation, true, cv::SOLVEPNP_ITERATIVE);
 
             cv::Rodrigues(rod, out_rotation);
         }

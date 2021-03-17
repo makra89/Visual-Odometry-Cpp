@@ -110,7 +110,7 @@ TEST(OrbTestWithMatching, RotationInvariance_OneLayer)
     matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
     EXPECT_GE(matches.size(), 489);
 
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordX, matches[idx].GetSecondFeature().imageCoordY);
         EXPECT_EQ(matches[idx].GetFirstFeature().imageCoordY, (grayScaleImg.rows - 1U) - matches[idx].GetSecondFeature().imageCoordX);
@@ -153,7 +153,7 @@ TEST(OrbTestWithMatching, RotationInvariance_ThreeLayers)
 
     cv::resize(grayScaleImg, grayScaleImg, cv::Size(0, 0), 1.0, grayScaleImg.cols/grayScaleImg.rows);
 
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         EXPECT_EQ(matches[idx].GetFirstFeature().scale, matches[idx].GetSecondFeature().scale);
         if (matches[idx].GetFirstFeature().scale == 1.0)
@@ -202,9 +202,9 @@ TEST(OrbTestWithMatching, ScaleInvariance)
     matcher.MatchDesriptions(descriptionsUnscaled, descriptionsRescaled, matches);
     EXPECT_GE(matches.size(), 200);
 
-    unsigned int numOutlierAngle = 0U;
+    uint32_t numOutlierAngle = 0U;
 
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         // We expect that we have to downscale the unscaled image to find matches
         EXPECT_LT(matches[idx].GetFirstFeature().scale, matches[idx].GetSecondFeature().scale);
@@ -227,7 +227,7 @@ TEST(OrbTestWithMatching, ScaleInvariance)
     std::vector<cv::Point2d> pRescaled;
     std::vector<cv::Point2d> pUnscaled;
     VOCPP::FeatureHandling::GetMatchingPoints(matches, pUnscaled, pRescaled);
-    for (unsigned int idx = 0U; idx < matches.size(); idx++)
+    for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         cv::circle(matchImg, cv::Point2d(matches[idx].GetFirstDescription().GetFeature().imageCoordX, matches[idx].GetFirstDescription().GetFeature().imageCoordY), 5, cv::Scalar(0, 0.0, 255.0), 2);
         cv::circle(matchImg, cv::Point2d(1000 + matches[idx].GetSecondDescription().GetFeature().imageCoordX, matches[idx].GetSecondDescription().GetFeature().imageCoordY), 5, cv::Scalar(0, 255.0, 0.0), 2);

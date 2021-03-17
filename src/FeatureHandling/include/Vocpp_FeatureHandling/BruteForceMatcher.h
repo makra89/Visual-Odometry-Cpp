@@ -27,7 +27,7 @@ public:
     /**
       * \brief Constructor
       */
-    BruteForceMatcher(const unsigned int& in_maxDistance = 50U);
+    BruteForceMatcher(const uint32_t& in_maxDistance = 50U);
 
     /**
       * \brief Compares binary feature descriptions and return matches.
@@ -45,7 +45,7 @@ private:
     BruteForceMatcher& operator=(const BruteForceMatcher&);
     BruteForceMatcher(const BruteForceMatcher&);
 
-    unsigned int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
+    uint32_t m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
 };
 
 } //namespace FeatureHandling

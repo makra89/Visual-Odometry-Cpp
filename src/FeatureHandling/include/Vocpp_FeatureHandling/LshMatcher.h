@@ -25,12 +25,12 @@ class LshMatcher
 {
 public:
 
-    static constexpr unsigned int s_lengthHashFunc = 2U;
+    static const uint32_t s_lengthHashFunc = 2U;
     
     /**
       * \brief Constructor
       */
-    LshMatcher(const unsigned int& in_maxDistance = 40U, const unsigned int& in_numHashFuncs = 16U);
+    LshMatcher(const uint32_t& in_maxDistance = 40U, const uint32_t& in_numHashFuncs = 16U);
 
     /**
       * \brief Compares binary feature descriptions and return matches.
@@ -50,12 +50,12 @@ private:
 
     void GenerateHashFuncs();
 
-    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<std::bitset<s_lengthHashFunc*8U>, std::vector<unsigned int>>& out_bucketTable);
+    void IndexDescriptions(const std::vector<BinaryFeatureDescription>& in_desc, std::unordered_map<std::bitset<s_lengthHashFunc*8U>, std::vector<uint32_t>>& out_bucketTable);
 
-    unsigned int m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
-    unsigned int m_numHashFuncs;
-    unsigned int m_lengthDescription;
-    std::vector<std::vector<unsigned int>> m_hashFuncs;
+    uint32_t m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
+    uint32_t m_numHashFuncs;
+    uint32_t m_lengthDescription;
+    std::vector<std::vector<uint32_t>> m_hashFuncs;
 };
 
 } //namespace FeatureHandling

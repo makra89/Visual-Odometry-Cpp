@@ -8,9 +8,7 @@
 #ifndef VOCPP_DELTA_CAMERA_POSE_H
 #define VOCPP_DELTA_CAMERA_POSE_H
 
-#include <opencv2/core/types.hpp>
-#include <opencv2/core/core.hpp>
-#include <iostream>
+#include <Vocpp_Interface/Types.h>
 
 namespace VOCPP
 {
@@ -60,8 +58,8 @@ public:
       */
     DeltaCameraPose()
     {
-        m_translation = { 0.0, 0.0, 0.0 };
-        m_orientation = { 0.0, 0.0, 0.0 };
+        m_translation.x = 0.0; m_translation.y = 0.0; m_translation.z = 0.0;
+        m_orientation.roll = 0.0; m_orientation.pitch = 0.0; m_orientation.yaw = 0.0;
     }
 
     const DeltaOrientation& GetDeltaOrientation() const

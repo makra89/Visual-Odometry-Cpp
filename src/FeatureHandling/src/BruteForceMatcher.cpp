@@ -14,7 +14,7 @@ namespace VOCPP
 namespace FeatureHandling
 {
 
-BruteForceMatcher::BruteForceMatcher(const unsigned int& in_maxDistance) : m_maxDistance(in_maxDistance)
+BruteForceMatcher::BruteForceMatcher(const uint32_t& in_maxDistance) : m_maxDistance(in_maxDistance)
 {
 }
 
@@ -30,14 +30,14 @@ bool BruteForceMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescript
     }
 
     // Loop over all descriptions 
-    for (auto desc1 : in_descFirst)
+    for (uint32_t idx = 0U; idx < in_descFirst.size(); idx++)
     {
-        unsigned int smallestDist = UINT_MAX;
-        unsigned int smallestIdx2 = 0;
+        uint32_t smallestDist = UINT_MAX;
+        uint32_t smallestIdx2 = 0;
         
-        for (int index2 = 0; index2 < in_descSecond.size(); index2++)
+        for (uint32_t index2 = 0U; index2 < in_descSecond.size(); index2++)
         {
-            unsigned int distance = BinaryFeatureDescription::ComputeHammingDistance(desc1, in_descSecond[index2], m_maxDistance + 1U);
+            uint32_t distance = BinaryFeatureDescription::ComputeHammingDistance(in_descFirst[idx], in_descSecond[index2], m_maxDistance + 1U);
             if (distance < smallestDist)
             {
                 smallestDist = distance;
@@ -48,7 +48,8 @@ bool BruteForceMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescript
         // Check if distance is smaller than threshold
         if (smallestDist <= m_maxDistance)
         {
-            out_matches.push_back(BinaryDescriptionMatch{ desc1,in_descSecond[smallestIdx2], static_cast<double>(smallestDist)});
+            BinaryDescriptionMatch match(in_descFirst[idx], in_descSecond[smallestIdx2], static_cast<double>(smallestDist));
+            out_matches.push_back(match);
         }
     }
     

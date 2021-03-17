@@ -24,8 +24,8 @@ namespace FeatureHandling
   */
 struct Feature
 {
-    unsigned int id; ///< ID should assigned by the feature detector
-    unsigned int frameId; ///< ID of frame this feature has been detected in
+    uint32_t id; ///< ID should assigned by the feature detector
+    uint32_t frameId; ///< ID of frame this feature has been detected in
     double imageCoordX; ///< image coordinates along image X axis [pixel]
     double imageCoordY; ///< image coordinates along image Y axis [pixel]
     double response; ///< "Goodness" of feature
@@ -70,18 +70,13 @@ public:
         return m_feature;
     }
 
-    constexpr static unsigned int GetSizeInBytes()
+    static uint32_t ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second, uint32_t in_earlyStop)
     {
-        return 32U;
-    }
+        uint32_t distance = 0U;
 
-    static unsigned int ComputeHammingDistance(const BinaryFeatureDescription& in_first, const BinaryFeatureDescription& in_second, unsigned int in_earlyStop)
-    {
-        unsigned int distance = 0U;
-
-        for (unsigned int i = 0U; i < in_first.GetDescription().size(); i++)
+        for (uint32_t i = 0U; i < in_first.GetDescription().size(); i++)
         {
-            distance += static_cast<unsigned int>(std::bitset<BinaryFeatureDescription::GetSizeInBytes()>(in_first.GetDescription()[i] ^ in_second.GetDescription()[i]).count());
+            distance += static_cast<uint32_t>(std::bitset<32U>(in_first.GetDescription()[i] ^ in_second.GetDescription()[i]).count());
 
             if (distance >= in_earlyStop)
             {
@@ -147,10 +142,10 @@ private:
 static void GetMatchingPoints(const std::vector<BinaryDescriptionMatch>& in_matches, std::vector<cv::Point2d>& out_firstPoints, 
     std::vector<cv::Point2d>& out_secondPoints)
 {
-    for (auto match : in_matches)
+    for (uint32_t idx = 0U; idx < in_matches.size(); idx++)
     {
-        cv::Point2d pointFirst(match.GetFirstFeature().imageCoordX, match.GetFirstFeature().imageCoordY);
-        cv::Point2d pointSecond(match.GetSecondFeature().imageCoordX, match.GetSecondFeature().imageCoordY);
+        cv::Point2d pointFirst(in_matches[idx].GetFirstFeature().imageCoordX, in_matches[idx].GetFirstFeature().imageCoordY);
+        cv::Point2d pointSecond(in_matches[idx].GetSecondFeature().imageCoordX, in_matches[idx].GetSecondFeature().imageCoordY);
         out_firstPoints.push_back(pointFirst);
         out_secondPoints.push_back(pointSecond);
     }
