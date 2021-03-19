@@ -38,7 +38,7 @@ TEST(FrameTest, Constructor_NoImageData)
 TEST(FrameTest, Constructor_Valid_Double)
 {
     // Creating a valid frame
-    double img[] = {0., 255.};    
+    double img[] = {0., 1.};    
     Frame f(img, 1, 2, 1);
 
     EXPECT_TRUE(f.IsValid());
@@ -52,13 +52,13 @@ TEST(FrameTest, Constructor_Valid_Double)
 TEST(FrameTest, Constructor_Valid_Uint)
 {
     // Creating a valid frame
-    uint8_t img[] = { 1, 2, 3, 4, 5, 6 };
-    Frame f(img, 3, 2, 1);
+    uint8_t img[] = { 0, 255, 1};
+    Frame f(img, 3, 1, 1);
 
     EXPECT_TRUE(f.IsValid());
     EXPECT_EQ(f.GetId(), 1);
 
-    EXPECT_EQ(f.GetImage().at<double>(0, 0), 1);
-    EXPECT_EQ(f.GetImage().at<double>(0, 2), 3);
-    EXPECT_EQ(f.GetImage().at<double>(1, 2), 6);
+    EXPECT_EQ(f.GetImage().at<double>(0, 0), 0);
+    EXPECT_EQ(f.GetImage().at<double>(1, 0), 1);
+    EXPECT_EQ(f.GetImage().at<double>(2, 0), 1./255.);
 }
