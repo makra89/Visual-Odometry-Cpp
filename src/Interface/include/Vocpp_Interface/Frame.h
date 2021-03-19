@@ -84,6 +84,7 @@ public:
         else
         {
             cv::Mat1b(in_height, in_width, in_grayImgData).convertTo(m_grayImage, CV_64F);
+            m_grayImage /= 255.0;
             m_Id = in_frameId;
             m_validFrame = true;
         }
