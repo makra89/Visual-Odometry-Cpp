@@ -1,5 +1,5 @@
 
-%module(directors="1") Vocpp
+%module(directors="1") vocpp
 
 %{
 #define SWIG_FILE_WITH_INIT
@@ -9,7 +9,7 @@
 #include<Vocpp_Interface/DeltaCameraPose.h>
 #include<Vocpp_Interface/CameraPose.h>
 #include<Vocpp_Calibration/MonoCameraCalibration.h>
-#include<Vocpp_Master/Master.h>
+#include<Vocpp_Master/VocppMaster.h>
 %}
 
 %include "numpy.i"
@@ -56,5 +56,5 @@ public:
 %include<Vocpp_Interface/Tracing.h>
 %include<Vocpp_Interface/DeltaCameraPose.h>
 %include<Vocpp_Interface/CameraPose.h>
-%include<Vocpp_Master/Master.h>
+%include<Vocpp_Master/VocppMaster.h>
 

@@ -15,7 +15,7 @@ target_include_directories(Vocpp_DeltaPoseReconstructionTest
 target_link_libraries(Vocpp_DeltaPoseReconstructionTest
     PRIVATE
         gtest
-        ${OpenCV_LIBS} 
+        Vocpp_Interface
         Vocpp_Utils
         Vocpp_DeltaPoseReconstruction
 )

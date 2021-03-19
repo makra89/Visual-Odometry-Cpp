@@ -22,8 +22,6 @@ target_include_directories(Vocpp_DeltaPoseReconstruction
 target_link_libraries(Vocpp_DeltaPoseReconstruction
     PUBLIC
         Vocpp_Interface
-    PRIVATE
-        ${OpenCV_LIBS} 
         Vocpp_FeatureHandling
         Vocpp_Utils
 )

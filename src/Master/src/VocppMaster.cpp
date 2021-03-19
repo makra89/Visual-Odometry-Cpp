@@ -5,23 +5,20 @@
 * Copyright (C) 2020 - 2021 Manuel Kraus
 */
 
-#include <Vocpp_Master/Master.h>
-#include <opencv2/opencv.hpp>
+#include <Vocpp_Master/VocppMaster.h>
 
 namespace VOCPP
 {
-namespace Master
-{
 
-Master::Master() : m_reconstructor(), m_calibModule(), m_debugOutputActive(false)
+VocppMaster::VocppMaster() : m_reconstructor(), m_calibModule(), m_debugOutputActive(false)
 {
 }
 
-Master::~Master()
+VocppMaster::~VocppMaster()
 {
 }
 
-bool Master::FeedNextFrame(const Frame& in_frame)
+bool VocppMaster::FeedNextFrame(const Frame& in_frame)
 {  
     // Try to get a valid mono camera calibration from the calibration module
     Calibration::MonoCameraCalibration monoCalib;
@@ -32,30 +29,29 @@ bool Master::FeedNextFrame(const Frame& in_frame)
     return ret;
 }
 
-DeltaCameraPose Master::GetLastDeltaPose()
+DeltaCameraPose VocppMaster::GetLastDeltaPose()
 {
     return m_reconstructor.GetLastDeltaPose();
 }
 
-CameraPose Master::GetLastPose()
+CameraPose VocppMaster::GetLastPose()
 {
     return m_reconstructor.GetLastPose();
 }
 
-void Master::ActivateDebugOutput()
+void VocppMaster::ActivateDebugOutput()
 {
     m_debugOutputActive = true;
 }
 
-void Master::DeactivateDebugOutput()
+void VocppMaster::DeactivateDebugOutput()
 {
     m_debugOutputActive = false;
 }
 
-bool Master::LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration)
+bool VocppMaster::LoadCalibration(const Calibration::MonoCameraCalibration& in_monoCalibration)
 {
     return m_calibModule.LoadCalibration(in_monoCalibration);
 }
 
-} //namespace Master
 } //namespace VOCPP

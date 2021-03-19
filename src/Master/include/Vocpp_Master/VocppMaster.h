@@ -18,15 +18,13 @@
 
 namespace VOCPP
 {
-namespace Master
-{
    
 /**
-  * /brief Master class for calculation of delta poses
+  * /brief VocppMaster class for calculation of delta poses
   *
   * Until now it is only possible to match features and draw those matches
   */
-class Master
+class VocppMaster
 {
 
 public:
@@ -34,12 +32,12 @@ public:
     /**
       * /brief Constructor
       */
-    Master();
+    VocppMaster();
 
     /**
       * /brief Destructor
       */
-    ~Master();
+    ~VocppMaster();
     
     /**
       * /brief Provide next image frame to master
@@ -79,7 +77,6 @@ private:
 
 };
 
-} //namespace Master
 } //namespace VOCPP
 
 #endif /* VOCPP_MASTER_H */

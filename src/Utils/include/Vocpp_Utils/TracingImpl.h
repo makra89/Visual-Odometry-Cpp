@@ -32,10 +32,10 @@ bool TraceLevelActive(const TraceLevel::Enum& in_traceLevel);
         VOCPP::Utils::GetTracerImpl()->receiveTrace(in_level, stream.str().c_str()); \
     }
 
-#define VOCPP_TRACE_INFO(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::INFO, in_msg)
-#define VOCPP_TRACE_WARNING(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::WARNING, in_msg)
-#define VOCPP_TRACE_ERROR(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::ERROR, in_msg)
-#define VOCPP_TRACE_DEBUG(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::DEBUG, in_msg)
+#define VOCPP_TRACE_INFO(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::TL_INFO, in_msg)
+#define VOCPP_TRACE_WARNING(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::TL_WARNING, in_msg)
+#define VOCPP_TRACE_ERROR(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::TL_ERROR, in_msg)
+#define VOCPP_TRACE_DEBUG(in_msg) VOCPP_TRACE(VOCPP::TraceLevel::TL_DEBUG, in_msg)
 
 } //namespace Utils
 } //namespace VOCPP
