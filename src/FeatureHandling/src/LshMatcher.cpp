@@ -92,7 +92,7 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
         }
     }
     
-    return ret;
+    return ret && (out_matches.size() > 0U);
 }
 
 void LshMatcher::GenerateHashFuncs()

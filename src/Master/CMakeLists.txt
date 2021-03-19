@@ -24,3 +24,7 @@ target_link_libraries(Vocpp_Master
         Vocpp_FeatureHandling
         Vocpp_Utils
 )
+
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()

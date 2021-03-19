@@ -44,7 +44,7 @@ public:
     }
 
     /**
-      * /brief Frame constructor using a pointer to the image data. Constructing a frame this way 
+      * /brief Frame constructor using a double pointer to the image data. Constructing a frame this way 
       * no memory is allocated. The frame is just a view on the data. The pointer has to be valid
       * for the whole lifetime of the frame object.
       *
@@ -61,6 +61,29 @@ public:
         else
         {
             m_grayImage = cv::Mat1d(in_height, in_width, in_grayImgData);
+            m_Id = in_frameId;
+            m_validFrame = true;
+        }
+    }
+
+    /**
+      * /brief Frame constructor using a uint8_t pointer to the image data. Constructing a frame this way
+      * no memory is allocated. The frame is just a view on the data. The pointer has to be valid
+      * for the whole lifetime of the frame object.
+      *
+      * Layout of the image data in memory: [row1, row2, row3, ....]
+      */
+    Frame(uint8_t* const in_grayImgData, uint32_t in_width, uint32_t in_height, uint32_t in_frameId) : m_Id(s_invalidFrameId)
+    {
+        // No image data
+        if (in_grayImgData == nullptr)
+        {
+            m_validFrame = false;
+        }
+        // Valid image data
+        else
+        {
+            cv::Mat1b(in_height, in_width, in_grayImgData).convertTo(m_grayImage, CV_64F);
             m_Id = in_frameId;
             m_validFrame = true;
         }

@@ -130,7 +130,7 @@ bool OrbDetectorDescriptor::ExtractFeatureDescriptions(const Frame& in_frame, co
         }
     }
 
-    return ret;
+    return ret && (out_descriptions.size() > 0U);
 }
 
 } //namespace FeatureHandling
