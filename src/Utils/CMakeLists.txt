@@ -26,9 +26,8 @@ target_include_directories(Vocpp_Utils
 )
 
 target_link_libraries(Vocpp_Utils
-    PRIVATE
+    PUBLIC
         Vocpp_Interface
-        ${OpenCV_LIBS} 
 )
 
 if(BUILD_TESTS)

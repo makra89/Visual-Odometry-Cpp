@@ -21,5 +21,4 @@ target_link_libraries(Vocpp_Calibration
         Vocpp_Interface
     PRIVATE
         Vocpp_Utils
-        ${OpenCV_LIBS} 
 )

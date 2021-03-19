@@ -28,9 +28,9 @@ class CompiledLibInstall(setuptools.command.install.install):
 if __name__ == '__main__':
 
     setuptools.setup(
-        name='Vocpp',
+        name='vocpp',
         version='0.0',
-        packages=['Vocpp'],
+        packages=['vocpp'],
         author='Manuel Kraus',
         cmdclass={'install': CompiledLibInstall}
     )

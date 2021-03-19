@@ -92,10 +92,10 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
         {
             PointPair rotPair = RotatePair(in_features[keyIdx].angle, m_pairs[pairIdx]);
             
-            uint32_t indFirstX = static_cast<uint32_t>(rotPair.x1 + in_features[keyIdx].imageCoordX);
-            uint32_t indFirstY = static_cast<uint32_t>(rotPair.y1 + in_features[keyIdx].imageCoordY);
-            uint32_t indSecX = static_cast<uint32_t>(rotPair.x2 + in_features[keyIdx].imageCoordX);
-            uint32_t indSecY = static_cast<uint32_t>(rotPair.y2 + in_features[keyIdx].imageCoordY);
+            int32_t indFirstX = static_cast<int32_t>(rotPair.x1 + in_features[keyIdx].imageCoordX);
+            int32_t indFirstY = static_cast<int32_t>(rotPair.y1 + in_features[keyIdx].imageCoordY);
+            int32_t indSecX = static_cast<int32_t>(rotPair.x2 + in_features[keyIdx].imageCoordX);
+            int32_t indSecY = static_cast<int32_t>(rotPair.y2 + in_features[keyIdx].imageCoordY);
 
             // Check whether all indices are within range
             const bool inRangeFirstX = (indFirstX >= 0) && (indFirstX < in_frame.GetImage().size[1]);

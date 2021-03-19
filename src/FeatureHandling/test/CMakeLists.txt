@@ -19,7 +19,6 @@ target_link_libraries(Vocpp_FeatureHandlingTest
         Vocpp_Utils
         Vocpp_FeatureHandling    
         gtest
-        ${OpenCV_LIBS} 
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/input.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/input.h)

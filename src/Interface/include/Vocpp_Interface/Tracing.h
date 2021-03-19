@@ -15,10 +15,10 @@ namespace TraceLevel
 {
     enum Enum
     {
-        DEBUG = 0,
-        INFO = 1,
-        WARNING = 2,
-        ERROR = 3
+        TL_DEBUG = 0,
+        TL_INFO = 1,
+        TL_WARNING = 2,
+        TL_ERROR = 3
     };
 }
 

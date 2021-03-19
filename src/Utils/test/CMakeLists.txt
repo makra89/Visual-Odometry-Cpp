@@ -18,7 +18,6 @@ target_link_libraries(Vocpp_UtilsTest
         Vocpp_Utils    
         Vocpp_Interface    
         gtest
-        ${OpenCV_LIBS} 
 )
 
 add_test(NAME UtilsTest COMMAND Vocpp_UtilsTest)

@@ -1,4 +1,4 @@
-import Vocpp
+import vocpp
 import cv2
 import numpy as np
 import sys
@@ -18,9 +18,9 @@ def usage():
     print("for KITTI sequence 0.")
 
 
-class StdOutTracer(Vocpp.Tracer):
+class StdOutTracer(vocpp.Tracer):
     def __init__(self):
-        Vocpp.Tracer.__init__(self)
+        vocpp.Tracer.__init__(self)
 
     def receiveTrace(self, level, msg):
         print(msg)
@@ -61,18 +61,18 @@ if __name__ == "__main__":
     ground_truth_positions = np.array(ground_truth_positions)
 
     # Activate tracing on Debug level
-    Vocpp.SetTraceLevel(Vocpp.DEBUG)
+    vocpp.SetTraceLevel(vocpp.TL_DEBUG)
     tracer = StdOutTracer()
-    Vocpp.RegisterTracer(tracer)
+    vocpp.RegisterTracer(tracer)
 
-    master = Vocpp.Master()
+    master = vocpp.VocppMaster()
 
     # Create camera calibration 
     foc_length = 7.18856e+02
     cam_center_x = 6.071928000000e+02
     cam_center_y = 1.852157000000e+02
     skew = 0.0
-    mono_calib = Vocpp.MonoCameraCalibration(foc_length, cam_center_x, cam_center_y, skew)
+    mono_calib = vocpp.MonoCameraCalibration(foc_length, cam_center_x, cam_center_y, skew)
 
     # Activate debug output
     master.ActivateDebugOutput()
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         # For some reason it can happen that empty images are read
         if(img.data is not None):
             img = np.double(img) * 1/255.0
-            frame = Vocpp.Frame(np.transpose(img), frame_id)
+            frame = vocpp.Frame(np.transpose(img), frame_id)
                 
             # Feed image to master and get last absolute pose in WCS
             master.FeedNextFrame(frame)

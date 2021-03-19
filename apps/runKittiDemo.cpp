@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
-#include<Vocpp_Master/Master.h>
+#include<Vocpp_Master/VocppMaster.h>
 #include<Vocpp_Interface/Frame.h>
 #include<Vocpp_Interface/Tracing.h>
 #include<Vocpp_Interface/DeltaCameraPose.h>
@@ -41,12 +41,12 @@ int32_t main(int32_t argc, char** argv)
     glob(path, imageNames);
 
     // Activate tracing on Debug level
-    SetTraceLevel(TraceLevel::DEBUG);
+    SetTraceLevel(TraceLevel::TL_DEBUG);
     StdOutTracer tracer;
     RegisterTracer(&tracer);
 
     // Instantiate master
-    Master::Master voMaster;
+    VocppMaster voMaster;
     voMaster.ActivateDebugOutput();
 
     // Construct MonoCameraCalibration

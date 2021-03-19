@@ -31,7 +31,6 @@ target_link_libraries(Vocpp_FeatureHandling
         Vocpp_Interface
     PRIVATE
         Vocpp_Utils
-        ${OpenCV_LIBS} 
 )
 
 if(BUILD_TESTS)
