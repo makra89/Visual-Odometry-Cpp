@@ -23,23 +23,43 @@ TEST(FrameTest, Constructor_Empty)
 TEST(FrameTest, Constructor_NoImageData)
 {
     // Construct empty frame
-    cv::Mat1d emptyImage;
-    Frame f(nullptr, 3, 3, 1);
+    Frame fDouble((double*)nullptr, 3, 3, 1);
 
     // Since no image has been provided it should be marked as invalid
-    EXPECT_FALSE(f.IsValid());
+    EXPECT_FALSE(fDouble.IsValid());
+
+    // Construct empty frame
+    Frame fUint((uint8_t*)nullptr, 3, 3, 1);
+
+    // Since no image has been provided it should be marked as invalid
+    EXPECT_FALSE(fUint.IsValid());
 }
 
-TEST(FrameTest, Constructor_Valid)
+TEST(FrameTest, Constructor_Valid_Double)
 {
     // Creating a valid frame
-    double img[] = {1, 2, 3, 4, 5, 6};    
-    Frame f(img, 3, 2, 1);
+    double img[] = {0., 1., 2.};    
+    Frame f(img, 1, 3, 1);
 
     EXPECT_TRUE(f.IsValid());
     EXPECT_EQ(f.GetId(), 1);
 
-    EXPECT_EQ(f.GetImage().at<double>(0, 0), 1);
-    EXPECT_EQ(f.GetImage().at<double>(0, 2), 3);
-    EXPECT_EQ(f.GetImage().at<double>(1, 2), 6);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 0), 0);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(1, 0), 1);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(2, 0), 2);
+
+}
+
+TEST(FrameTest, Constructor_Valid_Uint)
+{
+    // Creating a valid frame
+    uint8_t img[] = { 0, 255, 1};
+    Frame f(img, 3, 1, 1);
+
+    EXPECT_TRUE(f.IsValid());
+    EXPECT_EQ(f.GetId(), 1);
+
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 0), 0);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 1), 1);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 2), 1./255.);
 }

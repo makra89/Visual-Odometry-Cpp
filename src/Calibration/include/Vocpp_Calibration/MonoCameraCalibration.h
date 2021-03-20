@@ -50,9 +50,23 @@ public:
         m_validCalib = true;
     }
 
+    MonoCameraCalibration& operator=(const MonoCameraCalibration& in_right)
+    {
+        this->m_calibrationMatrix = in_right.m_calibrationMatrix.clone();
+        this->m_validCalib = in_right.m_validCalib;
+        return *this;
+    }
+
+    MonoCameraCalibration(const MonoCameraCalibration& in_right)
+    {
+        this->m_calibrationMatrix = in_right.m_calibrationMatrix.clone();
+        this->m_validCalib = in_right.m_validCalib;
+    }
+
+
     cv::Mat1d GetCalibrationMatrix() const
     {
-        return m_calibrationMatrix;
+        return m_calibrationMatrix.clone();
     }
 
     /**
