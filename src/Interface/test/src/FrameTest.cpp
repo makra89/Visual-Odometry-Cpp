@@ -45,8 +45,8 @@ TEST(FrameTest, Constructor_Valid_Double)
     EXPECT_EQ(f.GetId(), 1);
 
     EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 0), 0);
-    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 1), 1);
-    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 2), 2);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(1, 0), 1);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(2, 0), 2);
 
 }
 
@@ -60,6 +60,6 @@ TEST(FrameTest, Constructor_Valid_Uint)
     EXPECT_EQ(f.GetId(), 1);
 
     EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 0), 0);
-    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(1, 0), 1);
-    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(2, 0), 1./255.);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 1), 1);
+    EXPECT_DOUBLE_EQ(f.GetImage().at<double>(0, 2), 1./255.);
 }
