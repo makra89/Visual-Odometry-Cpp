@@ -169,7 +169,6 @@ public:
     }
 
 private:
-
     void RemoveUntrackedLandmarks(const uint32_t& in_currentFrameId);
 
     void ComputeRelativeScale(const uint32_t& in_currentFrameId);

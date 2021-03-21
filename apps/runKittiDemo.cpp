@@ -65,15 +65,14 @@ int32_t main(int32_t argc, char** argv)
     cv::Mat1d currentPose = cv::Mat1d::eye(3, 3);
     cv::Mat1d currentCamCenter = cv::Mat1d::zeros(3, 1);
     
-    for (auto imageName : imageNames)
+    for (uint32_t imageIdx = 0U; imageIdx < imageNames.size(); imageIdx++)
     {
-        // Convert the image to grayscale CV_64F, here from CV_8U to CV_64F
+        // Convert the image to grayscale
         cv::Mat grayScaleImg;
-        cv::cvtColor(imread(imageName, 1), grayScaleImg, COLOR_BGR2GRAY);
-        grayScaleImg.convertTo(grayScaleImg, CV_64F, 1.0 / 255.0);
+        cv::cvtColor(imread(imageNames[imageIdx], 1), grayScaleImg, COLOR_BGR2GRAY);
         
         // Feed frame to Master
-        Frame frame(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, frameId);
+        Frame frame(grayScaleImg.ptr<uint8_t>(0), grayScaleImg.cols, grayScaleImg.rows, frameId);
         voMaster.FeedNextFrame(frame);
         
         DeltaCameraPose delta = voMaster.GetLastDeltaPose();

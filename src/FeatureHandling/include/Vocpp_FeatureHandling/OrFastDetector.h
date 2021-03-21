@@ -28,7 +28,7 @@ public:
     /**
       * /brief Constructor
       */
-    OrientedFastDetector(const double& in_intRelTresh=0.2, const uint32_t& in_numPixelsAboveThresh=12U,
+    OrientedFastDetector(const double& in_intDiffTresh=10/255., const uint32_t& in_numPixelsAboveThresh=12U,
         const uint32_t& in_harrisBlockSize=3U, const uint32_t& in_distToEdges=31U);
 
     /**
@@ -59,7 +59,7 @@ private:
       */
     int32_t CheckAll(const cv::Mat1d& in_image, const int32_t& in_coordX, const int32_t& in_coordY, const int32_t& in_passLower, const int32_t& in_passHigher);
 
-    const double m_relDiffTresh; ///< relative treshold for pixel intensity comparison
+    const double m_intDiffTresh; ///< intensity treshold for pixel intensity comparison (intensity value given for 8 bit image)
     const uint32_t m_numPixelsAboveThresh; ///< necessary number of pixels above or below threshold for a detection
     const uint32_t m_harrisBlockSize; ///< size of patch over which harris detector averages gradients (has to be odd number)
     const uint32_t m_distToEdges; /// minimum distance to edges of reported features [pixels]

@@ -136,7 +136,6 @@ public:
     }
 
 private:
-
     cv::Mat1d m_grayImage; ///< grayscale image data
 
     uint32_t m_Id; ///< Id of the frame, must be a unique one!
