@@ -35,7 +35,6 @@ class DeltaPoseReconstructor
 {
 
 public:
-
     /**
       * /brief Constructor
       */
@@ -68,7 +67,6 @@ public:
     }
 
 private:
-
     /**
       * /brief Internally used to reset all members (e.g. used during construction or when tracking has been lost)
       */

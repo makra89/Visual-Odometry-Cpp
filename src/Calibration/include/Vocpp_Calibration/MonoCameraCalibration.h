@@ -23,7 +23,6 @@ class MonoCameraCalibration
 {
 
 public:
-    
     /**
       * /brief Default constructor for an invalid camera calibration
       */
@@ -78,7 +77,6 @@ public:
     }
 
 private:
-
     cv::Mat1d m_calibrationMatrix;
     bool m_validCalib;
 

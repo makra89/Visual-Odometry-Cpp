@@ -24,7 +24,6 @@ class CalibrationModule
 {
 
 public:
-    
     /**
       * /brief Constructor
       */
@@ -68,7 +67,6 @@ public:
     }
 
 private:
-
     MonoCameraCalibration m_monoCalib;
 };
 
