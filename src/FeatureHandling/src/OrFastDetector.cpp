@@ -21,7 +21,7 @@ const uint32_t OrientedFastDetector::s_featureSize = 7U;
 
 OrientedFastDetector::OrientedFastDetector(const double& in_intDiffTresh, const uint32_t& in_numPixelsAboveThresh,
     const uint32_t& in_harrisBlockSize, const uint32_t& in_distToEdges) :
-    m_relDiffTresh(in_intDiffTresh),
+    m_intDiffTresh(in_intDiffTresh),
     m_numPixelsAboveThresh(in_numPixelsAboveThresh),
     m_harrisBlockSize(in_harrisBlockSize),
     m_distToEdges(in_distToEdges),
@@ -105,29 +105,34 @@ int32_t OrientedFastDetector::CheckIntensities(const cv::Mat1d& in_image, const 
     
     const double nucleusInt = in_image(in_coordY, in_coordX);
     // Remove pixels with very small intensity
-    if (nucleusInt < 10.0F / 255.0F)
+    if (nucleusInt < (10.0F / 255.0F))
+    {
+        return 0;
+    }
+    // Remove pixels with very high intensity
+    if (nucleusInt > (250.0F / 255.0F))
     {
         return 0;
     }
 
     // Pixel 1
-    int32_t passLower = (in_image(in_coordY - 3, in_coordX) + (m_relDiffTresh * nucleusInt)) < nucleusInt ? 1 : 0;
+    int32_t passLower = (in_image(in_coordY - 3, in_coordX) + m_intDiffTresh) < nucleusInt ? 1 : 0;
     // Pixel 5
-    if ((in_image(in_coordY, in_coordX + 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) passLower++;
+    if ((in_image(in_coordY, in_coordX + 3) + m_intDiffTresh) < nucleusInt) passLower++;
     // Pixel 9
-    if ((in_image(in_coordY + 3, in_coordX) + (m_relDiffTresh * nucleusInt)) < nucleusInt) passLower++;
+    if ((in_image(in_coordY + 3, in_coordX) + m_intDiffTresh) < nucleusInt) passLower++;
     // Pixel 13
-    if ((in_image(in_coordY, in_coordX - 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) passLower++;
+    if ((in_image(in_coordY, in_coordX - 3) + m_intDiffTresh) < nucleusInt) passLower++;
     
     if (passLower < 3)
     {
-        int32_t passHigher = (in_image(in_coordY - 3, in_coordX) - (m_relDiffTresh * nucleusInt)) > nucleusInt ? 1 : 0;
+        int32_t passHigher = (in_image(in_coordY - 3, in_coordX) - m_intDiffTresh) > nucleusInt ? 1 : 0;
         // Pixel 5
-        if ((in_image(in_coordY, in_coordX + 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) passHigher++;
+        if ((in_image(in_coordY, in_coordX + 3) - m_intDiffTresh) > nucleusInt) passHigher++;
         // Pixel 9
-        if ((in_image(in_coordY + 3, in_coordX) - (m_relDiffTresh * nucleusInt)) > nucleusInt) passHigher++;
+        if ((in_image(in_coordY + 3, in_coordX) - m_intDiffTresh) > nucleusInt) passHigher++;
         // Pixel 13
-        if ((in_image(in_coordY, in_coordX - 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) passHigher++;
+        if ((in_image(in_coordY, in_coordX - 3) - m_intDiffTresh) > nucleusInt) passHigher++;
 
         if (passHigher >= 3)
         {
@@ -151,57 +156,57 @@ int32_t OrientedFastDetector::CheckAll(const cv::Mat1d& in_image, const int32_t&
     {
         score = in_passLower;
         // Pixel 2
-        if ((in_image(in_coordY - 3, in_coordX + 1) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY - 3, in_coordX + 1) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 3
-        if ((in_image(in_coordY - 2, in_coordX + 2) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY - 2, in_coordX + 2) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 4
-        if ((in_image(in_coordY - 1, in_coordX + 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY - 1, in_coordX + 3) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 6
-        if ((in_image(in_coordY + 1, in_coordX + 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY + 1, in_coordX + 3) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 7
-        if ((in_image(in_coordY + 2, in_coordX + 2) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY + 2, in_coordX + 2) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 8
-        if ((in_image(in_coordY + 3, in_coordX + 1) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY + 3, in_coordX + 1) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 10
-        if ((in_image(in_coordY + 3, in_coordX - 1) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY + 3, in_coordX - 1) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 11
-        if ((in_image(in_coordY + 2, in_coordX - 2) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY + 2, in_coordX - 2) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 12
-        if ((in_image(in_coordY + 1, in_coordX - 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY + 1, in_coordX - 3) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 14
-        if ((in_image(in_coordY - 1, in_coordX - 3) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY - 1, in_coordX - 3) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 15
-        if ((in_image(in_coordY - 2, in_coordX - 2) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY - 2, in_coordX - 2) + m_intDiffTresh) < nucleusInt) score++;
         // Pixel 16
-        if ((in_image(in_coordY - 3, in_coordX - 1) + (m_relDiffTresh * nucleusInt)) < nucleusInt) score++;
+        if ((in_image(in_coordY - 3, in_coordX - 1) + m_intDiffTresh) < nucleusInt) score++;
     }
     else if(in_passHigher > 0)
     {
         score = in_passHigher;
         // Pixel 2
-        if ((in_image(in_coordY - 3, in_coordX + 1) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY - 3, in_coordX + 1) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 3
-        if ((in_image(in_coordY - 2, in_coordX + 2) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY - 2, in_coordX + 2) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 4
-        if ((in_image(in_coordY - 1, in_coordX + 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY - 1, in_coordX + 3) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 6
-        if ((in_image(in_coordY + 1, in_coordX + 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY + 1, in_coordX + 3) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 7
-        if ((in_image(in_coordY + 2, in_coordX + 2) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY + 2, in_coordX + 2) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 8
-        if ((in_image(in_coordY + 3, in_coordX + 1) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY + 3, in_coordX + 1) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 10
-        if ((in_image(in_coordY + 3, in_coordX - 1) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY + 3, in_coordX - 1) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 11
-        if ((in_image(in_coordY + 2, in_coordX - 2) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY + 2, in_coordX - 2) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 12
-        if ((in_image(in_coordY + 1, in_coordX - 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY + 1, in_coordX - 3) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 14
-        if ((in_image(in_coordY - 1, in_coordX - 3) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY - 1, in_coordX - 3) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 15
-        if ((in_image(in_coordY - 2, in_coordX - 2) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY - 2, in_coordX - 2) - m_intDiffTresh) > nucleusInt) score++;
         // Pixel 16
-        if ((in_image(in_coordY - 3, in_coordX - 1) - (m_relDiffTresh * nucleusInt)) > nucleusInt) score++;
+        if ((in_image(in_coordY - 3, in_coordX - 1) - m_intDiffTresh) > nucleusInt) score++;
     }
     
     return score;
