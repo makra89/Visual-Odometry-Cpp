@@ -65,6 +65,11 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
         VOCPP_TRACE_ERROR("[DeltaPoseReconstructor]: Invalid frame provided");
         ret = false;
     }
+    else if (m_lastFrameId == in_frame.GetId())
+    {
+        VOCPP_TRACE_ERROR("[DeltaPoseReconstructor]: Same frame ID as last one --> frame rejected");
+        ret = false;
+    }
     else
     {
         // Measure frame processing time
@@ -77,8 +82,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
         // If the this is the first frame, or the last frame did not have a valid pose,
         // then set the pose to the center of the world coordinate system
         // TODO: Set it to the last valid pose
-        // If we have less than 5 descriptions we don't need to go on
-        if (ret && descriptions.size() >= 5U)
+        // If we have less than 10 descriptions we don't need to go on
+        if (ret && descriptions.size() >= 10U)
         {
             if (!IsValidFrameId(m_lastFrameId))
             {
@@ -95,8 +100,8 @@ bool DeltaPoseReconstructor::FeedNextFrame(const Frame& in_frame, const cv::Mat1
                 // Get matches and draw them
                 std::vector<FeatureHandling::BinaryDescriptionMatch> matches;
                 ret = m_matcher.MatchDesriptions(descriptions, m_descriptionsLastFrame, matches);
-                // For the algorithm we need at least 4 matches --> use 5 to be sure 
-                if (ret && matches.size() >= 5U)
+                // For the algorithm we need at least 6 matches --> use 10 to be sure 
+                if (ret && matches.size() >= 10U)
                 {
                     std::vector<cv::Point2d> pLastFrame;
                     std::vector<cv::Point2d> pCurrFrame;

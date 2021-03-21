@@ -21,13 +21,18 @@ TEST(MasterTest, LoadCalibrationTest)
         master.LoadCalibration(calib);
     }
 
-    // Provide an image with five features --> Master should return true
+    // Provide an image with ten features --> Master should return true
     cv::Mat img = cv::Mat::zeros(500, 500, CV_64F);
+    img.at<double>(120, 120) = 1.0;
+    img.at<double>(140, 140) = 1.0;
+    img.at<double>(180, 180) = 1.0;
     img.at<double>(250, 250) = 1.0;
     img.at<double>(240, 240) = 1.0;
     img.at<double>(260, 260) = 1.0;
     img.at<double>(270, 270) = 1.0;
     img.at<double>(280, 280) = 1.0;
+    img.at<double>(320, 320) = 1.0;
+    img.at<double>(360, 360) = 1.0;
     VOCPP::Frame frame(img, 0U);
     
     EXPECT_TRUE(master.FeedNextFrame(frame));
@@ -54,4 +59,39 @@ TEST(MasterTest, TooFewFeatures)
     img.at<double>(320, 320) = 1.0;
     VOCPP::Frame frame3(img, 3U);
     EXPECT_FALSE(master.FeedNextFrame(frame3));
+
+    // Provide an image with five features --> too few --> false
+    img.at<double>(120, 120) = 1.0;
+    img.at<double>(380, 380) = 1.0;
+    VOCPP::Frame frame4(img, 4U);
+    EXPECT_FALSE(master.FeedNextFrame(frame3));
 }
+
+// Make sure two frames with the same ID trigger are rejected
+TEST(MasterTest, SameFrameID)
+{
+    VOCPP::VocppMaster master;
+    VOCPP::Calibration::MonoCameraCalibration calib(1.0, 1.0, 1.0, 1.0);
+    master.LoadCalibration(calib);
+    
+    // Provide an image with five features --> Master should return true
+    cv::Mat img = cv::Mat::zeros(500, 500, CV_64F);
+    img.at<double>(120, 120) = 1.0;
+    img.at<double>(140, 140) = 1.0;
+    img.at<double>(180, 180) = 1.0;
+    img.at<double>(250, 250) = 1.0;
+    img.at<double>(240, 240) = 1.0;
+    img.at<double>(260, 260) = 1.0;
+    img.at<double>(270, 270) = 1.0;
+    img.at<double>(280, 280) = 1.0;
+    img.at<double>(320, 320) = 1.0;
+    img.at<double>(360, 360) = 1.0;
+    VOCPP::Frame frame(img, 0U);
+
+    EXPECT_TRUE(master.FeedNextFrame(frame));
+
+    // Provide same ID again --> rejected
+    VOCPP::Frame frame2(img, 0U);
+    EXPECT_FALSE(master.FeedNextFrame(frame2));
+}
+
