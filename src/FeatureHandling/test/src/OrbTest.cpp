@@ -108,7 +108,7 @@ TEST(OrbTestWithMatching, RotationInvariance_OneLayer)
     VOCPP::FeatureHandling::LshMatcher matcher;
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
-    EXPECT_GE(matches.size(), 489);
+    EXPECT_GE(matches.size(), 485);
 
     for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
