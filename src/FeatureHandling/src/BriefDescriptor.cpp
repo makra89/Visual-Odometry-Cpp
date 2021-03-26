@@ -135,13 +135,13 @@ bool BriefDescriptor::ComputeDescriptions(const Frame& in_frame, const std::vect
             // This should really never happen
             else if(m_trainingMode)
             {
-                VOCPP_TRACE_ERROR("[BriefDescriptor - TrainingMode]: Found a single test pattern that got rejected, training not possible anymore ");
+                VOCPP_TRACE_ERROR("[BriefDescriptor - TrainingMode]: Found a single test pattern that got rejected, training not possible anymore ")
                 m_trainingMode = false;
                 break;
             }
             else
             {
-                // Hello MISRA
+                VOCPP_TRACE_WARNING("[BriefDescriptor]: Feature position too close to the edges --> rejected")
             }
 
             pairId++;

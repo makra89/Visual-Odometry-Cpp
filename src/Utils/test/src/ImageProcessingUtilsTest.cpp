@@ -22,8 +22,8 @@ TEST(ExtractLocalMaximaTest, BlockMatrix)
     std::vector<LocalMaximum> max;
     ExtractLocalMaxima(ones, 2U, max);
     
-    // We expect 5 * 5 maxima since all values are equal
-    EXPECT_EQ(max.size(), 25);
+    // We 0 maxima since all values are equal
+    EXPECT_EQ(max.size(), 0);
 
     // All values should be equal to 1.0
     for (auto val : max)
@@ -51,35 +51,23 @@ TEST(ExtractLocalMaximaTest, OneMax)
 TEST(ExtractLocalMaximaTest, TestDistanceCheck)
 {
     // Construct image with three close-by maxima
-    cv::Mat1d ones = cv::Mat1d::zeros(5, 5);
+    cv::Mat1d ones = cv::Mat1d::zeros(15, 15);
     ones(2, 2) = 1.0;
     ones(2, 3) = 3.0;
     ones(3, 2) = 4.0;
+    ones(10, 2) = 1.0;
 
     std::vector<LocalMaximum> max;
-    ExtractLocalMaxima(ones, 0U, max);
-
-    // Without any distance check we expect three maxima
-    EXPECT_EQ(max.size(), 3);
-    EXPECT_DOUBLE_EQ(max[0].posX, 2.0);
-    EXPECT_DOUBLE_EQ(max[0].posY, 2.0);
-    EXPECT_DOUBLE_EQ(max[0].value, 1.0);
-    EXPECT_DOUBLE_EQ(max[2].posX, 2.0);
-    EXPECT_DOUBLE_EQ(max[2].posY, 3.0);
-    EXPECT_DOUBLE_EQ(max[2].value, 4.0);
-    EXPECT_DOUBLE_EQ(max[1].posX, 3.0);
-    EXPECT_DOUBLE_EQ(max[1].posY, 2.0);
-    EXPECT_DOUBLE_EQ(max[1].value, 3.0);
-
-    max.clear();
-    // Do it again, this time with a minimum distance
     ExtractLocalMaxima(ones, 1U, max);
 
-    // Only one maximum survives
-    EXPECT_EQ(max.size(), 1);
+    // Only two maxima survives
+    EXPECT_EQ(max.size(), 2);
     EXPECT_DOUBLE_EQ(max[0].posX, 2.0);
     EXPECT_DOUBLE_EQ(max[0].posY, 3.0);
     EXPECT_DOUBLE_EQ(max[0].value, 4.0);
+    EXPECT_DOUBLE_EQ(max[1].posX, 2.0);
+    EXPECT_DOUBLE_EQ(max[1].posY, 10.0);
+    EXPECT_DOUBLE_EQ(max[1].value, 1.0);
 }
 
 // Test essential matrix decomposition with translation only

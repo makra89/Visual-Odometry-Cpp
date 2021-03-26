@@ -30,7 +30,9 @@ public:
     /**
       * \brief Constructor
       */
-    LshMatcher(const uint32_t& in_maxDistance = 40U, const uint32_t& in_numHashFuncs = 16U);
+    LshMatcher(const uint32_t& in_maxDistance = 40U, const uint32_t& in_numHashFuncs = 16U, 
+        /** sanity check parameter **/
+        const double& in_maxPixelDist = 200.);
 
     /**
       * \brief Compares binary feature descriptions and return matches.
@@ -54,7 +56,7 @@ private:
 
     uint32_t m_maxDistance; ///< maximum Hamming distance between binary descriptions for reporting a match
     uint32_t m_numHashFuncs;
-    uint32_t m_lengthDescription;
+    double m_maxPixelDist;
     std::vector<std::vector<uint32_t>> m_hashFuncs;
 };
 
