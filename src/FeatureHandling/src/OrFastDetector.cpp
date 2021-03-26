@@ -57,10 +57,11 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const uint32_t
             }
         }
 
-        // Thin out neighbouring features, we use the same radius as the one used for calculating the angle
+        // Thin out neighbouring features, we use such a radius that features do not overlap
+        // with respect to the pixels checked by the FAST detector
         std::vector<Utils::LocalMaximum> localMax;
         localMax.reserve(in_maxNumFeatures);
-        Utils::ExtractLocalMaxima(harrisScore, (s_featureSize - 1) / 2, localMax);
+        Utils::ExtractLocalMaxima(harrisScore, (s_featureSize - 1), localMax);
 
         // Sort according to feature response and throw away weakest features if we have more than we need
         std::sort(localMax.begin(), localMax.end(), std::greater<Utils::LocalMaximum>());
@@ -69,7 +70,7 @@ bool OrientedFastDetector::ExtractFeatures(const Frame& in_frame, const uint32_t
             localMax.resize(in_maxNumFeatures);
         }
         
-        // Calculate Harris response for all surviving features
+        // Calculate orientation for all surviving features
         uint32_t featureId = 0U;
         uint32_t maxId = 0U;
         for (uint32_t idx = 0U; idx < localMax.size(); idx++)
