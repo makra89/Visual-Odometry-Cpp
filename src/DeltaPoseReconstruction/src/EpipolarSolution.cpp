@@ -21,7 +21,7 @@ bool RecoverPoseRansac(const std::vector<cv::Point2d>& in_correspondFirst, const
     // Set from outside, or set here hardcoded?
     // This is the gaussian noise in the distance to the epipolar line
     // The models have to scale this value by the number of codimensions of their variety
-    const double assumedDistanceError = 0.5;
+    const double assumedDistanceError = 2.0;
 
     // We assume the essential mat (or fundamental mat) gives x_first.T * F * x_second
     // But OpenCv computes x_second.T * F * x_first --> reorder arguments

@@ -9,14 +9,23 @@
 #include<Vocpp_Utils/NumericalUtilities.h>
 #include<Vocpp_Utils/TracingImpl.h>
 
+namespace
+{
+    bool pixelDistOk(const cv::Point2d& in_firstPos, const cv::Point2d& in_secondPos, const double& in_maxDist)
+    {
+        return cv::norm(in_firstPos - in_secondPos) < in_maxDist;
+    }
+}
+
 namespace VOCPP
 {
 namespace FeatureHandling
 {
 
-LshMatcher::LshMatcher(const uint32_t& in_maxDistance, const uint32_t& in_numHashFuncs) :
+LshMatcher::LshMatcher(const uint32_t& in_maxDistance, const uint32_t& in_numHashFuncs, const double& in_maxPixelDist) :
     m_maxDistance(in_maxDistance),
     m_numHashFuncs(in_numHashFuncs),
+    m_maxPixelDist(in_maxPixelDist),
     m_hashFuncs()
 {
     GenerateHashFuncs();
@@ -58,7 +67,12 @@ bool LshMatcher::MatchDesriptions(const std::vector<BinaryFeatureDescription>& i
                 for (uint32_t bucketIdx = 0U; bucketIdx < bucketTable[bucketId].size(); bucketIdx++)
                 {
                     std::vector<uint32_t>::iterator it = std::find(candidateIds.begin(), candidateIds.end(), bucketTable[bucketId][bucketIdx]);
-                    if (it == candidateIds.end())
+                    
+                    // Some sanity checks before adding the candidate
+                    bool pixDistOk = pixelDistOk(cv::Point2d(in_descFirst[descIdx].GetFeature().imageCoordX, in_descFirst[descIdx].GetFeature().imageCoordX),
+                        cv::Point2d(in_descSecond[bucketTable[bucketId][bucketIdx]].GetFeature().imageCoordX, in_descSecond[bucketTable[bucketId][bucketIdx]].GetFeature().imageCoordX),
+                        m_maxPixelDist);
+                    if (it == candidateIds.end() && pixDistOk)
                     {
                         candidateIds.push_back(bucketTable[bucketId][bucketIdx]);
                     }

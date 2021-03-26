@@ -46,7 +46,8 @@ void Compute2DGradients(const cv::Mat1d& in_image, cv::Mat1d& out_gradX, cv::Mat
 void ExtractLocalMaxima(const cv::Mat1d& in_image, const int32_t in_distance, std::vector<LocalMaximum>& out_localMaxima)
 {
     cv::Mat1d dilatedImage;
-    cv::Mat1b kernel = cv::Mat1b::ones(2 * in_distance + 1, 2 * in_distance + 1);
+    uint32_t kernelSize = 2U * in_distance + 1U;
+    cv::Mat1b kernel = cv::Mat1b::ones(kernelSize, kernelSize);
     kernel(in_distance, in_distance) = 0U;
 
     cv::dilate(in_image, dilatedImage, kernel);

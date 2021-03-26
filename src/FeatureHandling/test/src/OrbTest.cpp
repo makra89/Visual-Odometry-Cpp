@@ -104,8 +104,8 @@ TEST(OrbTestWithMatching, RotationInvariance_OneLayer)
     EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameUnscaled, 500U, descriptions));
     EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameRotated, 500U, descriptionsRotated));
 
-    // Instantiate Matcher
-    VOCPP::FeatureHandling::LshMatcher matcher;
+    // Instantiate Matcher, deactivate pixel distance sanity check (does only make sense for Visual Odometry)
+    VOCPP::FeatureHandling::LshMatcher matcher(40U, 16, 10000);
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
     EXPECT_GE(matches.size(), 485);
@@ -145,8 +145,8 @@ TEST(OrbTestWithMatching, RotationInvariance_ThreeLayers)
     EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameUnscaled, 500U, descriptions));
     EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameRotated, 500U, descriptionsRotated));
 
-    // Instantiate Matcher
-    VOCPP::FeatureHandling::LshMatcher matcher;
+    // Instantiate Matcher, deactivate pixel distance sanity check (does only make sense for Visual Odometry)
+    VOCPP::FeatureHandling::LshMatcher matcher(40U, 16, 10000);
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
     matcher.MatchDesriptions(descriptions, descriptionsRotated, matches);
     EXPECT_GE(matches.size(), 400);
@@ -195,45 +195,47 @@ TEST(OrbTestWithMatching, ScaleInvariance)
     EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameUnscaled, 1000U, descriptionsUnscaled));
     EXPECT_TRUE(detector.ExtractFeatureDescriptions(frameRescaled, 1000U, descriptionsRescaled));
     
-    // Instantiate Matcher
-    VOCPP::FeatureHandling::LshMatcher matcher;
+    // Instantiate Matcher, deactivate pixel distance sanity check (does only make sense for Visual Odometry)
+    VOCPP::FeatureHandling::LshMatcher matcher(40U, 16, 10000);
     std::vector<VOCPP::FeatureHandling::BinaryDescriptionMatch> matches;
 
     matcher.MatchDesriptions(descriptionsUnscaled, descriptionsRescaled, matches);
     EXPECT_GE(matches.size(), 200);
 
-    uint32_t numOutlierAngle = 0U;
+    uint32_t numOutlier = 0U;
 
     for (uint32_t idx = 0U; idx < matches.size(); idx++)
     {
         // We expect that we have to downscale the unscaled image to find matches
-        EXPECT_LT(matches[idx].GetFirstFeature().scale, matches[idx].GetSecondFeature().scale);
+        if (matches[idx].GetFirstFeature().scale >= matches[idx].GetSecondFeature().scale)
+        {
+            numOutlier++;
+        }
         // We expect that the feature angle should be similar
-        // TODO: Has been deactivated, there are some outliers
         if (abs(matches[idx].GetFirstFeature().angle - matches[idx].GetSecondFeature().angle) > 0.2)
         {
-            numOutlierAngle++;
+            numOutlier++;
         }
     }
     // Expect low number of outliers
-    EXPECT_LE(numOutlierAngle, 7U);
+    EXPECT_LE(numOutlier, 7U);
 
     /* Comment in for visualization
-    cv::Mat matchImg = cv::Mat::ones(1000, 2000, CV_64FC1);
-    grayScaleImg.copyTo(matchImg(cv::Rect(0, 0, grayScaleImg.cols, grayScaleImg.rows)));
-    rescaledGrayScaleImg.copyTo(matchImg(cv::Rect(1000, 0, rescaledGrayScaleImg.cols, rescaledGrayScaleImg.rows)));
-    cv::cvtColor(matchImg, matchImg, cv::COLOR_GRAY2BGR);
+   cv::Mat matchImg = cv::Mat::ones(1000, 2000, CV_64FC1);
+   grayScaleImg.copyTo(matchImg(cv::Rect(0, 0, grayScaleImg.cols, grayScaleImg.rows)));
+   rescaledGrayScaleImg.copyTo(matchImg(cv::Rect(1000, 0, rescaledGrayScaleImg.cols, rescaledGrayScaleImg.rows)));
+   cv::cvtColor(matchImg, matchImg, cv::COLOR_GRAY2BGR);
 
-    std::vector<cv::Point2d> pRescaled;
-    std::vector<cv::Point2d> pUnscaled;
-    VOCPP::FeatureHandling::GetMatchingPoints(matches, pUnscaled, pRescaled);
-    for (uint32_t idx = 0U; idx < matches.size(); idx++)
-    {
-        cv::circle(matchImg, cv::Point2d(matches[idx].GetFirstDescription().GetFeature().imageCoordX, matches[idx].GetFirstDescription().GetFeature().imageCoordY), 5, cv::Scalar(0, 0.0, 255.0), 2);
-        cv::circle(matchImg, cv::Point2d(1000 + matches[idx].GetSecondDescription().GetFeature().imageCoordX, matches[idx].GetSecondDescription().GetFeature().imageCoordY), 5, cv::Scalar(0, 255.0, 0.0), 2);
-        cv::line(matchImg, pUnscaled[idx], cv::Point2d(pRescaled[idx].x + 1000, pRescaled[idx].y), cv::Scalar(255.0, 0.0, 0.0), 2);
-    }
+   std::vector<cv::Point2d> pRescaled;
+   std::vector<cv::Point2d> pUnscaled;
+   VOCPP::FeatureHandling::GetMatchingPoints(matches, pUnscaled, pRescaled);
+   for (uint32_t idx = 0U; idx < matches.size(); idx++)
+   {
+       cv::circle(matchImg, cv::Point2d(matches[idx].GetFirstDescription().GetFeature().imageCoordX, matches[idx].GetFirstDescription().GetFeature().imageCoordY), 5, cv::Scalar(0, 0.0, 255.0), 2);
+       cv::circle(matchImg, cv::Point2d(1000 + matches[idx].GetSecondDescription().GetFeature().imageCoordX, matches[idx].GetSecondDescription().GetFeature().imageCoordY), 5, cv::Scalar(0, 255.0, 0.0), 2);
+       cv::line(matchImg, pUnscaled[idx], cv::Point2d(pRescaled[idx].x + 1000, pRescaled[idx].y), cv::Scalar(255.0, 0.0, 0.0), 2);
+   }
 
-    cv::imshow("Unscaled", matchImg);
-    cv::waitKey(0); */
+   cv::imshow("Unscaled", matchImg);
+   cv::waitKey(0); */
 }

@@ -76,7 +76,8 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Shifted)
 
     VOCPP::FeatureHandling::OrientedFastDetector detector;
     VOCPP::FeatureHandling::BriefDescriptor descriptor;
-    VOCPP::FeatureHandling::LshMatcher matcher;
+    // Instantiate Matcher, deactivate pixel distance sanity check (does only make sense for Visual Odometry)
+    VOCPP::FeatureHandling::LshMatcher matcher(40U, 16, 10000);
 
     VOCPP::Frame frame(img.ptr<double>(0), img.cols, img.rows, 1);
     VOCPP::Frame frameShifted(imgShifted.ptr<double>(0), imgShifted.cols, imgShifted.rows, 1);
@@ -167,7 +168,8 @@ TEST(OrFastChainTest_Lsh, MatchTriangles_Rotated)
 
     VOCPP::FeatureHandling::OrientedFastDetector detector;
     VOCPP::FeatureHandling::BriefDescriptor descriptor;
-    VOCPP::FeatureHandling::LshMatcher matcher;
+    // Instantiate Matcher, deactivate pixel distance sanity check (does only make sense for Visual Odometry)
+    VOCPP::FeatureHandling::LshMatcher matcher(40U, 16, 10000);
 
     VOCPP::Frame frame(grayScaleImg.ptr<double>(0), grayScaleImg.cols, grayScaleImg.rows, 1);
     VOCPP::Frame frameRotated(grayScaleImgRotated.ptr<double>(0), grayScaleImgRotated.cols, grayScaleImgRotated.rows, 1);
