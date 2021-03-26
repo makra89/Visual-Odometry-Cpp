@@ -29,7 +29,7 @@ public:
       * /brief Constructor
       */
     OrientedFastDetector(const double& in_intDiffTresh=10/255., const uint32_t& in_numPixelsAboveThresh=12U,
-        const uint32_t& in_harrisBlockSize=3U, const uint32_t& in_distToEdges=31U);
+        const uint32_t& in_harrisBlockSize=3U, const uint32_t& in_distToEdges=18U);
 
     /**
       * /brief Extract features from a provided grayscale image frame.
